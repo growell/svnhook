@@ -114,7 +114,7 @@ class SvnHook(object):
 
         # Set the non-zero exit code.
         try:
-            self.exitcode = int(action.get('exitcode', default=1))
+            self.exitcode = int(action.get('exitCode', default=1))
         except ValueError:
             self.exitcode = -1
 
