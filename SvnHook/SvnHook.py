@@ -11,6 +11,8 @@ import logging
 import logging.config
 import os
 import re
+import sys
+import textwrap
 import yaml
 
 from lxml import etree
@@ -48,33 +50,72 @@ class SvnHook(object):
         # Read and parse the hook configuration file.
         self.cfg = etree.parse(open(cfgfile))
 
+        # Get the known action handler methods.
+        self.handlers = dict(
+            inspect.getmembers(self, predicate=inspect.ismethod))
+        del self.handlers['__init__']
+        del self.handlers['run']
+        del self.handlers['execute_action']
+
+        # Initialize the hook exit code.
+        self.exitcode = 0
+
     def run(self):
-        """Executes actions found in hook configuration."""
+        """Executes all top-level actions in hook configuration."""
 
-        # Get the known methods. Remove the overhead.
-        handlers = dict(inspect.getmembers(self, predicate=inspect.ismethod))
-        del handlers['__init__']
-        del handlers['run']
+        # Perform the hook actions.
+        for action in self.cfg.getroot().iterfind(r'./*'):
+            self.execute_action(action)
 
-        # Execute the hook actions.
-        for action in self.cfg.getroot().getchildren():
+        # Exit with the final exit code.
+        exit(self.exitcode)
 
-            # Convert the mixed-case tag name into an underscored,
-            # lower case, method name.
-            tomethod = lambda pat: \
-                pat.group(1) + '_' + pat.group(2).lower()
-            method = re.sub(
-                r'([a-z])([A-Z])', tomethod, action.tag).lower()
+    def execute_action(self, action):
+        """Executes single hook handler action."""
 
-            # Make sure it's a valid handler.
-            if method not in handlers:
-                raise RuntimeError(
-                    'Action method not found: ' + method)
-            handler = handlers[method]
+        # Convert the mixed-case tag name into an underscored,
+        # lower case, method name.
+        tomethod = lambda pat: \
+            pat.group(1) + '_' + pat.group(2).lower()
+        method = re.sub(
+            r'([a-z])([A-Z])', tomethod, action.tag).lower()
 
-            # Call the action method. Pass it the configuration
-            # element.
-            logging.debug('Calling {}...'.format(method))
-            handler(action)
+        # Make sure it's a valid handler.
+        if method not in self.handlers:
+            raise RuntimeError(
+                'Action method not found: ' + method)
+        handler = self.handlers[method]
+
+        # Call the action method. Pass it the configuration
+        # element.
+        logging.debug('Calling {}...'.format(method))
+        handler(action)
+
+    def send_error(self, action):
+        """Sends an error to Subversion.
+
+        Emits an error message to STDERR and sets a non-zero exit
+        code. For "pre-" hooks, this may abort a Subversion activity.
+        """
+
+        if action.text==None:
+            raise RuntimeError(
+                'Required tag content missing: SendError')
+
+        # Trim leading whitespace from the error message.
+        errormsg = textwrap.dedent(
+            re.sub(r'(?s)^[\n\r]+', '', action.text))
+
+        # Log the error message lines.
+        for e in errormsg.splitlines(): logging.error(e.lstrip())
+
+        # Send the message to STDERR and use the exit code.
+        sys.stderr.write(errormsg)
+
+        # Set the non-zero exit code.
+        try:
+            self.exitcode = int(action.get('exitcode', default=1))
+        except ValueError:
+            self.exitcode = -1
 
 ########################### end of file ##############################
