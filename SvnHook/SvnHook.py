@@ -65,8 +65,9 @@ class SvnHook(object):
             inspect.getmembers(self, predicate=inspect.ismethod))
         for m in SvnHook.non_action_methods: del self.handlers[m]
 
-        # Initialize the token set.
-        self.tokens = dict()
+        # Initialize the token set with the current environment
+        # variables.
+        self.tokens = dict(os.environ)
 
         # Initialize the hook exit code.
         self.exitcode = 0
