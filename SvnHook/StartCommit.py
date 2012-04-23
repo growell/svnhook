@@ -57,7 +57,7 @@ class StartCommit(SvnHook):
         regex = re.compile(
             r'(?:.+\:)?' + regextag.text + r'(?:\:.+|$)')
         sense = re.match(r'(?i)(1|true|yes)',
-                         regextag.get('sense', default='1'))!=None
+                         regextag.get('sense', default='true'))!=None
 
         # Apply the regex to the capabilities string.
         if sense:
