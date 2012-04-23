@@ -16,12 +16,22 @@ import textwrap
 import yaml
 
 from lxml import etree
+from string import Template
 
 class SvnHook(object):
     """Base class for hook-specific handlers.
 
-    Initializes logging. Reads and parses XML configuration.
+    Initializes logging.
+    Reads and parses XML configuration.
+    Defines base hook actions.
     """
+
+    # Infrastructure Methods
+    non_action_methods = (
+        '__init__',
+        'run',
+        'execute_action',
+        'apply_tokens')
 
     def __init__(self, cfgfile):
         """Construct a new object of the class."""
@@ -53,9 +63,10 @@ class SvnHook(object):
         # Get the known action handler methods.
         self.handlers = dict(
             inspect.getmembers(self, predicate=inspect.ismethod))
-        del self.handlers['__init__']
-        del self.handlers['run']
-        del self.handlers['execute_action']
+        for m in SvnHook.non_action_methods: del self.handlers[m]
+
+        # Initialize the token set.
+        self.tokens = dict()
 
         # Initialize the hook exit code.
         self.exitcode = 0
@@ -91,20 +102,42 @@ class SvnHook(object):
         logging.debug('Calling {}...'.format(method))
         handler(action)
 
+    def apply_tokens(self, template):
+        """Applies tokens to a template string."""
+        engine = Template(template)
+        return engine.safe_substitute(self.tokens)
+
+    #-----------------------------------------------------------------
+    # Action Methods
+    #-----------------------------------------------------------------
+
+    def set_token(self, action):
+        """Sets a token to be used in subsequent actions."""
+
+        try:
+            name = action.attrib['name']
+        except KeyError:
+            raise RuntimeError(
+                'Required attribute missing: name')
+
+        # Set the token value.
+        self.tokens[name] = action.text or ''
+
     def send_error(self, action):
         """Sends an error to Subversion.
 
         Emits an error message to STDERR and sets a non-zero exit
-        code. For "pre-" hooks, this may abort a Subversion activity.
+        code. For "pre" hooks, this may abort a Subversion activity.
         """
 
         if action.text==None:
             raise RuntimeError(
                 'Required tag content missing: SendError')
 
-        # Trim leading whitespace from the error message.
-        errormsg = textwrap.dedent(
-            re.sub(r'(?s)^[\n\r]+', '', action.text))
+        # Trim leading whitespace from the error message. Apply any
+        # tokens.
+        errormsg = self.apply_tokens(textwrap.dedent(
+                re.sub(r'(?s)^[\n\r]+', '', action.text)))
 
         # Log the error message lines.
         for e in errormsg.splitlines(): logging.error(e.lstrip())
