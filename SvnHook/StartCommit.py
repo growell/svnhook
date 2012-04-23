@@ -25,9 +25,17 @@ class StartCommit(SvnHook):
             'capabilities', help='List of client capabilities')
 
         args = cmdline.parse_args()
+        self.repospath    = args.repospath
+        self.user         = args.user
+        self.capabilities = args.capabilities
         
         # Perform parent initialization.
         super(StartCommit, self).__init__(args.cfgfile)
 
-    def run(self):
-        raise Exception('Found the handler')
+    def filter_capabilities(self, cfgtag):
+        """Filters based on client capabilities."""
+
+        print 'capabilities ="{}"'.format(self.capabilities)
+        raise Exception('In filter_capabilities...')
+
+########################### end of file ##############################

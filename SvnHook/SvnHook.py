@@ -6,6 +6,7 @@ __license__   = 'Apache'
 __version__   = '3.00'
 __status__    = 'Development'
 
+import inspect
 import logging
 import logging.config
 import os
@@ -48,6 +49,32 @@ class SvnHook(object):
         self.cfg = etree.parse(open(cfgfile))
 
     def run(self):
-        raise Exception('Handler not implemented')
+        """Executes actions found in hook configuration."""
+
+        # Get the known methods. Remove the overhead.
+        handlers = dict(inspect.getmembers(self, predicate=inspect.ismethod))
+        del handlers['__init__']
+        del handlers['run']
+
+        # Execute the hook actions.
+        for action in self.cfg.getroot().getchildren():
+
+            # Convert the mixed-case tag name into an underscored,
+            # lower case, method name.
+            tomethod = lambda pat: \
+                pat.group(1) + '_' + pat.group(2).lower()
+            method = re.sub(
+                r'([a-z])([A-Z])', tomethod, action.tag).lower()
+
+            # Make sure it's a valid handler.
+            if method not in handlers:
+                raise RuntimeError(
+                    'Action method not found: ' + method)
+            handler = handlers[method]
+
+            # Call the action method. Pass it the configuration
+            # element.
+            logging.debug('Calling {}...'.format(method))
+            handler(action)
 
 ########################### end of file ##############################
