@@ -11,7 +11,7 @@ import logging
 import logging.config
 import os
 import re
-import subprocess
+import shlex, subprocess
 import sys
 import textwrap
 import yaml
@@ -82,6 +82,7 @@ class SvnHook(object):
         # Perform the hook actions.
         for action in self.cfg.getroot().iterfind(r'./*'):
             self.execute_action(action)
+            if self.exitcode != 0: break
 
         # Exit with the final exit code.
         exit(self.exitcode)
@@ -168,18 +169,40 @@ class SvnHook(object):
             raise RuntimeError(
                 'Required tag content missing: ExecuteCmd')
 
+        # Apply tokens to the command line.
+        cmdline = self.apply_tokens(action.text)
+
         # Get the minimum exit code needed to signal a hook failure.
         errorlevel = int(action.get('errorLevel', default=1))
 
-        # Execute the tokenized system command.
-        try:
-            check_output(self.apply_tokens(action.text), shell=True)
-        except CalledProcessError as e:
+        # Execute the tokenized system command. If the process fails
+        # to start, it'll throw an OSError. Treat that as a
+        # non-maskable hook failure.
+        logging.debug('cmdline = "{}", errorlevel = {}'
+                      .format(cmdline, errorlevel))
 
-            # Compare the exit code to the minimum level.
-            if e.returncode >= errorlevel:
-                logging.error(e.output)
-                sys.stderr.write(e.output)
-                self.exitcode = e.returncode
+        try:
+            p = subprocess.Popen(shlex.split(cmdline),
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE,
+                                 shell=False)
+        except OSError as e:
+            logging.critical(e)
+            sys.stderr.write('Internal hook error.'
+                             + ' Please notify administrator.\n')
+            self.exitcode = -1
+            return
+
+        # The process started, wait for it to finish.
+        p.wait()
+
+        # Compare the process exit code to the error level.
+        if p.returncode >= errorlevel:
+            errstr = p.stderr.read()
+            sys.stderr.write(errstr)
+            logging.error(errstr)
+            self.exitcode = p.returncode
+        else:
+            logging.debug('exit code = {}'.format(p.returncode))
 
 ########################### end of file ##############################
