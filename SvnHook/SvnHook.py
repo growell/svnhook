@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Defines SvnHook base class."""
+"""Base Class for Hook Handlers"""
 __author__    = 'Geoff Rowell'
 __copyright__ = 'Copyright 2012, Geoff Rowell'
 __license__   = 'Apache'
@@ -11,6 +11,7 @@ import logging
 import logging.config
 import os
 import re
+import subprocess
 import sys
 import textwrap
 import yaml
@@ -34,8 +35,12 @@ class SvnHook(object):
         'apply_tokens')
 
     def __init__(self, cfgfile):
-        """Construct a new object of the class."""
+        """Construct a new object of the class.
 
+        Arguments:
+        cfgfile -- Path name of hook configuration file.
+
+        """
         if cfgfile==False:
             raise KeyError('Required argument missing: cfgfile')
         if os.path.isfile(cfgfile)==False:
@@ -73,8 +78,7 @@ class SvnHook(object):
         self.exitcode = 0
 
     def run(self):
-        """Executes all top-level actions in hook configuration."""
-
+        """Execute top-level hook actions and set exit code."""
         # Perform the hook actions.
         for action in self.cfg.getroot().iterfind(r'./*'):
             self.execute_action(action)
@@ -83,8 +87,12 @@ class SvnHook(object):
         exit(self.exitcode)
 
     def execute_action(self, action):
-        """Executes single hook handler action."""
+        """Execute a hook handler action.
 
+        Arguments:
+        action -- Element object for action tag.
+
+        """
         # Convert the mixed-case tag name into an underscored,
         # lower case, method name.
         tomethod = lambda pat: \
@@ -104,7 +112,15 @@ class SvnHook(object):
         handler(action)
 
     def apply_tokens(self, template):
-        """Applies tokens to a template string."""
+        """Apply tokens to a template string.
+
+        Arguments:
+        template -- String containing tokens.
+
+        Returns:
+        Template string with token substitutions.
+
+        """
         engine = Template(template)
         return engine.safe_substitute(self.tokens)
 
@@ -113,8 +129,7 @@ class SvnHook(object):
     #-----------------------------------------------------------------
 
     def set_token(self, action):
-        """Sets a token to be used in subsequent actions."""
-
+        """Set a token to be used in template substitutions."""
         try:
             name = action.attrib['name']
         except KeyError:
@@ -125,12 +140,7 @@ class SvnHook(object):
         self.tokens[name] = action.text or ''
 
     def send_error(self, action):
-        """Sends an error to Subversion.
-
-        Emits an error message to STDERR and sets a non-zero exit
-        code. For "pre" hooks, this may abort a Subversion activity.
-        """
-
+        """Send a STDERR message to Subversion and set exit code."""
         if action.text==None:
             raise RuntimeError(
                 'Required tag content missing: SendError')
@@ -151,5 +161,25 @@ class SvnHook(object):
             self.exitcode = int(action.get('exitCode', default=1))
         except ValueError:
             self.exitcode = -1
+
+    def execute_cmd(self, action):
+        """Execute a system command line."""
+        if action.text==None:
+            raise RuntimeError(
+                'Required tag content missing: ExecuteCmd')
+
+        # Get the minimum exit code needed to signal a hook failure.
+        errorlevel = int(action.get('errorLevel', default=1))
+
+        # Execute the tokenized system command.
+        try:
+            check_output(self.apply_tokens(action.text), shell=True)
+        except CalledProcessError as e:
+
+            # Compare the exit code to the minimum level.
+            if e.returncode >= errorlevel:
+                logging.error(e.output)
+                sys.stderr.write(e.output)
+                self.exitcode = e.returncode
 
 ########################### end of file ##############################
