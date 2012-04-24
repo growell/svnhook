@@ -12,6 +12,7 @@ import logging.config
 import os
 import re
 import shlex, subprocess
+import smtplib
 import sys
 import textwrap
 import yaml
@@ -162,6 +163,83 @@ class SvnHook(object):
             self.exitcode = int(action.get('exitCode', default=1))
         except ValueError:
             self.exitcode = -1
+
+    def send_smtp(self, action):
+        """Send a mail message."""
+
+        # Get the SMTP server host name.
+        try:
+            host = self.apply_tokens(action.attrib['server'])
+        except KeyError:
+            raise RuntimeError(
+                'Required attribute missing: server')
+
+        # Get the maximum number of connect seconds.
+        try:
+            timeout = int(action.get('seconds', default=60))
+        except ValueError:
+            raise ValueError('Illegal seconds attribute: {}'
+                             .format(action.get('seconds')))
+
+        # Get the from email address.
+        fromtag = action.find('FromAddress')
+        if fromtag == None:
+            raise RuntimeError(
+                'Required tag missing: FromAddress')
+        fromaddress = self.apply_tokens(fromtag.text)
+        
+        # Get the recipient email addresses.
+        toaddresses = []
+        for totag in action.findall('ToAddress'):
+            toaddresses.append(self.apply_tokens(totag.text))
+        if len(toaddresses) == 0:
+            raise RuntimeError(
+                'Required tag missing: ToAddress')
+
+        # Get the message subject line.
+        subjecttag = action.find('Subject')
+        if subjecttag == None:
+            raise RuntimeError(
+                'Required tag missing: Subject')
+        subject = self.apply_tokens(subjecttag.text)
+
+        # Get the message body.
+        messagetag = action.find('Message')
+        if messagetag == None:
+            raise RuntimeError(
+                'Required tag missing: Message')
+        message = self.apply_tokens(messagetag.text)
+
+        # Assemble the message content.
+        content = 'From: {}\r\n'.format(fromaddress)
+        for toaddress in toaddresses:
+            content += 'To: {}\r\n'.format(toaddress)
+        content += 'Subject: {}\r\n'.format(subject)
+
+        content += '\r\n'
+        for msgline in message.splitlines():
+            content += '{}\r\n'.format(msgline)
+
+        # Construct the SMTP connection.
+        try:
+            server = smtplib.SMTP(host, None, None, timeout)
+        except SMTPConnectError as e:
+            logging.critical(e)
+            sys.stderr.write('Internal hook error.'
+                             + ' Please notify administrator.')
+            self.exitcode = -1
+            return
+
+        # Send the message.
+        try:
+            server.sendmail(fromaddress, toaddresses, content)
+        except smtplib.SMTPRecipientsRefused as e:
+            for recipient in e.recipients:
+                logging.warning(
+                    'Recipient refused: {}'.format(recipient))
+
+        # Disconnect from the host.
+        server.quit()
 
     def execute_cmd(self, action):
         """Execute a system command line."""
