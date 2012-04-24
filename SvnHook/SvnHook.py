@@ -299,15 +299,15 @@ class SvnHook(object):
             raise RuntimeError(
                 'Required tag content missing: AuthorRegex')
 
-        regex = re.compile(r'(?i).*' + regextag.text + r'.*')
+        regex = re.compile(regextag.text, re.IGNORECASE)
         sense = re.match(r'(?i)(1|true|yes)',
                          regextag.get('sense', default='true'))!=None
 
         # Apply the regex to the user name string.
         if sense:
-            result = regex.match(self.author)!=None
+            result = regex.search(self.author)!=None
         else:
-            result = regex.match(self.author)==None
+            result = regex.search(self.author)==None
         if result == False: return
 
         # Perform the child actions.
@@ -331,15 +331,15 @@ class SvnHook(object):
             raise RuntimeError(
                 'Required tag content missing: UserRegex')
 
-        regex = re.compile(r'(?i).*' + regextag.text + r'.*')
+        regex = re.compile(regextag.text, re.IGNORECASE)
         sense = re.match(r'(?i)(1|true|yes)',
                          regextag.get('sense', default='true'))!=None
 
         # Apply the regex to the user name string.
         if sense:
-            result = regex.match(self.user)!=None
+            result = regex.search(self.user)!=None
         else:
-            result = regex.match(self.user)==None
+            result = regex.search(self.user)==None
         if result == False: return
 
         # Perform the child actions.
@@ -347,7 +347,7 @@ class SvnHook(object):
             self.execute_action(subaction)
             if self.exitcode != 0: break
 
-    def filter_log_msg(self, action):
+    def filter_log_messages(self, action):
         """Filter actions based on log message."""
         # Get the log message regex tag.
         regextag = action.find('LogMsgRegex')
@@ -363,22 +363,22 @@ class SvnHook(object):
             raise RuntimeError(
                 'Required tag content missing: LogMsgRegex')
 
-        regex = re.compile(r'.*' + regextag.text + r'.*')
+        regex = re.compile(regextag.text)
         sense = re.match(r'(?i)(1|true|yes)',
                          regextag.get('sense', default='true'))!=None
 
         # Get the current log message.
         try:
-            logmsg = self.get_log_msg()
+            logmsg = self.get_log_message()
         except AttributeError:
             raise RuntimeError(
                 'Log message not available for this hook type.')
 
         # Apply the regex to the log message.
         if sense:
-            result = regex.match(logmsg)!=None
+            result = regex.search(logmsg)!=None
         else:
-            result = regex.match(logmsg)==None
+            result = regex.search(logmsg)==None
         if result == False: return
 
         # Perform the child actions.
