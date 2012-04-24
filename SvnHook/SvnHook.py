@@ -284,7 +284,7 @@ class SvnHook(object):
     #-----------------------------------------------------------------
 
     def filter_authors(self, action):
-        """Filters operations based on (author) user name."""
+        """Filter operations based on author (user) name."""
         # Get the user name regex tag.
         regextag = action.find('AuthorRegex')
         if regextag == None:
@@ -316,7 +316,7 @@ class SvnHook(object):
             if self.exitcode != 0: break
         
     def filter_users(self, action):
-        """Filters operations based on user name."""
+        """Filter operations based on user name."""
         # Get the user name regex tag.
         regextag = action.find('UserRegex')
         if regextag == None:
@@ -346,5 +346,44 @@ class SvnHook(object):
         for subaction in action.iterfind(r'./*'):
             self.execute_action(subaction)
             if self.exitcode != 0: break
+
+    def filter_log_msg(self, action):
+        """Filter actions based on log message."""
+        # Get the log message regex tag.
+        regextag = action.find('LogMsgRegex')
+        if regextag == None:
+            raise RuntimeError(
+                'Required tag missing: LogMsgRegex')
+
+        # Avoid tag reuse.
+        action.remove(regextag)
         
+        # Extract the comparison details.
+        if regextag.text == None or regextag.text == '':
+            raise RuntimeError(
+                'Required tag content missing: LogMsgRegex')
+
+        regex = re.compile(r'.*' + regextag.text + r'.*')
+        sense = re.match(r'(?i)(1|true|yes)',
+                         regextag.get('sense', default='true'))!=None
+
+        # Get the current log message.
+        try:
+            logmsg = self.get_log_msg()
+        except AttributeError:
+            raise RuntimeError(
+                'Log message not available for this hook type.')
+
+        # Apply the regex to the log message.
+        if sense:
+            result = regex.match(logmsg)!=None
+        else:
+            result = regex.match(logmsg)==None
+        if result == False: return
+
+        # Perform the child actions.
+        for subaction in action.iterfind(r'./*'):
+            self.execute_action(subaction)
+            if self.exitcode != 0: break
+
 ########################### end of file ##############################
