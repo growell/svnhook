@@ -34,6 +34,9 @@ class StartCommit(SvnHook):
         # Perform parent initialization.
         super(StartCommit, self).__init__(args.cfgfile)
 
+        # Define the additional actions.
+        self.actions['FilterCapabilities'] = self.filter_capabilities
+
     def filter_capabilities(self, cfgtag):
         """Filters based on client capabilities."""
 

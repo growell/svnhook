@@ -28,12 +28,12 @@ class SvnHook(object):
     Defines base hook actions.
     """
 
-    # Infrastructure Methods
-    non_action_methods = (
-        '__init__',
-        'run',
-        'execute_action',
-        'apply_tokens')
+    # Action Methods
+    action_methods = (
+        'set_token',
+        'send_error',
+        'send_smtp',
+        'execute_cmd')
 
     def __init__(self, cfgfile):
         """Construct a new object of the class.
@@ -66,10 +66,12 @@ class SvnHook(object):
         # Read and parse the hook configuration file.
         self.cfg = etree.parse(open(cfgfile))
 
-        # Get the known action handler methods.
-        self.handlers = dict(
-            inspect.getmembers(self, predicate=inspect.ismethod))
-        for m in SvnHook.non_action_methods: del self.handlers[m]
+        # Set dictionary of action methods.
+        self.actions = {
+            'SetToken':   self.set_token,
+            'SendError':  self.send_error,
+            'SendSmtp':   self.send_smtp,
+            'ExecuteCmd': self.execute_cmd}
 
         # Initialize the token set with the current environment
         # variables.
@@ -95,22 +97,16 @@ class SvnHook(object):
         action -- Element object for action tag.
 
         """
-        # Convert the mixed-case tag name into an underscored,
-        # lower case, method name.
-        tomethod = lambda pat: \
-            pat.group(1) + '_' + pat.group(2).lower()
-        method = re.sub(
-            r'([a-z])([A-Z])', tomethod, action.tag).lower()
-
         # Make sure it's a valid handler.
-        if method not in self.handlers:
+        try:
+            handler = self.actions[action.tag]
+        except KeyError:
             raise RuntimeError(
-                'Action method not found: ' + method)
-        handler = self.handlers[method]
+                'Action not recognized: ' + action.tag)
 
         # Call the action method. Pass it the configuration
         # element.
-        logging.debug('Calling {}...'.format(method))
+        logging.debug('Calling {}...'.format(handler.__name__))
         handler(action)
 
     def apply_tokens(self, template):
@@ -127,7 +123,7 @@ class SvnHook(object):
         return engine.safe_substitute(self.tokens)
 
     #-----------------------------------------------------------------
-    # Action Methods
+    # Base Action Methods
     #-----------------------------------------------------------------
 
     def set_token(self, action):
