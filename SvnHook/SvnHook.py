@@ -42,9 +42,9 @@ class SvnHook(object):
         cfgfile -- Path name of hook configuration file.
 
         """
-        if cfgfile==False:
+        if cfgfile == False:
             raise KeyError('Required argument missing: cfgfile')
-        if os.path.isfile(cfgfile)==False:
+        if os.path.isfile(cfgfile) == False:
             raise IOError('Configuration file not found: '
                             + cfgfile)
 
@@ -55,10 +55,10 @@ class SvnHook(object):
         logconffile = re.sub(
             r'\.[^\.]+$', r'-log.conf', cfgfile)
 
-        if os.path.isfile(logymlfile)==True:
+        if os.path.isfile(logymlfile) == True:
             logcfg = yaml.load(open(logymlfile).read())
             logging.config.dictConfig(logcfg)
-        elif os.path.isfile(logconffile)==True:
+        elif os.path.isfile(logconffile) == True:
             logging.config.fileConfig(logconffile)
         else:
             logging.basicConfig()
@@ -139,7 +139,7 @@ class SvnHook(object):
 
     def send_error(self, action):
         """Send a STDERR message to Subversion and set exit code."""
-        if action.text==None:
+        if action.text == None:
             raise RuntimeError(
                 'Required tag content missing: SendError')
 
@@ -239,7 +239,7 @@ class SvnHook(object):
 
     def execute_cmd(self, action):
         """Execute a system command line."""
-        if action.text==None:
+        if action.text == None:
             raise RuntimeError(
                 'Required tag content missing: ExecuteCmd')
 
@@ -279,4 +279,40 @@ class SvnHook(object):
         else:
             logging.debug('exit code = {}'.format(p.returncode))
 
+    #-----------------------------------------------------------------
+    # Filter Actions
+    #-----------------------------------------------------------------
+
+    def filter_users(self, action):
+        """Filters operations based on user name."""
+        # Get the user name regex tag.
+        regextag = action.find('UserRegex')
+        if regextag == None:
+            raise RuntimeError(
+                'Required tag missing: UserRegex')
+
+        # Avoid tag reuse.
+        action.remove(regextag)
+        
+        # Extract the comparison details.
+        if regextag.text == None or regextag.text == '':
+            raise RuntimeError(
+                'Required tag content missing: UserRegex')
+
+        regex = re.compile(r'(?i).*' + regextag.text + r'.*')
+        sense = re.match(r'(?i)(1|true|yes)',
+                         regextag.get('sense', default='true'))!=None
+
+        # Apply the regex to the user name string.
+        if sense:
+            result = regex.match(self.user)!=None
+        else:
+            result = regex.match(self.user)==None
+        if result == False: return
+
+        # Perform the child actions.
+        for subaction in action.iterfind(r'./*'):
+            self.execute_action(subaction)
+            if self.exitcode != 0: break
+        
 ########################### end of file ##############################

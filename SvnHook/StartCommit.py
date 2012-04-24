@@ -36,6 +36,7 @@ class StartCommit(SvnHook):
 
         # Define the additional actions.
         self.actions['FilterCapabilities'] = self.filter_capabilities
+        self.actions['FilterUser'] = self.filter_users
 
     def filter_capabilities(self, cfgtag):
         """Filters based on client capabilities."""
