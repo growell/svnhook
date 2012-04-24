@@ -283,6 +283,38 @@ class SvnHook(object):
     # Filter Actions
     #-----------------------------------------------------------------
 
+    def filter_authors(self, action):
+        """Filters operations based on (author) user name."""
+        # Get the user name regex tag.
+        regextag = action.find('AuthorRegex')
+        if regextag == None:
+            raise RuntimeError(
+                'Required tag missing: AuthorRegex')
+
+        # Avoid tag reuse.
+        action.remove(regextag)
+        
+        # Extract the comparison details.
+        if regextag.text == None or regextag.text == '':
+            raise RuntimeError(
+                'Required tag content missing: AuthorRegex')
+
+        regex = re.compile(r'(?i).*' + regextag.text + r'.*')
+        sense = re.match(r'(?i)(1|true|yes)',
+                         regextag.get('sense', default='true'))!=None
+
+        # Apply the regex to the user name string.
+        if sense:
+            result = regex.match(self.author)!=None
+        else:
+            result = regex.match(self.author)==None
+        if result == False: return
+
+        # Perform the child actions.
+        for subaction in action.iterfind(r'./*'):
+            self.execute_action(subaction)
+            if self.exitcode != 0: break
+        
     def filter_users(self, action):
         """Filters operations based on user name."""
         # Get the user name regex tag.
