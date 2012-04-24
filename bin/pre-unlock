@@ -7,7 +7,7 @@ import sys
 
 # Prefer local modules.
 mylib = os.path.normpath(os.path.join(
-        os.path.dirname(__file__), '..')
+        os.path.dirname(__file__), '..'))
 if os.path.isdir(mylib): sys.path.insert(0, mylib)
 
 from SvnHook.PreUnlock import *
