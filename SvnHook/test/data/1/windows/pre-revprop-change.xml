@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Actions>
+
+  <FilterUser>
+    <UserRegex sense="false">(?i)^(geoff|DevonHaigh)$</UserRegex>
+    <SendError>User "${User}" cannot change revision properties!</SendError>
+  </FilterUser>
+
+</Actions>
