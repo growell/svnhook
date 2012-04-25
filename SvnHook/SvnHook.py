@@ -73,32 +73,32 @@ class SvnHook(object):
 
     def run(self):
         """Execute top-level hook actions and set exit code."""
-        # Perform the hook actions.
-        for action in self.cfg.getroot().iterfind(r'./*'):
-            self.execute_action(action)
-            if self.exitcode != 0: break
+
+        # Perform the root hook actions.
+        self.run_actions(self.cfg.getroot())
 
         # Exit with the final exit code.
         exit(self.exitcode)
 
-    def execute_action(self, action):
-        """Execute a hook handler action.
+    def run_actions(self, parent):
+        """Execute child tag actions."""
+        for action in parent.iterfind(r'./*'):
 
-        Arguments:
-        action -- Element object for action tag.
+            # Make sure it's a valid handler.
+            try:
+                handler = self.actions[action.tag]
+            except KeyError:
+                raise RuntimeError(
+                    'Action not recognized: ' + action.tag)
 
-        """
-        # Make sure it's a valid handler.
-        try:
-            handler = self.actions[action.tag]
-        except KeyError:
-            raise RuntimeError(
-                'Action not recognized: ' + action.tag)
+            # Call the action method. Pass it the configuration
+            # element.
+            self.debug('Calling {}...'.format(handler.__name__))
+            handler(action)
 
-        # Call the action method. Pass it the configuration
-        # element.
-        self.debug('Calling {}...'.format(handler.__name__))
-        handler(action)
+            # If the handler set an exit code, stop executing the
+            # hook actions.
+            if self.exitcode != 0: break
 
     def apply_tokens(self, template):
         """Apply tokens to a template string.
@@ -142,6 +142,7 @@ class SvnHook(object):
 
     def set_token(self, action):
         """Set a token to be used in template substitutions."""
+
         try:
             name = action.attrib['name']
         except KeyError:
@@ -153,6 +154,7 @@ class SvnHook(object):
 
     def send_error(self, action):
         """Send a STDERR message to Subversion and set exit code."""
+
         if action.text == None:
             raise RuntimeError(
                 'Required tag content missing: SendError')
@@ -253,6 +255,7 @@ class SvnHook(object):
 
     def execute_cmd(self, action):
         """Execute a system command line."""
+
         if action.text == None:
             raise RuntimeError(
                 'Required tag content missing: ExecuteCmd')
@@ -299,6 +302,7 @@ class SvnHook(object):
 
     def filter_authors(self, action):
         """Filter operations based on author (user) name."""
+
         # Get the user name regex tag.
         regextag = action.find('AuthorRegex')
         if regextag == None:
@@ -317,52 +321,26 @@ class SvnHook(object):
         sense = re.match(r'(?i)(1|true|yes)',
                          regextag.get('sense', default='true'))!=None
 
-        # Apply the regex to the user name string.
-        if sense:
-            result = regex.search(self.author)!=None
-        else:
-            result = regex.search(self.author)==None
-        if result == False: return
-
-        # Perform the child actions.
-        for subaction in action.iterfind(r'./*'):
-            self.execute_action(subaction)
-            if self.exitcode != 0: break
-        
-    def filter_users(self, action):
-        """Filter operations based on user name."""
-        # Get the user name regex tag.
-        regextag = action.find('UserRegex')
-        if regextag == None:
+        # Get the current author.
+        try:
+            author = self.get_author()
+        except AttributeError:
             raise RuntimeError(
-                'Required tag missing: UserRegex')
-
-        # Avoid tag reuse.
-        action.remove(regextag)
-        
-        # Extract the comparison details.
-        if regextag.text == None or regextag.text == '':
-            raise RuntimeError(
-                'Required tag content missing: UserRegex')
-
-        regex = re.compile(regextag.text, re.IGNORECASE)
-        sense = re.match(r'(?i)(1|true|yes)',
-                         regextag.get('sense', default='true'))!=None
+                'Author not available for this hook type.')
 
         # Apply the regex to the user name string.
         if sense:
-            result = regex.search(self.user)!=None
+            result = regex.search(author)!=None
         else:
-            result = regex.search(self.user)==None
+            result = regex.search(author)==None
         if result == False: return
 
         # Perform the child actions.
-        for subaction in action.iterfind(r'./*'):
-            self.execute_action(subaction)
-            if self.exitcode != 0: break
-
+        self.run_actions(action)
+        
     def filter_log_messages(self, action):
         """Filter actions based on log message."""
+
         # Get the log message regex tag.
         regextag = action.find('LogMsgRegex')
         if regextag == None:
@@ -396,8 +374,37 @@ class SvnHook(object):
         if result == False: return
 
         # Perform the child actions.
-        for subaction in action.iterfind(r'./*'):
-            self.execute_action(subaction)
-            if self.exitcode != 0: break
+        self.run_actions(action)
+
+    def filter_users(self, action):
+        """Filter operations based on user name."""
+
+        # Get the user name regex tag.
+        regextag = action.find('UserRegex')
+        if regextag == None:
+            raise RuntimeError(
+                'Required tag missing: UserRegex')
+
+        # Avoid tag reuse.
+        action.remove(regextag)
+        
+        # Extract the comparison details.
+        if regextag.text == None or regextag.text == '':
+            raise RuntimeError(
+                'Required tag content missing: UserRegex')
+
+        regex = re.compile(regextag.text, re.IGNORECASE)
+        sense = re.match(r'(?i)(1|true|yes)',
+                         regextag.get('sense', default='true'))!=None
+
+        # Apply the regex to the user name string.
+        if sense:
+            result = regex.search(self.user)!=None
+        else:
+            result = regex.search(self.user)==None
+        if result == False: return
+
+        # Perform the child actions.
+        self.run_actions(action)
 
 ########################### end of file ##############################

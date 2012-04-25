@@ -46,7 +46,31 @@ class PreCommit(SvnHook):
         super(PreCommit, self).__init__(args.cfgfile)
 
         # Enable hook-specific actions.
+        self.actions['FilterAuthor'] = self.filter_authors
         self.actions['FilterLogMsg'] = self.filter_log_messages
+
+    def get_author(self):
+        """Get the transaction author."""
+
+        # Look up the log message associated with the transaction.
+        cmdline = 'svnlook author -t "{}" "{}"'.format(
+            self.txnname, self.repospath)
+        p = subprocess.Popen(shlex.split(cmdline),
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE,
+                             shell=False)
+
+        # The process started, wait for it to finish.
+        p.wait()
+
+        # Handle errors returned by the command.
+        if p.returncode != 0:
+            errstr = p.stderr.read()
+            raise RuntimeError(
+                'Command failed: {}: {}'.format(cmdline, errstr))
+
+        # Get the regular output. Remove whitespace.
+        return p.stdout.read().strip()
 
     def get_log_message(self):
         """Get the transaction log message."""
@@ -62,14 +86,14 @@ class PreCommit(SvnHook):
         # The process started, wait for it to finish.
         p.wait()
 
-        # Handle command errors.
+        # Handle errors returned by the command.
         if p.returncode != 0:
             errstr = p.stderr.read()
             raise RuntimeError(
                 'Command failed: {}: {}'.format(cmdline, errstr))
 
-        # Get the regular output.
-        return p.stdout.read()
+        # Get the regular output. Remove extra whitespace.
+        return p.stdout.read().strip()
 
     #-----------------------------------------------------------------
     # Action Methods

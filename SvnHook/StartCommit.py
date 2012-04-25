@@ -75,8 +75,6 @@ class StartCommit(SvnHook):
         if result==False: return
 
         # Perform the child actions.
-        for action in cfgtag.iterfind(r'./*'):
-            self.execute_action(action)
-            if self.exitcode != 0: break
+        self.run_actions(action)
 
 ########################### end of file ##############################
