@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Actions>
+
+	<!-- Log message must contain letters. -->
+  <FilterLogMsg>
+    <LogMsgRegex sense="false">[[:alpha:]]</LogMsgRegex>
+    <SendError>Log message must contain some text!</SendError>
+  </FilterLogMsg>
+
+	<!-- Log message must not contain placeholders. -->
+  <FilterLogMsg>
+    <LogMsgRegex>(?i)\[(COMMENT|X+|Revie?wer)\]</LogMsgRegex>
+    <SendError>Log message placeholders not replaced.</SendError>
+  </FilterLogMsg>
+
+	<!-- Prevent case conflicts with an existing entry. -->
+  <FilterAddNameCase>
+    <SendError>
+      Name case conflict with existing repository entry!
+
+      Folder..: ${ParentFolder}
+      Existing: ${ExistingName}
+      Added...: ${AddName}
+    </SendError>
+  </FilterAddNameCase>
+
+	<!-- Don't allow "autobuild" changes to non-build number files. -->
+  <FilterAuthor>
+    <AuthorRegex>^autobuild$</AuthorRegex>
+    <FilterCommitList>
+      <PathRegex sense="false">/build\.cfg$</PathRegex>
+      <SendError>User "autobuild" not allowed to commit changes!</SendError>
+    </FilterCommitList>
+  </FilterAuthor>
+
+  <!-- Prevent adding items with "@" (at) symbols in their name. -->
+  <FilterCommitList>
+    <ChgTypeRegex>A</ChgTypeRegex>
+    <PathRegex>\@</PathRegex>
+    <SendError>
+      File and folder names cannot contain an @ (at) symbol.
+
+      Path: ${Path}
+    </SendError>
+  </FilterCommitList>
+
+  <!-- Prevent setting merge info anywhere other than a root folder. -->
+  <FilterCommitList>
+    <!-- Item is not deleted and is not a root folder... -->
+    <ChgTypeRegex sense="false">D</ChgTypeRegex>
+    <PathRegex sense="false">(?i)/(trunk|branches/[^/]+|tags/[^/]+)/$</PathRegex>
+    <FilterPath>
+      <!-- Item is on a branched tree... -->
+      <PathRegex>(?i)/(trunk|branches|tags)/</PathRegex>
+      <FilterPropList>
+        <!-- Item has merge info... -->
+        <PropNameRegex>(?i)^svn:mergeinfo$</PropNameRegex>
+        <SendError>
+          Setting merge info for path '${Path}' not allowed!
+          Please revert working copy changes and apply merges to the root directory.
+        </SendError>
+      </FilterPropList>
+    </FilterPath>
+  </FilterCommitList>
+
+	<!-- Prevent adding/updating stored procedures that contain the
+	  "GO" command. -->
+  <FilterCommitList>
+    <ChgTypeRegex sense="false">D</ChgTypeRegex>
+    <PathRegex>(?i)/db/DatabaseTypes/.+/(?:sp|StoredProcedures)/.+\.sql$</PathRegex>
+    <FilterFileContent>
+      <ContentRegex>(?im)^\s*go\s*$</ContentRegex>
+      <SendError>
+        Stored procedure contains 'GO' statements!
+
+           Path: ${Path}
+      </SendError>
+    </FilterFileContent>
+  </FilterCommitList>
+
+</Actions>
