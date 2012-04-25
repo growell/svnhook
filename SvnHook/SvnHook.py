@@ -17,7 +17,7 @@ import sys
 import textwrap
 import yaml
 
-from lxml import etree
+from xml.etree.ElementTree import ElementTree
 from string import Template
 
 class SvnHook(object):
@@ -55,7 +55,7 @@ class SvnHook(object):
         self.logger = logging.getLogger(self.__class__.__name__)
 
         # Read and parse the hook configuration file.
-        self.cfg = etree.parse(open(cfgfile))
+        self.cfg = ElementTree(file=cfgfile)
 
         # Set dictionary of action methods.
         self.actions = {

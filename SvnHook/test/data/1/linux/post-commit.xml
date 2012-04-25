@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Actions>
+
+  <SetToken name="FlagDir">flags</SetToken>
+
+  <FilterCommitList matchFirst="true">
+    <PathRegex>(?i)^components/[^/]+/trunk/</PathRegex>
+    <SendLogSmtp server="mail.corp02.envoyww.com" verbose="true">
+      <Subject>[SVN] Component Trunk Change</Subject>
+      <FromAddress>svn.server@varolii.com</FromAddress>
+      <ToAddress>ZZ-BED_ENG@varolii.com</ToAddress>
+    </SendLogSmtp>
+  </FilterCommitList>
+
+  <!-- Profiles Silk Testing -->
+  <FilterCommitList matchFirst="true">
+    <PathRegex>(?i)^products/ep/trunk/ep/test/Automation</PathRegex>
+    <SetRevisionFile>${FlagDir}\ep_trunk_Automation.revision</SetRevisionFile>
+  </FilterCommitList>
+  <FilterCommitList matchFirst="true">
+    <PathRegex>(?i)^products/ep/branches/5.08/ep/test/Automation</PathRegex>
+    <SetRevisionFile>${FlagDir}\ep_5.08_Automation.revision</SetRevisionFile>
+  </FilterCommitList>
+  <FilterCommitList matchFirst="true">
+    <PathRegex>(?i)^products/ep/branches/nashua/ep/test/Automation</PathRegex>
+    <SetRevisionFile>${FlagDir}\ep_nashua_Automation.revision</SetRevisionFile>
+  </FilterCommitList>
+
+  <!-- Third Party Build Libraries -->
+  <!-- ** NOTE: This should match with build_libs externals. ** -->
+  <FilterCommitList matchFirst="true">
+    <PathRegex>(?i)^thirdpty/(build_libs|boost|google|xerces)</PathRegex>
+    <SetRevisionFile>${FlagDir}\thirdpty_build_libs.revision</SetRevisionFile>
+  </FilterCommitList>
+
+  <!-- Local Perl Package Repository -->
+  <FilterCommitList matchFirst="true">
+    <PathRegex>(?i)^thirdpty/ppm</PathRegex>
+    <SetRevisionFile>${FlagDir}\thirdpty_ppm.revision</SetRevisionFile>
+  </FilterCommitList>
+
+    <!-- Athena, Trollop and TOPS -->
+  <FilterCommitList matchFirst="true">
+    <PathRegex>(?i)^tools/athena/branches/02\.03</PathRegex>
+    <SetRevisionFile>${FlagDir}\tools_athena_production.revision</SetRevisionFile>
+  </FilterCommitList>
+  <FilterCommitList matchFirst="true">
+    <PathRegex>(?i)^tools/athena/trunk</PathRegex>
+    <SetRevisionFile>${FlagDir}\tools_athena_trunk.revision</SetRevisionFile>
+  </FilterCommitList>
+
+  <FilterCommitList matchFirst="true">
+    <PathRegex>(?i)^tools/(build|testtools)/trunk</PathRegex>
+    <SetRevisionFile>${FlagDir}\tools_testtools.revision</SetRevisionFile>
+  </FilterCommitList>
+
+  <FilterCommitList matchFirst="true">
+    <PathRegex>(?i)^tools/svnaccess/branches/02\.00</PathRegex>
+    <SetRevisionFile>${FlagDir}\tools_svnaccess_production.revision</SetRevisionFile>
+  </FilterCommitList>
+
+  <FilterCommitList matchFirst="true">
+    <PathRegex>(?i)^tools/tops/trunk</PathRegex>
+    <SetRevisionFile>${FlagDir}\tools_tops_trunk.revision</SetRevisionFile>
+  </FilterCommitList>
+
+    <!-- Scheduled Task Scripts -->
+  <FilterCommitList matchFirst="true">
+    <PathRegex>(?i)^tools/jobscripts/trunk</PathRegex>
+    <SetRevisionFile>${FlagDir}\tools_jobscripts.revision</SetRevisionFile>
+  </FilterCommitList>
+
+    <!-- QA System Tools -->
+  <FilterCommitList matchFirst="true">
+    <PathRegex>(?i)^tools/QATools</PathRegex>
+    <SetRevisionFile>${FlagDir}\tools_QATools.revision</SetRevisionFile>
+  </FilterCommitList>
+
+  <!-- Production Tools -->
+  <FilterCommitList matchFirst="true">
+    <PathRegex>(?i)^tools/ServerBuild</PathRegex>
+    <SetRevisionFile>${FlagDir}\tools_ServerBuild.revision</SetRevisionFile>
+  </FilterCommitList>
+  <FilterCommitList matchFirst="true">
+    <PathRegex>(?i)^tools/ServerBuild/ProdTools</PathRegex>
+    <SetRevisionFile>${FlagDir}\tools_ProdTools.revision</SetRevisionFile>
+  </FilterCommitList>
+
+</Actions>

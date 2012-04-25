@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Actions>
+
+  <FilterUser>
+    <UserRegex>^autobuild$</UserRegex>
+    <SendError>User "${User}" cannot lock files!</SendError>
+  </FilterUser>
+
+  <FilterPath>
+    <PathRegex sense="false">(?i)\.(doc|gif|jpe?g|png|ppt|rtf|svg|tiff?|pcm|wav|vox|xl[sw])$</PathRegex>
+    <SendError>
+      User: ${User}
+      Path: ${Path}
+
+      Locking not allowed for files with that extension!
+    </SendError>
+  </FilterPath>
+
+</Actions>

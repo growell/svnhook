@@ -1,2 +1,4 @@
 *~
 *.pyc
+SvnHook/test/repo_*
+SvnHook/test/wc_*

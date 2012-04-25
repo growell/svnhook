@@ -4,7 +4,5 @@ UBUNTU
 ------
 The following additional Python packages are required:
 
-  python-lxml
-    Python bindings for libxml2 library
   python-yaml
-    YAML processing for Python
+    YAML processing for Python. Used for logging.
