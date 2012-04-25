@@ -1,240 +1,240 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
-	<!-- root element -->
-	<xs:element name="Actions">
-		<xs:complexType>
-			<xs:choice maxOccurs="unbounded">
-				<!-- filters -->
-				<xs:element ref="FilterComment" />
-				<xs:element ref="FilterFileContent" />
-				<xs:element ref="FilterPath" />
-				<xs:element ref="FilterPropList" />
-				<xs:element ref="FilterStealLock" />
-				<xs:element ref="FilterUser" />
-				<!-- actions -->
-				<xs:element ref="ExecuteCmd" />
-				<xs:element ref="SendError" maxOccurs="1" />
-				<xs:element ref="SendSmtp" />
-				<xs:element ref="SetToken" />
-			</xs:choice>
-		</xs:complexType>
-	</xs:element>
+  <!-- root element -->
+  <xs:element name="Actions">
+    <xs:complexType>
+      <xs:choice maxOccurs="unbounded">
+	<!-- filters -->
+	<xs:element ref="FilterComment" />
+	<xs:element ref="FilterFileContent" />
+	<xs:element ref="FilterPath" />
+	<xs:element ref="FilterPropList" />
+	<xs:element ref="FilterStealLock" />
+	<xs:element ref="FilterUser" />
+	<!-- actions -->
+	<xs:element ref="ExecuteCmd" />
+	<xs:element ref="SendError" maxOccurs="1" />
+	<xs:element ref="SendSmtp" />
+	<xs:element ref="SetToken" />
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
 
-	<!-- filter elements -->
+  <!-- filter elements -->
 
-	<xs:element name="FilterComment">
-		<xs:complexType>
-			<xs:sequence>
-				<xs:element name="CommentRegex" type="regex" />
-				<xs:choice maxOccurs="unbounded">
-					<!-- filters -->
-					<xs:element ref="FilterComment" />
-					<xs:element ref="FilterFileContent" />
-					<xs:element ref="FilterPath" />
-					<xs:element ref="FilterPropList" />
-					<xs:element ref="FilterStealLock" />
-					<xs:element ref="FilterUser" />
-					<!-- actions -->
-					<xs:element ref="ExecuteCmd" />
-					<xs:element ref="SendError" maxOccurs="1" />
-					<xs:element ref="SendSmtp" />
-					<xs:element ref="SetToken" />
-				</xs:choice>
-			</xs:sequence>
-		</xs:complexType>
-	</xs:element>
+  <xs:element name="FilterComment">
+    <xs:complexType>
+      <xs:sequence>
+	<xs:element name="CommentRegex" type="regex" />
+	<xs:choice maxOccurs="unbounded">
+	  <!-- filters -->
+	  <xs:element ref="FilterComment" />
+	  <xs:element ref="FilterFileContent" />
+	  <xs:element ref="FilterPath" />
+	  <xs:element ref="FilterPropList" />
+	  <xs:element ref="FilterStealLock" />
+	  <xs:element ref="FilterUser" />
+	  <!-- actions -->
+	  <xs:element ref="ExecuteCmd" />
+	  <xs:element ref="SendError" maxOccurs="1" />
+	  <xs:element ref="SendSmtp" />
+	  <xs:element ref="SetToken" />
+	</xs:choice>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
 
-	<xs:element name="FilterFileContent">
-		<xs:complexType>
-			<xs:sequence>
-				<xs:element name="ContentRegex" type="regex" />
-				<xs:choice maxOccurs="unbounded">
-					<!-- filters -->
-					<xs:element ref="FilterComment" />
-					<xs:element ref="FilterFileContent" />
-					<xs:element ref="FilterPath" />
-					<xs:element ref="FilterPropList" />
-					<xs:element ref="FilterStealLock" />
-					<xs:element ref="FilterUser" />
-					<!-- actions -->
-					<xs:element ref="ExecuteCmd" />
-					<xs:element ref="SendError" maxOccurs="1" />
-					<xs:element ref="SendSmtp" />
-					<xs:element ref="SetToken" />
-				</xs:choice>
-			</xs:sequence>
-		</xs:complexType>
-	</xs:element>
+  <xs:element name="FilterFileContent">
+    <xs:complexType>
+      <xs:sequence>
+	<xs:element name="ContentRegex" type="regex" />
+	<xs:choice maxOccurs="unbounded">
+	  <!-- filters -->
+	  <xs:element ref="FilterComment" />
+	  <xs:element ref="FilterFileContent" />
+	  <xs:element ref="FilterPath" />
+	  <xs:element ref="FilterPropList" />
+	  <xs:element ref="FilterStealLock" />
+	  <xs:element ref="FilterUser" />
+	  <!-- actions -->
+	  <xs:element ref="ExecuteCmd" />
+	  <xs:element ref="SendError" maxOccurs="1" />
+	  <xs:element ref="SendSmtp" />
+	  <xs:element ref="SetToken" />
+	</xs:choice>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
 
-	<xs:element name="FilterPath">
-		<xs:complexType>
-			<xs:sequence>
-				<xs:element name="PathRegex" type="regex" />
-				<xs:choice maxOccurs="unbounded">
-					<!-- filters -->
-					<xs:element ref="FilterComment" />
-					<xs:element ref="FilterFileContent" />
-					<xs:element ref="FilterPath" />
-					<xs:element ref="FilterPropList" />
-					<xs:element ref="FilterStealLock" />
-					<xs:element ref="FilterUser" />
-					<!-- actions -->
-					<xs:element ref="ExecuteCmd" />
-					<xs:element ref="SendError" maxOccurs="1" />
-					<xs:element ref="SendSmtp" />
-					<xs:element ref="SetToken" />
-				</xs:choice>
-			</xs:sequence>
-		</xs:complexType>
-	</xs:element>
+  <xs:element name="FilterPath">
+    <xs:complexType>
+      <xs:sequence>
+	<xs:element name="PathRegex" type="regex" />
+	<xs:choice maxOccurs="unbounded">
+	  <!-- filters -->
+	  <xs:element ref="FilterComment" />
+	  <xs:element ref="FilterFileContent" />
+	  <xs:element ref="FilterPath" />
+	  <xs:element ref="FilterPropList" />
+	  <xs:element ref="FilterStealLock" />
+	  <xs:element ref="FilterUser" />
+	  <!-- actions -->
+	  <xs:element ref="ExecuteCmd" />
+	  <xs:element ref="SendError" maxOccurs="1" />
+	  <xs:element ref="SendSmtp" />
+	  <xs:element ref="SetToken" />
+	</xs:choice>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
 
-	<xs:element name="FilterPropList">
-		<xs:complexType>
-			<xs:sequence>
-				<xs:element name="PropNameRegex" type="regex" />
-				<xs:element name="PropValueRegex" type="regex" minOccurs="0" />
-				<xs:choice maxOccurs="unbounded">
-					<!-- filters -->
-					<xs:element ref="FilterComment" />
-					<xs:element ref="FilterFileContent" />
-					<xs:element ref="FilterPath" />
-					<xs:element ref="FilterPropList" />
-					<xs:element ref="FilterStealLock" />
-					<xs:element ref="FilterUser" />
-					<!-- actions -->
-					<xs:element ref="ExecuteCmd" />
-					<xs:element ref="SendError" maxOccurs="1" />
-					<xs:element ref="SendSmtp" />
-					<xs:element ref="SetToken" />
-				</xs:choice>
-			</xs:sequence>
-			<xs:attribute name="matchFirst" type="xs:boolean" />
-		</xs:complexType>
-	</xs:element>
+  <xs:element name="FilterPropList">
+    <xs:complexType>
+      <xs:sequence>
+	<xs:element name="PropNameRegex" type="regex" />
+	<xs:element name="PropValueRegex" type="regex" minOccurs="0" />
+	<xs:choice maxOccurs="unbounded">
+	  <!-- filters -->
+	  <xs:element ref="FilterComment" />
+	  <xs:element ref="FilterFileContent" />
+	  <xs:element ref="FilterPath" />
+	  <xs:element ref="FilterPropList" />
+	  <xs:element ref="FilterStealLock" />
+	  <xs:element ref="FilterUser" />
+	  <!-- actions -->
+	  <xs:element ref="ExecuteCmd" />
+	  <xs:element ref="SendError" maxOccurs="1" />
+	  <xs:element ref="SendSmtp" />
+	  <xs:element ref="SetToken" />
+	</xs:choice>
+      </xs:sequence>
+      <xs:attribute name="matchFirst" type="xs:boolean" />
+    </xs:complexType>
+  </xs:element>
 
-	<xs:element name="FilterStealLock">
-		<xs:complexType>
-			<xs:sequence>
-				<xs:choice maxOccurs="unbounded">
-					<!-- filters -->
-					<xs:element ref="FilterComment" />
-					<xs:element ref="FilterFileContent" />
-					<xs:element ref="FilterPath" />
-					<xs:element ref="FilterPropList" />
-					<xs:element ref="FilterUser" />
-					<!-- actions -->
-					<xs:element ref="ExecuteCmd" />
-					<xs:element ref="SendError" maxOccurs="1" />
-					<xs:element ref="SendSmtp" />
-					<xs:element ref="SetToken" />
-				</xs:choice>
-			</xs:sequence>
-			<xs:attribute name="sense" type="xs:boolean" />
-		</xs:complexType>
-	</xs:element>
+  <xs:element name="FilterStealLock">
+    <xs:complexType>
+      <xs:sequence>
+	<xs:choice maxOccurs="unbounded">
+	  <!-- filters -->
+	  <xs:element ref="FilterComment" />
+	  <xs:element ref="FilterFileContent" />
+	  <xs:element ref="FilterPath" />
+	  <xs:element ref="FilterPropList" />
+	  <xs:element ref="FilterUser" />
+	  <!-- actions -->
+	  <xs:element ref="ExecuteCmd" />
+	  <xs:element ref="SendError" maxOccurs="1" />
+	  <xs:element ref="SendSmtp" />
+	  <xs:element ref="SetToken" />
+	</xs:choice>
+      </xs:sequence>
+      <xs:attribute name="sense" type="xs:boolean" />
+    </xs:complexType>
+  </xs:element>
 
-	<xs:element name="FilterUser">
-		<xs:complexType>
-			<xs:sequence>
-				<xs:element name="UserRegex" type="regex" />
-				<xs:choice maxOccurs="unbounded">
-					<!-- filters -->
-					<xs:element ref="FilterComment" />
-					<xs:element ref="FilterFileContent" />
-					<xs:element ref="FilterPath" />
-					<xs:element ref="FilterPropList" />
-					<xs:element ref="FilterStealLock" />
-					<xs:element ref="FilterUser" />
-					<!-- actions -->
-					<xs:element ref="ExecuteCmd" />
-					<xs:element ref="SendError" maxOccurs="1" />
-					<xs:element ref="SendSmtp" />
-					<xs:element ref="SetToken" />
-				</xs:choice>
-			</xs:sequence>
-		</xs:complexType>
-	</xs:element>
+  <xs:element name="FilterUser">
+    <xs:complexType>
+      <xs:sequence>
+	<xs:element name="UserRegex" type="regex" />
+	<xs:choice maxOccurs="unbounded">
+	  <!-- filters -->
+	  <xs:element ref="FilterComment" />
+	  <xs:element ref="FilterFileContent" />
+	  <xs:element ref="FilterPath" />
+	  <xs:element ref="FilterPropList" />
+	  <xs:element ref="FilterStealLock" />
+	  <xs:element ref="FilterUser" />
+	  <!-- actions -->
+	  <xs:element ref="ExecuteCmd" />
+	  <xs:element ref="SendError" maxOccurs="1" />
+	  <xs:element ref="SendSmtp" />
+	  <xs:element ref="SetToken" />
+	</xs:choice>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
 
-	<!-- action elements -->
+  <!-- action elements -->
 
-	<xs:element name="ExecuteCmd">
-		<xs:complexType>
-			<xs:simpleContent>
-				<xs:extension base="some-string">
-					<xs:attribute name="errorLevel" type="error-exit-code" />
-				</xs:extension>
-			</xs:simpleContent>
-		</xs:complexType>
-	</xs:element>
+  <xs:element name="ExecuteCmd">
+    <xs:complexType>
+      <xs:simpleContent>
+	<xs:extension base="some-string">
+	  <xs:attribute name="errorLevel" type="error-exit-code" />
+	</xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
 
-	<xs:element name="SendError">
-		<xs:complexType>
-			<xs:simpleContent>
-				<xs:extension base="some-string">
-					<xs:attribute name="exitCode" type="error-exit-code" />
-				</xs:extension>
-			</xs:simpleContent>
-		</xs:complexType>
-	</xs:element>
+  <xs:element name="SendError">
+    <xs:complexType>
+      <xs:simpleContent>
+	<xs:extension base="some-string">
+	  <xs:attribute name="exitCode" type="error-exit-code" />
+	</xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
 
-	<xs:element name="SendSmtp">
-		<xs:complexType>
-			<xs:sequence>
-				<xs:element name="Subject" type="some-string" />
-				<xs:element name="FromAddress" type="email-address" />
-				<xs:element name="ToAddress" maxOccurs="unbounded" type="email-address" />
-				<xs:element name="Message" type="some-string" />
-			</xs:sequence>
-			<xs:attribute name="server" type="server-address" use="required" />
-			<xs:attribute name="seconds" type="xs:positiveInteger" />
-		</xs:complexType>
-	</xs:element>
+  <xs:element name="SendSmtp">
+    <xs:complexType>
+      <xs:sequence>
+	<xs:element name="Subject" type="some-string" />
+	<xs:element name="FromAddress" type="email-address" />
+	<xs:element name="ToAddress" maxOccurs="unbounded" type="email-address" />
+	<xs:element name="Message" type="some-string" />
+      </xs:sequence>
+      <xs:attribute name="server" type="server-address" use="required" />
+      <xs:attribute name="seconds" type="xs:positiveInteger" />
+    </xs:complexType>
+  </xs:element>
 
-	<xs:element name="SetToken">
-		<xs:complexType>
-			<xs:simpleContent>
-				<xs:extension base="xs:string">
-					<xs:attribute name="name" type="some-string" use="required" />
-				</xs:extension>
-			</xs:simpleContent>
-		</xs:complexType>
-	</xs:element>
+  <xs:element name="SetToken">
+    <xs:complexType>
+      <xs:simpleContent>
+	<xs:extension base="xs:string">
+	  <xs:attribute name="name" type="some-string" use="required" />
+	</xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
 
-	<!-- datatypes -->
+  <!-- datatypes -->
 
-	<xs:complexType name="regex">
-		<xs:simpleContent>
-			<xs:extension base="some-string">
-				<xs:attribute name="sense" type="xs:boolean" />
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
+  <xs:complexType name="regex">
+    <xs:simpleContent>
+      <xs:extension base="some-string">
+	<xs:attribute name="sense" type="xs:boolean" />
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
 
-	<xs:simpleType name="error-exit-code">
-		<xs:restriction base="xs:integer">
-			<xs:minInclusive value="1"/>
-			<xs:maxInclusive value="255"/>
-		</xs:restriction>
-	</xs:simpleType>
-	
-	<xs:simpleType name="some-string">
-		<xs:restriction base="xs:string">
-			<xs:minLength value="1" />
-		</xs:restriction>
-	</xs:simpleType>
+  <xs:simpleType name="error-exit-code">
+    <xs:restriction base="xs:integer">
+      <xs:minInclusive value="1"/>
+      <xs:maxInclusive value="255"/>
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="some-string">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1" />
+    </xs:restriction>
+  </xs:simpleType>
 
-	<xs:simpleType name="server-address">
-		<xs:restriction base="xs:string">
-			<xs:pattern
-				value="(\p{L}[\p{L}\d\.\-]*|\d+(\.\d+){3})" />
-		</xs:restriction>
-	</xs:simpleType>
+  <xs:simpleType name="server-address">
+    <xs:restriction base="xs:string">
+      <xs:pattern
+	  value="(\p{L}[\p{L}\d\.\-]*|\d+(\.\d+){3})" />
+    </xs:restriction>
+  </xs:simpleType>
 
-	<xs:simpleType name="email-address">
-		<xs:restriction base="xs:string">
-			<xs:pattern value="[\p{L}\d\.\-_]+@[\p{L}\d\.]+" />
-		</xs:restriction>
-	</xs:simpleType>
+  <xs:simpleType name="email-address">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[\p{L}\d\.\-_]+@[\p{L}\d\.]+" />
+    </xs:restriction>
+  </xs:simpleType>
 
 </xs:schema>
