@@ -45,7 +45,7 @@ class StartCommit(SvnHook):
     def filter_capabilities(self, cfgtag):
         """Filters based on client capabilities."""
 
-        logging.debug('capabilities ="{}"'.format(self.capabilities))
+        self.debug('capabilities="{}"'.format(self.capabilities))
 
         # Find the required regex element.
         regextag = cfgtag.find('CapabilitiesRegex')

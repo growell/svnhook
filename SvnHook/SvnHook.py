@@ -21,19 +21,7 @@ from lxml import etree
 from string import Template
 
 class SvnHook(object):
-    """Base class for hook-specific handlers.
-
-    Initializes logging.
-    Reads and parses XML configuration.
-    Defines base hook actions.
-    """
-
-    # Action Methods
-    action_methods = (
-        'set_token',
-        'send_error',
-        'send_smtp',
-        'execute_cmd')
+    """Base class for hook-specific handlers."""
 
     def __init__(self, cfgfile):
         """Construct a new object of the class.
@@ -62,6 +50,9 @@ class SvnHook(object):
             logging.config.fileConfig(logconffile)
         else:
             logging.basicConfig()
+
+        # Initialize the logger with the instance class name.
+        self.logger = logging.getLogger(self.__class__.__name__)
 
         # Read and parse the hook configuration file.
         self.cfg = etree.parse(open(cfgfile))
@@ -106,7 +97,7 @@ class SvnHook(object):
 
         # Call the action method. Pass it the configuration
         # element.
-        logging.debug('Calling {}...'.format(handler.__name__))
+        self.debug('Calling {}...'.format(handler.__name__))
         handler(action)
 
     def apply_tokens(self, template):
@@ -121,6 +112,29 @@ class SvnHook(object):
         """
         engine = Template(template)
         return engine.safe_substitute(self.tokens)
+
+    #-----------------------------------------------------------------
+    # Logging Utility Methods
+    #-----------------------------------------------------------------
+    def debug(self, msg, *args, **kwargs):
+        """Log a message with severity DEBUG on the hook logger."""
+        self.logger.debug(msg, *args, **kwargs)
+
+    def info(self, msg, *args, **kwargs):
+        """Log a message with severity INFO on the hook logger."""
+        self.logger.info(msg, *args, **kwargs)
+
+    def warning(self, msg, *args, **kwargs):
+        """Log a message with severity WARNING on the hook logger."""
+        self.logger.warning(msg, *args, **kwargs)
+
+    def error(self, msg, *args, **kwargs):
+        """Log a message with severity ERROR on the hook logger."""
+        self.logger.error(msg, *args, **kwargs)
+
+    def critical(self, msg, *args, **kwargs):
+        """Log a message with severity CRITICAL on the hook logger."""
+        self.logger.critical(msg, *args, **kwargs)
 
     #-----------------------------------------------------------------
     # Base Action Methods
@@ -149,7 +163,7 @@ class SvnHook(object):
                 re.sub(r'(?s)^[\n\r]+', '', action.text)))
 
         # Log the error message lines.
-        for e in errormsg.splitlines(): logging.error(e.lstrip())
+        for e in errormsg.splitlines(): self.error(e.lstrip())
 
         # Send the message to STDERR and use the exit code.
         sys.stderr.write(errormsg)
@@ -220,7 +234,7 @@ class SvnHook(object):
         try:
             server = smtplib.SMTP(host, None, None, timeout)
         except SMTPConnectError as e:
-            logging.critical(e)
+            self.critical(e)
             sys.stderr.write('Internal hook error.'
                              + ' Please notify administrator.')
             self.exitcode = -1
@@ -231,7 +245,7 @@ class SvnHook(object):
             server.sendmail(fromaddress, toaddresses, content)
         except smtplib.SMTPRecipientsRefused as e:
             for recipient in e.recipients:
-                logging.warning(
+                self.warning(
                     'Recipient refused: {}'.format(recipient))
 
         # Disconnect from the host.
@@ -252,7 +266,7 @@ class SvnHook(object):
         # Execute the tokenized system command. If the process fails
         # to start, it'll throw an OSError. Treat that as a
         # non-maskable hook failure.
-        logging.debug('cmdline = "{}", errorlevel = {}'
+        self.debug('cmdline="{}", errorlevel={}'
                       .format(cmdline, errorlevel))
 
         try:
@@ -261,7 +275,7 @@ class SvnHook(object):
                                  stderr=subprocess.PIPE,
                                  shell=False)
         except OSError as e:
-            logging.critical(e)
+            self.critical(e)
             sys.stderr.write('Internal hook error.'
                              + ' Please notify administrator.\n')
             self.exitcode = -1
@@ -274,10 +288,10 @@ class SvnHook(object):
         if p.returncode >= errorlevel:
             errstr = p.stderr.read()
             sys.stderr.write(errstr)
-            logging.error(errstr)
+            self.error(errstr)
             self.exitcode = p.returncode
         else:
-            logging.debug('exit code = {}'.format(p.returncode))
+            self.debug('exit code={}'.format(p.returncode))
 
     #-----------------------------------------------------------------
     # Filter Actions
