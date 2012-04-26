@@ -7,6 +7,7 @@ import shlex, subprocess
 import sys
 
 from SvnHook import *
+from SvnHook.ChgParser import ChgParser
 
 class PreCommit(SvnHook):
     """Handles pre-commit hook calls."""
@@ -71,6 +72,35 @@ class PreCommit(SvnHook):
 
         # Get the regular output. Remove whitespace.
         return p.stdout.read().strip()
+
+    def get_changed(self):
+        """Get the dictionary of changed paths in the transaction."""
+
+        # Look up the log message associated with the transaction.
+        cmdline = 'svnlook changed -t "{}" "{}"'.format(
+            self.txnname, self.repospath)
+        p = subprocess.Popen(shlex.split(cmdline),
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE,
+                             shell=False)
+
+        # The process started, wait for it to finish.
+        p.wait()
+
+        # Handle errors returned by the command.
+        if p.returncode != 0:
+            errstr = p.stderr.read()
+            raise RuntimeError(
+                'Command failed: {}: {}'.format(cmdline, errstr))
+
+        # Parse the change listing lines into a dictionary of paths
+        # whose values are the change flags.
+        changes = dict()
+        parser = ChgParser()
+        for change in p.stdout.read():
+            [chgtype, chgpath] = parser.parse(change)
+            changes[chgpath] = chgtype
+        return changes
 
     def get_log_message(self):
         """Get the transaction log message."""
