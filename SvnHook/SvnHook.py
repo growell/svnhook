@@ -1,10 +1,14 @@
 #!/usr/bin/env python
-"""Base Class for Hook Handlers"""
+"""Base Class for Hook Handlers
+
+Provides core Subversion hook handler functionality.
+"""
 __author__    = 'Geoff Rowell'
 __copyright__ = 'Copyright 2012, Geoff Rowell'
 __license__   = 'Apache'
 __version__   = '3.00'
 __status__    = 'Development'
+__all__       = ['SvnHook']
 
 import inspect
 import logging
@@ -19,6 +23,7 @@ import yaml
 
 from xml.etree.ElementTree import ElementTree
 from string import Template
+from svnhook.RegexTag import RegexTag
 
 class SvnHook(object):
     """Base class for hook-specific handlers."""
@@ -311,15 +316,9 @@ class SvnHook(object):
 
         # Avoid tag reuse.
         action.remove(regextag)
-        
-        # Extract the comparison details.
-        if regextag.text == None or regextag.text == '':
-            raise RuntimeError(
-                'Required tag content missing: AuthorRegex')
 
-        regex = re.compile(regextag.text, re.IGNORECASE)
-        sense = re.match(r'(?i)(1|true|yes)',
-                         regextag.get('sense', default='true'))!=None
+        # Extract the comparison details.
+        regex = RegexTag(regextag, re.IGNORECASE)
 
         # Get the current author.
         try:
@@ -329,15 +328,49 @@ class SvnHook(object):
                 'Author not available for this hook type.')
 
         # Apply the regex to the user name string.
-        if sense:
-            result = regex.search(author)!=None
-        else:
-            result = regex.search(author)==None
-        if result == False: return
+        if not regex.search(author): return
+
+        # Set the author name token.
+        self.tokens['AUTHOR'] = author
 
         # Perform the child actions.
         self.run_actions(action)
-        
+
+    def filter_changes(self, action):
+        """Filter actions based on changes."""
+
+        # Get the change path regex.
+        pathregextag = action.find('ChgPathRegex')
+        if pathregextag == None:
+            pathregex = None
+        else:
+            action.remove(pathregextag)
+            pathregex = RegexTag(pathregextag)
+
+        # Get the change type regex.
+        typeregextag = action.find('ChgTypeRegex')
+        if typeregextag == None:
+            typeregex = None
+        else:
+            action.remove(typeregextag)
+            typeregex = RegexTag(typeregextag, re.IGNORECASE)
+
+        # Require at least one regex tag.
+        if typeregex == None and pathregex == None:
+            raise RuntimeError(
+                'Required tag missing: ChgPathRegex or ChgTypeRegex')
+
+        # Get the dictionary of changes.
+        try:
+            changes = self.get_changes()
+        except AttributeError:
+            raise RuntimeError(
+                'Changes not available for this hook type.')
+
+        # Compare the changes to the regular expressions.
+        for [chgpath, chgtype] in changes:
+            pass
+
     def filter_log_messages(self, action):
         """Filter actions based on log message."""
 
@@ -351,13 +384,7 @@ class SvnHook(object):
         action.remove(regextag)
         
         # Extract the comparison details.
-        if regextag.text == None or regextag.text == '':
-            raise RuntimeError(
-                'Required tag content missing: LogMsgRegex')
-
-        regex = re.compile(regextag.text)
-        sense = re.match(r'(?i)(1|true|yes)',
-                         regextag.get('sense', default='true'))!=None
+        regex = RegexTag(regextag)
 
         # Get the current log message.
         try:
@@ -367,11 +394,10 @@ class SvnHook(object):
                 'Log message not available for this hook type.')
 
         # Apply the regex to the log message.
-        if sense:
-            result = regex.search(logmsg)!=None
-        else:
-            result = regex.search(logmsg)==None
-        if result == False: return
+        if not regex.search(logmsg): return
+
+        # Set the log message token.
+        self.tokens['LOGMSG'] = logmsg
 
         # Perform the child actions.
         self.run_actions(action)
@@ -389,20 +415,13 @@ class SvnHook(object):
         action.remove(regextag)
         
         # Extract the comparison details.
-        if regextag.text == None or regextag.text == '':
-            raise RuntimeError(
-                'Required tag content missing: UserRegex')
-
-        regex = re.compile(regextag.text, re.IGNORECASE)
-        sense = re.match(r'(?i)(1|true|yes)',
-                         regextag.get('sense', default='true'))!=None
+        regex = RegexTag(regextag, re.IGNORECASE)
 
         # Apply the regex to the user name string.
-        if sense:
-            result = regex.search(self.user)!=None
-        else:
-            result = regex.search(self.user)==None
-        if result == False: return
+        if not regex.search(self.user): return
+
+        # Set the user name token.
+        self.tokens['USER'] = self.user
 
         # Perform the child actions.
         self.run_actions(action)

@@ -1,19 +1,24 @@
 #!/usr/bin/env python
-"""Defines handler class for pre-commit hook."""
+"""Pre-commit Hook Handler Class
+
+Defines the hook-specific logic needed to handle pre-commit hook
+requests.
+"""
+__version__ = '3.00'
+__all__     = ['PreCommit']
 
 import argparse
 import re
 import shlex, subprocess
 import sys
 
-from SvnHook import *
-from SvnHook.ChgParser import ChgParser
+from svnhook import SvnHook
+from svnhook.chgparser import ChgParser
 
 class PreCommit(SvnHook):
-    """Handles pre-commit hook calls."""
+    """Handle pre-commit hook calls."""
 
     def __init__(self):
-        """Process the input arguments."""
 
         # Define how to process the command line.
         cmdline = argparse.ArgumentParser(
