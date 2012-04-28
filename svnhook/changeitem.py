@@ -4,7 +4,7 @@ Use the first "svnlook change" line to determine how to separate the
 change flags from the change path. Subsequent change lines are parsed
 using the previously-determined format.
 """
-__version__ = '2.00'
+__version__ = '3.00'
 __all__     = ['ChangeItem']
 
 class ChangeItem(object):
