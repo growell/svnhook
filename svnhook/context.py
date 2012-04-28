@@ -1,6 +1,8 @@
 """Configuration Action Context Classes"""
 __version__ = '3.00'
-__all__     = ['Standard', 'Revision', 'Transaction']
+__all__     = ['CtxStandard', 'CtxRevision', 'CtxTransaction']
+
+from svnhook.changeitem import ChangeItem
 
 import logging
 import shlex, subprocess
@@ -102,7 +104,7 @@ class Context(object):
         # Return the STDOUT content.
         return p.stdout.read().strip()
 
-class Standard(Context):
+class CtxStandard(Context):
     """Context class for hooks without revision or transaction."""
 
     def get_author(self):
@@ -128,7 +130,7 @@ class Standard(Context):
         logger.debug('LogMsg = "{}"'.format(self.tokens['LogMsg']))
         return self.tokens['LogMsg']
 
-class Revision(Context):
+class CtxRevision(Context):
     """Context class for hooks with a revision."""
 
     def get_author(self):
@@ -157,7 +159,7 @@ class Revision(Context):
         logger.debug('LogMsg = "{}"'.format(self.tokens['LogMsg']))
         return self.tokens['LogMsg']
 
-class Transaction(Context):
+class CtxTransaction(Context):
     """Context class for hooks with a transaction."""
 
     def get_author(self):
