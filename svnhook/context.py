@@ -21,6 +21,13 @@ class Context(object):
         tokens -- Dictionary of base tokens.
 
         """
+        # Make sure the local repository path and user name are
+        # provided.
+        if 'ReposPath' not in tokens:
+            raise ValueError('Required token missing: ReposPath')
+        if 'User' not in tokens:
+            raise ValueError('Required token missing: User')
+
         # Create a deep copy of the tokens.
         self.tokens = dict(tokens)
 
@@ -64,8 +71,8 @@ class Context(object):
 
             # If the item was both added and deleted, it's a
             # replacement.
-            if item.is_add(): path['add'] = True
-            if item.is_delete(): path['delete'] = True
+            if item.isadd(): path['add'] = True
+            if item.isdelete(): path['delete'] = True
 
             item.replaced = path['add'] and path['delete']
 
