@@ -7,6 +7,10 @@ using the previously-determined format.
 __version__ = '3.00'
 __all__     = ['ChangeItem']
 
+import logging
+
+logger = logging.getLogger()
+
 class ChangeItem(object):
     """Change Listing Item Class"""
 
@@ -14,8 +18,7 @@ class ChangeItem(object):
         """Parse a change line.
 
         Arguments:
-
-        - chgline -- Svnlook line to parse.
+        chgline -- Svnlook line to parse.
 
         """
         # If the delimiter index isn't known, figure it out. Scan the

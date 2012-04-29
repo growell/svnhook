@@ -2,14 +2,14 @@
 __version__ = '3.00'
 __all__     = ['CtxStandard', 'CtxRevision', 'CtxTransaction']
 
-from svnhook.changeitem import ChangeItem
+from changeitem import ChangeItem
 
 import logging
 import shlex, subprocess
 
 from string import Template
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 class Context(object):
     """Base class for hook configuration actions."""
@@ -21,12 +21,9 @@ class Context(object):
         tokens -- Dictionary of base tokens.
 
         """
-        # Make sure the local repository path and user name are
-        # provided.
+        # Make sure the local repository path is provided.
         if 'ReposPath' not in tokens:
             raise ValueError('Required token missing: ReposPath')
-        if 'User' not in tokens:
-            raise ValueError('Required token missing: User')
 
         # Create a deep copy of the tokens.
         self.tokens = dict(tokens)
@@ -71,8 +68,8 @@ class Context(object):
 
             # If the item was both added and deleted, it's a
             # replacement.
-            if item.isadd(): path['add'] = True
-            if item.isdelete(): path['delete'] = True
+            if item.is_add(): path['add'] = True
+            if item.is_delete(): path['delete'] = True
 
             item.replaced = path['add'] and path['delete']
 

@@ -20,7 +20,7 @@ class RegexTag(object):
 
         """
         if regextag.text == None:
-            raise RuntimeError(
+            raise ValueError(
                 'Required tag content missing: {}'.format(regextag.tag))
 
         # Compile the regular expression.
