@@ -5,20 +5,20 @@ Run child actions and sub-filters based on filtering conditions.
 __version__ = '3.00'
 __all__     = ['Filter']
 
-from svnhook.action import Action
-from svnhook.regextag import RegexTag
+import action
+from regextag import RegexTag
 
 import inspect
 import logging
 import re
 import sys
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 # Define modules containing action handler classes.
-actionmodules = [svnhook.action, svnhook.filter]
+actionmodules = [action, sys.modules[__name__]]
 
-class Filter(Action):
+class Filter(action.Action):
     """Filter Base Class
 
     Also used to process root hook actions.
@@ -36,15 +36,16 @@ class Filter(Action):
         # Execute the child actions.
         exitcode = 0
         for childtag in self.thistag.iterfind(r'./*'):
+            logger.debug('child tag = "{}"'.format(childtag.tag))
 
             # Look for an action handler class that matches the
             # child tag name.
             action = None
             for module in actionmodules:
                 try:
-                    action = getattr(svnhook.action, childtag.tag)
+                    action = getattr(module, childtag.tag)
                     break
-                except KeyError:
+                except AttributeError:
                     continue
 
             # Ignore non-action (parameter) tags.
@@ -117,7 +118,7 @@ class FilterCapabilities(Filter):
         if not regex.match(capabilities): return 0
 
         # Perform the child actions.
-        self.run_actions(action)
+        return super(FilterCapabilities, self).run()
 
 class FilterChanges(Filter):
 

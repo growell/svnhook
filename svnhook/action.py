@@ -3,7 +3,8 @@
 Provide classes that handle non-filtering hook actions.
 """
 __version__ = '3.00'
-__all__     = ['Action']
+__all__     = ['Action', 'SetToken', 'SendError', 'SendSmtp',
+               'ExecuteCmd']
 
 import logging
 import re
@@ -11,7 +12,7 @@ import smtplib
 import sys
 import textwrap
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 class Action(object):
 
