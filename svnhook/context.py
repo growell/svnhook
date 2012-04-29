@@ -21,10 +21,6 @@ class Context(object):
         tokens -- Dictionary of base tokens.
 
         """
-        # Make sure the local repository path is provided.
-        if 'ReposPath' not in tokens:
-            raise ValueError('Required token missing: ReposPath')
-
         # Create a deep copy of the tokens.
         self.tokens = dict(tokens)
 
@@ -40,40 +36,6 @@ class Context(object):
         """
         engine = Template(template)
         return engine.safe_substitute(self.tokens)
-
-    def get_changes(self, chglines):
-        """Get a list of change instances.
-
-        Arguments:
-        chglines -- Listing data from the "svnlook changed".
-
-        Returns:
-        Array of change instances for the changed items.
-
-        """
-        changes = []
-        paths = dict()
-        for chgline in chglines:
-
-            # Construct the change item instance.
-            item = ChangeItem(chgline)
-
-            # Add the change item to the list of changes.
-            changes.append(item)
-
-            # Track the changed path for replacement detection.
-            if item.path not in paths:
-                paths[item.path] = dict({ 'add': 0, 'delete': 0 })
-            path = paths[item.path]
-
-            # If the item was both added and deleted, it's a
-            # replacement.
-            if item.is_add(): path['add'] = True
-            if item.is_delete(): path['delete'] = True
-
-            item.replaced = path['add'] and path['delete']
-
-        return changes
 
     def execute(self, cmdline):
         """Execute a system call.
@@ -108,88 +70,181 @@ class Context(object):
         # Return the STDOUT content.
         return p.stdout.read().strip()
 
-class CtxStandard(Context):
-    """Context class for hooks without revision or transaction."""
+    def get_author(self, cmdline):
+        """Get the author of repository changes.
 
-    def get_author(self):
-        """Get the author of the last revision."""
-        # When first requested, cache the last change author.
+        Arguments:
+        cmdline -- Svnlook command to acquire author name.
+
+        """
+        # When first requested, cache the author name.
         if 'Author' not in self.tokens:
-            self.tokens['Author'] = self.execute(
-                'svnlook author "{}"'.format(
-                    self.tokens['ReposPath']))
+            self.tokens['Author'] = self.execute(cmdline)
 
         # Return the cached result.
         logger.debug('Author = "{}"'.format(self.tokens['Author']))
         return self.tokens['Author']
 
-    def get_log_message(self):
-        """Get the log message of the last revision."""
-        # When first requested, cache the last change message.
+    def get_changes(self, cmdline):
+        """Get the list of repository changes.
+
+        Arguments:
+        cmdline -- Svnlook command to acquire change listing.
+
+        """
+        # When first requested, cache the list of changes.
+        if 'Changes' not in self.tokens:
+
+            # Track the items added and deleted.
+            addpaths = dict()
+            deletepaths = dict()
+
+            # Parse the change listing output.
+            self.tokens['Changes'] = []
+            for chgline in self.execute(cmdline).splitlines():
+
+                # Construct the change item instance.
+                item = ChangeItem(chgline)
+
+                # Add the change item to the list of changes.
+                self.tokens['Changes'].append(item)
+
+                # Track the added and deleted items.
+                if item.is_add(): addpaths[item.path] = item
+                if item.is_delete(): deletepaths[item.path] = item
+
+                # If the path shows in both lists, it's a replacement.
+                if item.path in addpaths and item.path in deletepaths:
+                    addpaths[item.path].replaced = True
+                    deletepaths[item.path].replaced = True
+
+        # Return the cached list.
+        return self.tokens['Changes']
+
+    def get_log_message(self, cmdline):
+        """Get the log message of a repository change.
+
+        Arguments:
+        cmdline -- Svnlook command to acquire log message.
+
+        """
+        # When first requested, cache the log message.
         if 'LogMsg' not in self.tokens:
-            self.tokens['LogMsg'] = self.execute(
-                'svnlook log "{}"'.format(self.tokens['ReposPath']))
+            self.tokens['LogMsg'] = self.execute(cmdline)
 
         # Return the cached result.
         logger.debug('LogMsg = "{}"'.format(self.tokens['LogMsg']))
         return self.tokens['LogMsg']
+
+class CtxStandard(Context):
+    """Context class for hooks without revision or transaction."""
+
+    def get_author(self):
+        """Get the author of the last revision.
+
+        Returns:
+        author -- User name of the revision author.
+
+        """
+        return super(CtxStandard, self).get_author(
+            'svnlook author "{}"'.format(self.tokens['ReposPath']))
+
+    def get_changes(self):
+        """Get the list of changes in the last revision.
+
+        Returns:
+        changes -- List of change objects for the changes.
+
+        """
+        return super(CtxStandard, self).get_changes(
+            'svnlook changes "{}"'.format(self.tokens['ReposPath']))
+
+    def get_log_message(self):
+        """Get the log message of the last revision.
+
+        Returns:
+        changes -- Log message of the revision.
+
+        """
+        return super(CtxStandard, self).get_log_message(
+            'svnlook log "{}"'.format(self.tokens['ReposPath']))
 
 class CtxRevision(Context):
     """Context class for hooks with a revision."""
 
     def get_author(self):
-        """Get the author of the revision."""
-        # When first requested, cache the revision author.
-        if 'Author' not in self.tokens:
-            self.tokens['Author'] = self.execute(
-                'svnlook author -r {} "{}"'.format(
-                    self.tokens['Revision'],
-                    self.tokens['ReposPath']))
+        """Get the author of the revision.
 
-        # Return the cached result.
-        logger.debug('Author = "{}"'.format(self.tokens['Author']))
-        return self.tokens['Author']
+        Returns:
+        author -- User name of the revision author.
+
+        """
+        return super(CtxRevision, self).get_author(
+            'svnlook author -r {} "{}"'.format(
+                self.tokens['Revision'],
+                self.tokens['ReposPath']))
+
+    def get_changes(self):
+        """Get the list of changes in the revision.
+
+        Returns:
+        changes -- List of change objects for the changes.
+
+        """
+        return super(CtxRevision, self).get_changes(
+            'svnlook changes -r {} "{}"'.format(
+                self.tokens['Revision'],
+                self.tokens['ReposPath']))
 
     def get_log_message(self):
-        """Get the log message of the revision."""
-        # When first requested, cache the revision message.
-        if 'LogMsg' not in self.tokens:
-            self.tokens['LogMsg'] = self.execute(
-                'svnlook log -r {} "{}"'.format(
-                    self.tokens['Revision'],
-                    self.tokens['ReposPath']))
+        """Get the log message of the revision.
 
-        # Return the cached result.
-        logger.debug('LogMsg = "{}"'.format(self.tokens['LogMsg']))
-        return self.tokens['LogMsg']
+        Returns:
+        changes -- Log message of the revision.
+
+        """
+        return super(CtxRevision, self).get_log_message(
+            'svnlook log -r {} "{}"'.format(
+                self.tokens['Revision'],
+                self.tokens['ReposPath']))
 
 class CtxTransaction(Context):
     """Context class for hooks with a transaction."""
 
     def get_author(self):
-        """Get the author of the transaction."""
-        # When first requested, cache the transaction author.
-        if 'Author' not in self.tokens:
-            self.tokens['Author'] = self.execute(
-                'svnlook author -t "{}" "{}"'.format(
-                    self.tokens['Transaction'],
-                    self.tokens['ReposPath']))
+        """Get the author of the transaction.
 
-        # Return the cached result.
-        logger.debug('Author = "{}"'.format(self.tokens['Author']))
-        return self.tokens['Author']
+        Returns:
+        author -- User name of the transaction author.
+
+        """
+        return super(CtxTransaction, self).get_author(
+            'svnlook author -t "{}" "{}"'.format(
+                self.tokens['Transaction'],
+                self.tokens['ReposPath']))
+
+    def get_changes(self):
+        """Get the list of changes in the transaction.
+
+        Returns:
+        changes -- List of change objects for the changes.
+
+        """
+        return super(CtxTransaction, self).get_changes(
+            'svnlook changes -t "{}" "{}"'.format(
+                self.tokens['Transaction'],
+                self.tokens['ReposPath']))
 
     def get_log_message(self):
-        """Get the log message of the transaction."""
-        # When first requested, cache the transaction message.
-        if 'LogMsg' not in self.tokens:
-            self.tokens['LogMsg'] = self.execute(
-                'svnlook log -t "{}" "{}"'.format(
-                    self.tokens['Transaction'],
-                    self.tokens['ReposPath']))
+        """Get the log message of the transaction.
 
-        # Return the cached result.
-        logger.debug('LogMsg = "{}"'.format(self.tokens['LogMsg']))
-        return self.tokens['LogMsg']
+        Returns:
+        changes -- Log message of the transaction.
+
+        """
+        return super(CtxTransaction, self).get_log_message(
+            'svnlook log -t "{}" "{}"'.format(
+                self.tokens['Transaction'],
+                self.tokens['ReposPath']))
 
 ########################### end of file ##############################
