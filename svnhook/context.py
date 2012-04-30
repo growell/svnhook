@@ -122,7 +122,15 @@ class Context(object):
         return self.tokens['Changes']
 
     def get_file_content(self, cmdline):
-        pass
+        """Get the contents of a repository file.
+
+        Arguments:
+        cmdline -- Svnlook command to acquire file content.
+
+        """
+        # To limit memory consumption, the file is always retrieved
+        # from the repository.
+        return self.execute(cmdline);
 
     def get_log_message(self, cmdline):
         """Get the log message of a repository change.
@@ -162,11 +170,23 @@ class CtxStandard(Context):
         return super(CtxStandard, self).get_changes(
             'svnlook changes "{}"'.format(self.tokens['ReposPath']))
 
+    def get_file_content(self):
+        """Get the content of a file in the last revision.
+
+        Returns:
+        content -- Content of the revision file.
+
+        """
+        return super(CtxStandard, self).get_file_content(
+            'svnlook cat "{}" "{}"'.format(
+                self.tokens['ReposPath'],
+                self.tokens['Path']))
+
     def get_log_message(self):
         """Get the log message of the last revision.
 
         Returns:
-        changes -- Log message of the revision.
+        logmsg -- Log message of the revision.
 
         """
         return super(CtxStandard, self).get_log_message(
@@ -199,11 +219,24 @@ class CtxRevision(Context):
                 self.tokens['Revision'],
                 self.tokens['ReposPath']))
 
+    def get_file_content(self):
+        """Get the content of a file in the revision.
+
+        Returns:
+        content -- Content of the revision file.
+
+        """
+        return super(CtxRevision, self).get_file_content(
+            'svnlook cat -r {} "{}" "{}"'.format(
+                self.tokens['Revision'],
+                self.tokens['ReposPath'],
+                self.tokens['Path']))
+
     def get_log_message(self):
         """Get the log message of the revision.
 
         Returns:
-        changes -- Log message of the revision.
+        logmsg -- Log message of the revision.
 
         """
         return super(CtxRevision, self).get_log_message(
@@ -238,11 +271,24 @@ class CtxTransaction(Context):
                 self.tokens['Transaction'],
                 self.tokens['ReposPath']))
 
+    def get_file_content(self):
+        """Get the content of a file in the transaction.
+
+        Returns:
+        content -- Content of the transaction file.
+
+        """
+        return super(CtxTransaction, self).get_file_content(
+            'svnlook cat -t "{}" "{}" "{}"'.format(
+                self.tokens['Transaction'],
+                self.tokens['ReposPath'],
+                self.tokens['Path']))
+
     def get_log_message(self):
         """Get the log message of the transaction.
 
         Returns:
-        changes -- Log message of the transaction.
+        logmsg -- Log message of the transaction.
 
         """
         return super(CtxTransaction, self).get_log_message(
