@@ -121,6 +121,9 @@ class Context(object):
         # Return the cached list.
         return self.tokens['Changes']
 
+    def get_file_content(self, cmdline):
+        pass
+
     def get_log_message(self, cmdline):
         """Get the log message of a repository change.
 
