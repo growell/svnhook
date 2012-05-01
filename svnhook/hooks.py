@@ -123,22 +123,21 @@ class PreCommit(SvnHook):
         # Parse the command line.
         args = cmdline.parse_args()
 
-        # Parse the STDIN lock tokens.
+        # Parse the STDIN data.
+
         locktokens = []
         intotokens = False
         for inline in sys.stdin.read():
             if intotokens and re.search(r'\S', inline):
-                [path, name] = inline.split('|', 1)
-                locktokens[path] = name
+                locktokens.append(inline)
             elif re.match(r'LOCK-TOKENS:$', inline):
                 intotoken = True
-
-        ### MHL: What to do with lock tokens?
 
         # Construct the hook context.
         tokens = dict(os.environ)
         tokens['ReposPath']   = args.repospath
         tokens['Transaction'] = args.txnname
+        tokens['LockTokens']  = locktokens
         context = CtxTransaction(tokens)
 
         # Perform parent initialization.
