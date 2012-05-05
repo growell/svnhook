@@ -15,5 +15,5 @@ class TestSvnHook(unittest.TestCase):
         print 'Test it, you dummy!'
         self.assertTrue(True)
 
-if __name__ == '__main__':
-    unittest.main()
+suite = unittest.TestLoader().loadTestsFromTestCase(TestSvnHook)
+unittest.TextTestRunner(verbosity=2).run(suite)
