@@ -1,4 +1,5 @@
 *~
 *.pyc
-SvnHook/test/repo_*
-SvnHook/test/wc_*
+MANIFEST
+dist/**
+tests/tmp/**
