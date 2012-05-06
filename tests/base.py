@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 ######################################################################
-# SvnHook Test Case Core Classes
+# SvnHook Test Case Core Classes and Functions
 ######################################################################
-__all__ = ['HookTestCase', 'LogScanner']
+__all__ = ['HookTestCase', 'LogScanner', 'rmtree']
 
 import re
-import os, sys, shutil
+import errno, os, sys, shutil, stat
 import subprocess
 from textwrap import dedent
 import unittest
@@ -36,16 +36,20 @@ class HookTestCase(unittest.TestCase):
         self.password = password
 
         self.repopath = os.path.join(tmpdir, self.repoid + '-repo')
-        self.repourl = 'file://' + self.repopath
+        if self.repopath[:1] == '/':
+            self.repourl = 'file://' + self.repopath
+        else:
+            self.repourl = 'file:///'\
+                + re.sub(r'\\', r'/', self.repopath)
         self.wcpath = os.path.join(tmpdir, self.repoid + '-wc')
 
         self.hooks = {}
 
         # If the repository already exists, delete it.
-        if os.path.isdir(self.repopath): shutil.rmtree(self.repopath)
+        if os.path.isdir(self.repopath): rmtree(self.repopath)
             
         # If the working copy already exists, delete it.
-        if os.path.isdir(self.wcpath): shutil.rmtree(self.wcpath)
+        if os.path.isdir(self.wcpath): rmtree(self.wcpath)
             
         # Construct the test repository.
         subprocess.check_call(['svnadmin', 'create', self.repopath])
@@ -256,7 +260,7 @@ class HookTestCase(unittest.TestCase):
 
         """
         fullpath = os.path.join(self.wcpath, pathname)
-        if os.isdir(fullpath): os.rmtree(fullpath)
+        if os.isdir(fullpath): rmtree(fullpath)
         os.mkdirs(fullpath)
 
     def addWcFile(self, pathname, content=''):
@@ -312,4 +316,32 @@ class LogScanner(object):
 
         return content
 
+# Under Windows, the "shutil.rmtree" function fails upon encountering
+# read-only files. These functions isolate callers from these details.
+
+def _rmtree_onerror(func, path, excinfo):
+    """Handle an rmtree read-only error.
+
+    Arguments:
+    func -- Calling function.
+    path -- Path name of the target.
+    excinfo -- Exception information.
+    """
+    excvalue = excinfo[1]
+    if func in (os.rmdir, os.remove)\
+            and excvalue.errno == errno.EACCES:
+        os.chmod(path, stat.S_IRWXU| stat.S_IRWXG| stat.S_IRWXO)
+        func(path)
+    else:
+        raise
+
+def rmtree(path):
+    """Reliably remove a non-empty directory.
+
+    Arguments:
+    path -- Path name of the directory.
+
+    """
+    shutil.rmtree(path, onerror=_rmtree_onerror)
+    
 ########################### end of file ##############################

@@ -51,5 +51,6 @@ REM culprit may be unusual (or missing) environment variables.
 
 cd /d %1
 python ..\..\..\bin\start-commit %1 %2 %3 --cfgfile=conf\start-commit.xml
+exit %errorlevel%
 
 REM ####################### end of file #############################
