@@ -12,7 +12,7 @@ from svnhook.hooks import SvnHook
 class TestSvnHook(HookTestCase):
 
     def setUp(self):
-        super(TestSvnHook, self).setUp('junk')
+        super(TestSvnHook, self).setUp(__name__)
 
     def test_constructor(self):
         self.assertRaises(TypeError, SvnHook())
