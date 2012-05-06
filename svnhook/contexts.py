@@ -5,6 +5,7 @@ __all__     = ['CtxStandard', 'CtxRevision', 'CtxTransaction']
 from changeitem import ChangeItem
 
 import logging
+import re
 import shlex, subprocess
 
 from string import Template
@@ -24,18 +25,29 @@ class Context(object):
         # Create a deep copy of the tokens.
         self.tokens = dict(tokens)
 
-    def expand(self, template):
+    def expand(self, template, depth=1):
         """Apply tokens to a template string.
 
         Arguments:
         template -- String containing tokens.
+        depth -- Incremental recursion depth count (default 1).
 
         Returns:
         Template string with token substitutions.
 
         """
-        engine = Template(template)
-        return engine.safe_substitute(self.tokens)
+        # Determine if nothing's left to do.
+        if re.search(r'\$\{\w+\}', template) == None:
+            return template
+
+        # Limit the recursion depth.
+        if depth > 12: raise RuntimeError(
+            'Maximum token recursion depth exceeded')
+
+        # Replace the next level of tokens.
+        return self.expand(
+            Template(template).safe_substitute(self.tokens),
+            depth + 1)
 
     def execute(self, cmdline):
         """Execute a system call.
