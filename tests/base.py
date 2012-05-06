@@ -2,7 +2,7 @@
 ######################################################################
 # SvnHook Test Case Core Classes
 ######################################################################
-__all__ = ['HookTestCase', 'LogFile']
+__all__ = ['HookTestCase', 'LogScanner']
 
 import re
 import os, sys, shutil
@@ -16,7 +16,7 @@ tmpdir = os.path.abspath(os.path.join(
         os.path.dirname(__file__), 'tmp'))
 
 # If needed, create the temporary directory.
-if not os.path.isdir(tmpdir): os.mkdirs(tmpdir)
+if not os.path.isdir(tmpdir): os.makedirs(tmpdir)
 
 class HookTestCase(unittest.TestCase):
     """SvnHook Test Case Base Class"""
@@ -34,9 +34,11 @@ class HookTestCase(unittest.TestCase):
         self.username = username
         self.password = password
 
-        self.repopath = os.path.join(tmpdir, repoid + '-repo')
+        self.repopath = os.path.join(tmpdir, self.repoid + '-repo')
         self.repourl = 'file://' + self.repopath
-        self.wcpath = os.path.join(tmpdir, repoid + '-wc')
+        self.wcpath = os.path.join(tmpdir, self.repoid + '-wc')
+
+        self.hooks = {}
 
         # If the repository already exists, delete it.
         if os.path.isdir(self.repopath): shutil.rmtree(self.repopath)
@@ -47,36 +49,54 @@ class HookTestCase(unittest.TestCase):
         # Construct the test repository.
         subprocess.check_call(['svnadmin', 'create', self.repopath])
 
+        # Create the standard repository log file directory.
+        os.mkdir(os.path.join(self.repopath, 'logs'))
+
         # Check for repository initialization data directory.
         repodata = os.path.join(datadir, repoid)
         if os.path.isdir(repodata):
 
             # Load the initialization files.
             for datafile in os.listdir(repodata):
+                datapath = os.path.join(repodata, datafile)
 
                 # Load a repository dump file.
-                if datafile[-4:] == '.dmp':
+                if datafile.endswith('.dmp'):
                     subprocess.check_call(
                         ['svnadmin', 'load', self.repopath],
-                        stdin=open(datafile))
+                        stdin=open(datapath))
 
                 # Load a hook configuration file.
-                elif re.match(datafile, r'.*\.(conf|[xy]ml)') != None:
+                elif datafile.endswith('.conf')\
+                        or datafile.endswith('.xml')\
+                        or datafile.endswith('.yml'):
                     shutil.copy(
-                        datafile, os.path.join(self.repopath, 'conf'))
+                        datapath, os.path.join(self.repopath, 'conf'))
 
-                # Load a hook script.
-                elif datafile[-3:] == '.sh':
-                    hookfile = os.path.join(
-                        self.repopath, 'hooks', re.sub(
-                            r'\.sh$', '', os.path.basename(datafile)))
-                    shutil.copyfile(datafile, hookfile)
+                # Load a Windows (BAT) hook script.
+                elif sys.platform.startswith('win')\
+                        and datafile.endswith('.bat'):
+                    hookname = datafile[:-4]
+                    hookpath = os.path.join(
+                        self.repopath, 'hooks', datafile)
+                    shutil.copyfile(datapath, hookpath)
+                    self.hooks[hookname] = hookpath
 
-        # Create the initial working copy.
+                # Load a Unix (shell) hook script.
+                elif (not sys.platform.startswith('win'))\
+                        and datafile.endswith('.sh'):
+                    hookname = datafile[:-3]
+                    hookpath = os.path.join(
+                        self.repopath, 'hooks', hookname)
+                    shutil.copy2(datapath, hookpath)
+                    self.hooks[hookname] = hookpath
+
+        # Create the initial working copy. Explicit credentials are
+        # used to set the default commit user name.
         subprocess.check_call(
             ['svn', 'checkout', self.repourl, self.wcpath,
-             '--username', self.username,
-             '--password', '"{}"'.format(self.password)])
+             '--username', self.username, '--password', self.password],
+            stdout=subprocess.PIPE)
 
     def writeConf(self, filename, content):
         """Write content into a repository configuration file.
@@ -90,7 +110,7 @@ class HookTestCase(unittest.TestCase):
         with open(filepath, 'w') as f:
             f.write(content)
 
-    def getLogFile(self, filename):
+    def getLogScanner(self, filename):
         """Get the scanner object for a log file.
 
         Arguments:
@@ -100,7 +120,43 @@ class HookTestCase(unittest.TestCase):
         Log file scanner object.
 
         """
-        return LogFile(os.path.join(self.repopath, 'logs', filename))
+        return LogScanner(os.path.join(self.repopath, 'logs', filename))
+
+    def callHook(self, hookname, *args, **kwargs):
+        """Call a hook script directly.
+
+        Arguments:
+        hookname -- Base name of the pre-loaded hook script.
+        *args -- Hook-specific arguments.
+
+        Returns:
+        Subprocess object produced by hook script execution.
+
+        """
+        if hookname not in self.hooks:
+            raise KeyError('Hook script not found: ' + hookname)
+        cmd = [self.hooks[hookname]] + list(args)
+
+        # Handle passing STDIN to the script.
+        if 'stdin' in kwargs.keys():
+            p = subprocess.Popen(cmd,
+                                 stdin=kwargs['stdin'],
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE,
+                                 shell=False)
+
+        # Handle a script without STDIN data.
+        else:
+            p = subprocess.Popen(cmd,
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE,
+                                 shell=False)
+
+        # Wait for the script to finish.
+        p.wait()
+
+        # Pass back the process object.
+        return p
 
     def addWcItem(self, pathname):
         """Schedule working copy items for addition.
@@ -221,7 +277,7 @@ class HookTestCase(unittest.TestCase):
         self.makeWcFolder(pathname)
         self.addWcItem(pathname)
 
-class LogFile(object):
+class LogScanner(object):
     """SvnHook Log File Scanner"""
 
     def __init__(self, pathname):
