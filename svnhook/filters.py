@@ -5,7 +5,7 @@ Run child actions and sub-filters based on filtering conditions.
 __version__ = '3.00'
 __all__     = ['Filter']
 
-import action
+import actions
 from regextag import RegexTag
 
 import inspect
@@ -16,9 +16,9 @@ import sys
 logger = logging.getLogger()
 
 # Define modules containing action handler classes.
-actionmodules = [action, sys.modules[__name__]]
+actionmodules = [actions, sys.modules[__name__]]
 
-class Filter(action.Action):
+class Filter(actions.Action):
     """Filter Base Class
 
     Also used to process root hook actions.

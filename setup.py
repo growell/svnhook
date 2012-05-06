@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+######################################################################
+# Subversion Hook Framework Setup
+######################################################################
 from distutils.core import setup
 
 config = {
@@ -7,10 +11,10 @@ config = {
     'download_url': 'http://github.com',
     'author_email': 'geoff.rowell@gmail.com',
     'version': '3.00',
-    'install_requires': ['nose'],
     'packages': ['svnhook'],
     'scripts': [],
     'name': 'svnhook'
 }
 
 setup(**config)
+########################### end of file ##############################

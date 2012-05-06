@@ -7,8 +7,8 @@ __version__   = '3.00'
 __status__    = 'Development'
 __all__       = ['PreCommit', 'StartCommit']
 
-from filter import Filter
-from context import *
+from filters import Filter
+from contexts import *
 
 import argparse
 import logging

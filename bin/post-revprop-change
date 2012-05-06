@@ -10,7 +10,7 @@ mylib = os.path.normpath(os.path.join(
         os.path.dirname(__file__), '..'))
 if os.path.isdir(mylib): sys.path.insert(0, mylib)
 
-from svnhook.hook import PostRevPropChange
+from svnhook.hooks import PostRevPropChange
 
 # Call the hook handler method.
 if __name__=="__main__":
