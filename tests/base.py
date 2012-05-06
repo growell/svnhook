@@ -7,6 +7,7 @@ __all__ = ['HookTestCase', 'LogScanner']
 import re
 import os, sys, shutil
 import subprocess
+from textwrap import dedent
 import unittest
 
 # Define the data root.
@@ -21,8 +22,8 @@ if not os.path.isdir(tmpdir): os.makedirs(tmpdir)
 class HookTestCase(unittest.TestCase):
     """SvnHook Test Case Base Class"""
 
-    def setUp(self, repoid, username='user', password='password'):
-        """Initialize the test repository.
+    def setUpTest(self, repoid, username='user', password='password'):
+        """Initialize the test repository and working copy.
 
         Arguments:
         repoid -- Identifier for the repository and data set.
@@ -98,23 +99,25 @@ class HookTestCase(unittest.TestCase):
              '--username', self.username, '--password', self.password],
             stdout=subprocess.PIPE)
 
-    def writeConf(self, filename, content):
+    def writeConf(self, filename, content, raw=False):
         """Write content into a repository configuration file.
 
         Arguments:
-        filename - File name of the 'conf' directory file.
-        content  - Content to store in the file.
+        filename -- File name of the 'conf' directory file.
+        content  -- Content to store in the file.
+        raw -- Flag request for no dedent (default=False).
 
         """
         filepath = os.path.join(self.repopath, 'conf', filename)
         with open(filepath, 'w') as f:
-            f.write(content)
+            if raw: f.write(content)
+            else: f.write(dedent(content))
 
     def getLogScanner(self, filename):
         """Get the scanner object for a log file.
 
         Arguments:
-        filename - File name of the 'logs' directory file.
+        filename -- File name of the 'logs' directory file.
 
         Returns:
         Log file scanner object.
