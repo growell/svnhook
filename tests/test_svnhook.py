@@ -1,19 +1,24 @@
 #!/usr/bin/env python
 import os, sys
-import unittest
 
-class TestSvnHook(unittest.TestCase):
+# Prefer local modules.
+mylib = os.path.normpath(os.path.join(
+        os.path.dirname(__file__), '..'))
+if os.path.isdir(mylib): sys.path.insert(0, mylib)
+
+from tests.base import HookTestCase
+from svnhook.hooks import SvnHook
+
+class TestSvnHook(HookTestCase):
 
     def setUp(self):
-        sys.path.insert(0, '..')
-        import SvnHook
+        super(TestSvnHook, self).setUp('junk')
 
     def test_constructor(self):
         self.assertRaises(TypeError, SvnHook())
 
     def test_dummy(self):
-        print 'Test it, you dummy!'
         self.assertTrue(True)
 
-suite = unittest.TestLoader().loadTestsFromTestCase(TestSvnHook)
-unittest.TextTestRunner(verbosity=2).run(suite)
+if __name__=='__main__':
+    unittest.main()
