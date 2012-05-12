@@ -5,16 +5,18 @@
 from distutils.core import setup, Command
 
 class UnitTest(Command):
-    """Discover and run unit tests."""
-    user_options = []
+    description = 'Discover and run unit tests.'
+    user_options = [(
+            'verbose', 'v', 'display verbose test output')]
     def initialize_options(self):
         pass
     def finalize_options(self):
         pass
     def run(self):
         import sys, subprocess
-        errno = subprocess.call(
-            [sys.executable, '-m', 'unittest', 'discover'])
+        cmd = [sys.executable, '-m', 'unittest', 'discover']
+        if self.verbose: cmd.append('-v')
+        errno = subprocess.call(cmd)
         raise SystemExit(errno)
 
 config = {
