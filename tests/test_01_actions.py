@@ -3,6 +3,7 @@
 # Test Non-Filter Actions
 ######################################################################
 import os, re, sys, unittest
+import subprocess
 
 # Prefer local modules.
 mylib = os.path.normpath(os.path.join(
@@ -144,6 +145,72 @@ class TestActions(HookTestCase):
         self.assertEqual(
             stderrdata, 'She said, "I feel joy!"',
             'Error output not correct: "{}"'.format(stderrdata))
+
+    def test_06_executecmd(self):
+        """Execute a successful system command."""
+        # Define the hook configuration. Please note that the test
+        # command is designed to work on most OSes.
+        dirpath = os.path.join(self.repopath, 'HelloWorld')
+        self.writeConf(testconf, '''\
+          <?xml version="1.0"?>
+          <Actions>
+            <ExecuteCmd>mkdir {}</ExecuteCmd>
+          </Actions>
+          '''.format(dirpath))
+
+        # Call the script that uses the configuration.
+        p = self.callHook(testhook,
+                          self.repopath, self.username, '')
+
+        # Check for the default exit code.
+        self.assertTrue(
+            p.returncode == 0,
+            'Exit code is not correct: {}'.format(p.returncode))
+
+        # Verify that the command ran.
+        self.assertTrue(os.path.isdir(dirpath),
+            'Command test directory not found: "{}"'.format(dirpath))
+
+    def test_07_executecmd(self):
+        """Execute an unmasked failing system command."""
+        # Define the hook configuration.
+        exitcode = 2
+        cmdline = '{} -c "exit({})"'.format(sys.executable, exitcode)
+        self.writeConf(testconf, '''\
+          <?xml version="1.0"?>
+          <Actions>
+            <ExecuteCmd errorLevel="2"><![CDATA[{}]]></ExecuteCmd>
+          </Actions>
+          '''.format(cmdline))
+
+        # Call the script that uses the configuration.
+        p = self.callHook(testhook,
+                          self.repopath, self.username, '')
+
+        # Check for the expected exit code.
+        self.assertTrue(
+            p.returncode == exitcode,
+            'Exit code is not correct: {}'.format(p.returncode))
+
+    def test_08_executecmd(self):
+        """Execute a masked failing system command."""
+        # Define the hook configuration.
+        cmdline = '{} -c "exit(2)"'.format(sys.executable)
+        self.writeConf(testconf, '''\
+          <?xml version="1.0"?>
+          <Actions>
+            <ExecuteCmd errorLevel="3"><![CDATA[{}]]></ExecuteCmd>
+          </Actions>
+          '''.format(cmdline))
+
+        # Call the script that uses the configuration.
+        p = self.callHook(testhook,
+                          self.repopath, self.username, '')
+
+        # Check for the expected exit code.
+        self.assertTrue(
+            p.returncode == 0,
+            'Exit code is not correct: {}'.format(p.returncode))
 
 # Allow manual execution of tests.
 if __name__=='__main__':
