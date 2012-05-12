@@ -9,7 +9,7 @@ __all__     = ['Action', 'ExecuteCmd', 'SendError', 'SendLogSmtp',
 import logging
 import re
 import smtplib
-import sys
+import sys, subprocess, shlex
 import textwrap
 
 logger = logging.getLogger()
