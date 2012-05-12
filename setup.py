@@ -2,7 +2,20 @@
 ######################################################################
 # Subversion Hook Framework Setup
 ######################################################################
-from distutils.core import setup
+from distutils.core import setup, Command
+
+class UnitTest(Command):
+    """Discover and run unit tests."""
+    user_options = []
+    def initialize_options(self):
+        pass
+    def finalize_options(self):
+        pass
+    def run(self):
+        import sys, subprocess
+        errno = subprocess.call(
+            [sys.executable, '-m', 'unittest', 'discover'])
+        raise SystemExit(errno)
 
 config = {
     'description': 'Subversion Hook Framework',
@@ -13,7 +26,8 @@ config = {
     'version': '3.00',
     'packages': ['svnhook'],
     'scripts': [],
-    'name': 'svnhook'
+    'name': 'svnhook',
+    'cmdclass': {'test': UnitTest},
 }
 
 setup(**config)
