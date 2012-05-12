@@ -3,4 +3,4 @@
 *.pyc
 MANIFEST
 dist/**
-tests/tmp/**
+tests/tmp
