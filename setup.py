@@ -19,8 +19,8 @@ class UnitTest(Command):
         import sys, subprocess
 
         cmd = [sys.executable, '-m', 'unittest']
-        if self.verbose > 1: cmd.append('-v')
         for tests in self.tests.split(r','): cmd.append(tests)
+        if self.verbose > 1: cmd.append('-v')
 
         errno = subprocess.call(cmd)
         raise SystemExit(errno)
