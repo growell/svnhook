@@ -64,6 +64,47 @@ class TestActions(SmtpTestCase):
         self.assertToAddress(message, toaddr)
         self.assertBody(message, body)
 
+    def test_02_multiple_to(self):
+        """Send an email to multiple recipients."""
+        # Define the message parameters.
+        toaddrs = ['gal{}@yourdomain.com'.format(idx)
+                   for idx in range(1, 10)]
+        subject = 'test @ {}'.format(time.asctime())
+
+        # Define the hook configuration.
+        totags = ['<ToAddress>{}</ToAddress>'.format(toaddr)
+                  for toaddr in toaddrs]
+
+        self.writeConf(testconf, '''\
+          <?xml version="1.0"?>
+          <Actions>
+            <SendSmtp port="{}">
+              <FromAddress>source@mydomain.com</FromAddress>
+              {}
+              <Subject>{}</Subject>
+              <Message>Hello World!</Message>
+            </SendSmtp>
+          </Actions>
+          '''.format(self.smtpport, ''.join(totags), subject))
+
+        # Call the script that uses the configuration.
+        p = self.callHook(testhook,
+                          self.repopath, self.username, '')
+
+        # Check for the default exit code.
+        self.assertIs(
+            p.returncode, 0,
+            'Exit code not correct: {}'.format(p.returncode))
+
+        # Get the received email message.
+        try:
+            message = self.getMessage(subject=subject)
+        except KeyError:
+            self.fail('Message with subject not found: ' + subject)
+
+        # Check that all addresses are included.
+        for toaddr in toaddrs: self.assertToAddress(message, toaddr)
+
 # Allow manual execution of tests.
 if __name__=='__main__':
     suite = unittest.TestLoader()\
