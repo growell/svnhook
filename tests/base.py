@@ -32,7 +32,6 @@ class HookTestCase(unittest.TestCase):
             repoid: Identifier for the repository and data set.
             username: Working copy user name.
             password: Working copy password.
-
         """
         # Initialize the test attributes.
         self.repoid = repoid
@@ -114,7 +113,6 @@ class HookTestCase(unittest.TestCase):
             filename: File name of the 'conf' directory file.
             content: Content to store in the file.
             raw: Flag request for no dedent.
-
         """
         filepath = os.path.join(self.repopath, 'conf', filename)
         with open(filepath, 'w') as f:
@@ -126,7 +124,6 @@ class HookTestCase(unittest.TestCase):
 
         Args:
             filename: File name of the 'logs' directory file.
-
         """
         return LogScanner(
             os.path.join(self.repopath, 'logs', filename))
@@ -138,7 +135,6 @@ class HookTestCase(unittest.TestCase):
             hookname: Base name of the pre-loaded hook script.
 
         Returns: Subprocess object produced by hook script execution.
-
         """
         if hookname not in self.hooks:
             raise KeyError('Hook script not found: ' + hookname)
@@ -170,7 +166,6 @@ class HookTestCase(unittest.TestCase):
 
         Args:
             pathname: Relative path name of the item.
-
         """
         fullpath = os.path.join(self.wcpath, pathname)
         subprocess.check_call(['svn', 'add', fullpath])
@@ -180,7 +175,6 @@ class HookTestCase(unittest.TestCase):
 
         Args:
             pathname: Relative path name of the item.
-
         """
         fullpath = os.path.join(self.wcpath, pathname)
         subprocess.check_call(['svn', 'rm', fullpath])
@@ -192,7 +186,6 @@ class HookTestCase(unittest.TestCase):
             propname: Name of the property.
             propval: Value of the property.
             pathname: Relative path name of target.
-
         """
         fullpath = os.path.join(self.wcpath, pathname)
         subprocess.check_call(
@@ -204,7 +197,6 @@ class HookTestCase(unittest.TestCase):
         Args:
             propname: Name of the property.
             pathname: Relative path name of target.
-
         """
         fullpath = os.path.join(self.wcpath, pathname)
         subprocess.check_call(
@@ -219,7 +211,6 @@ class HookTestCase(unittest.TestCase):
 
         Args:
             message: Log message for commit.
-
         """
         options = ['-m', message]
         for option in sorted(kwargs.keys()):
@@ -241,7 +232,6 @@ class HookTestCase(unittest.TestCase):
         Args:
             pathname: Relative path name of the file.
             content: Content of the file.
-
         """
         fullpath = os.path.join(self.wcpath, pathname)
 
@@ -257,7 +247,6 @@ class HookTestCase(unittest.TestCase):
 
         Args:
             pathname: Relative path name of the folder.
-
         """
         fullpath = os.path.join(self.wcpath, pathname)
         if os.isdir(fullpath): rmtree(fullpath)
@@ -269,7 +258,6 @@ class HookTestCase(unittest.TestCase):
         Args:
             pathname: Relative path name of the file.
             content: Content of the file.
-
         """
         self.makeWcFile(pathname, content)
         self.addWcItem(pathname)
@@ -279,7 +267,6 @@ class HookTestCase(unittest.TestCase):
 
         Args:
             pathname: Relative path name of the folder.
-
         """
         self.makeWcFolder(pathname)
         self.addWcItem(pathname)
@@ -287,19 +274,21 @@ class HookTestCase(unittest.TestCase):
 class SmtpTestCase(HookTestCase):
     """SvnHook Test Case with SMTP Server"""
 
-    def setUp(self, port=8025, *args, **kwargs):
+    def setUp(self, repoid, host='localhost', port=8025,
+              *args, **kwargs):
         # Initialize the base test case.
-        super(SmtpTestCase, self).setUp(*args, **kwargs)
+        super(SmtpTestCase, self).setUp(repoid, *args, **kwargs)
 
         # Construct the SMTP server.
-        self.smtpaddress = 'localhost', port
-        self.smtpserver = SmtpSink(port=port)
+        self.smtphost = host
+        self.smtpport = port
+        self.smtpserver = SmtpSink(host=host, port=port)
 
         # Start the SMTP server thread.
         self.smtpserver.start()
 
         # Make sure the SMTP server is always shut down.
-        self.addCleanup(_stopSmtpServer, self)
+        self.addCleanup(self.__class__._stopSmtpServer, self)
 
     def _stopSmtpServer(self):
         # Stop the SMTP server thread.
@@ -316,49 +305,56 @@ class SmtpTestCase(HookTestCase):
         return mailbox.PortableUnixMailbox(
             mailboxFile, email.message_from_file)
 
-    def assertSubjectIn(self, subject, msg=None):
-        """Assert that a received message has the exact subject
-        line.
+    def getMessage(self, subject):
+        """Get the first email message with a matching subject line.
+        Throws a KeyError, when a matching message not found.
 
         Args:
-            subject: Subject line of the message.
-            msg: Optional message to use on failure.
+            subject: Subject line of message.
 
+        Returns: Message object for the matching message.
         """
-        # Get the subject lines of the messages.
-        subjects = [re.match(
-                r'^Subject: (.+)$', message.as_string(), re.MULTILINE)
-                    for message in self.getMailbox()]
+        # Look at the received message subject lines.
+        for msgsubject in [
+            message.get('Subject') for message in self.getMailbox()]:
+            if msgsubject == subject: return message
 
-        # Apply the assertion.
-        self.assertIn(subject, subjects, msg)
+        # A matching message wasn't found.
+        raise KeyError('Message with subject not found: ' + subject)
 
-    def assertBodyRegexpIn(self, regex, msg=None):
-        """Assert that a regular expression is in a received message
-        body. Header lines are not searched.
+    def assertFromAddress(self, message, fromaddr, msg=None):
+        """Assert that a message has proper From address.
 
         Args:
-            regex: Regular expression to search with.
+            message: Message to be checked.
+            fromaddr: Expected sender email address.
             msg: Optional message to use on failure.
-
         """
-        # Defined the default failure message.
-        if msg == None:
-            msg = 'Regular expression not matched'\
-                ' by message bodies: ' + re
+        self.assertEquals(message.get('From'), fromaddr, msg)
 
-        # Get the body sections of the messages.
-        bodies = [re.search(
-                r'\n\n(.+)$', message.as_string(), re.DOTALL)
-                  for message in self.getMailbox()]
+    def assertToAddress(self, message, toaddr, msg=None):
+        """Assert that a message has proper To address.
 
-        # Search through the bodies for a match.
-        regexobj = re.compile(regex)
-        for body in bodies:
-            if regexobj.search(body) != None: return
+        Args:
+            message: Message to be checked.
+            toaddr: Expected recipient email address.
+            msg: Optional message to use on failure.
+        """
+        self.assertIn(toaddr, message.get_all('To'), msg)
 
-        # A match wasn't found. Indicate a failure.
-        self.fail(msg)
+    def assertBody(self, message, body, msg=None):
+        """Assert that a message has the correct body.
+
+        Args:
+            message: Message to be checked.
+            body: Expected body of the email message.
+            msg: Optional message to use on failure.
+        """
+        # Assert against the decoded, non-multipart, content. Trim off
+        # the terminal whitespace (two linefeeds).
+        self.assertEquals(
+            message.get_payload(None, True).rstrip(),
+            body.rstrip(), msg)
 
 class LogScanner(object):
     """SvnHook Log File Scanner"""
@@ -368,7 +364,6 @@ class LogScanner(object):
 
         Args:
             pathname: Path name of the log file.
-
         """
         self.pathname = pathname
 
@@ -397,7 +392,6 @@ def _rmtree_onerror(func, path, excinfo):
         func: Calling function.
         path: Path name of the target.
         excinfo: Exception information.
-
     """
     excvalue = excinfo[1]
     if func in (os.rmdir, os.remove)\
@@ -412,7 +406,6 @@ def rmtree(path):
 
     Args:
         path: Path name of the directory.
-
     """
     shutil.rmtree(path, onerror=_rmtree_onerror)
     
