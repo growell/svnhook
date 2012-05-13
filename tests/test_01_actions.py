@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 ######################################################################
-# Test Non-Filter Actions
+# Test Basic Non-Filter Actions
 ######################################################################
 import os, re, sys, unittest
 import subprocess
@@ -19,7 +19,7 @@ testconf = 'start-commit.xml'
 class TestActions(HookTestCase):
 
     def setUp(self):
-        self.setUpTest(
+        super(TestActions, self).setUp(
             re.sub(r'^test_?(.+)\.[^\.]+$', r'\1',
                    os.path.basename(__file__)))
 
