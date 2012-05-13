@@ -103,12 +103,16 @@ class _SendSmtp(Action):
     def __init__(self, *args, **kwargs):
         super(_SendSmtp, self).__init__(*args, **kwargs)
 
-        # Get the SMTP server host name.
+        # Get the SMTP server host name and port number.
         try:
             self.host = self.thistag.attrib['server']
         except KeyError:
-            raise ValueError(
-                'Required attribute missing: server')
+            self.host = 'localhost'
+
+        try:
+            self.port = self.thistag.attrib['port']
+        except KeyError:
+            self.port = None
 
         # Get the maximum number of connect seconds.
         try:
@@ -149,11 +153,15 @@ class _SendSmtp(Action):
         """
         # Expand the message details
         host = self.expand(self.host)
+        if self.port:
+            port = self.expand(self.port)
+        else:
+            port = None
         fromaddress = self.expand(self.fromaddress)
 
         toaddresses = []
         for address in self.toaddresses:
-            toaddress.append(self.expand(address))
+            toaddresses.append(self.expand(address))
 
         subject = self.expand(self.subject)
 
@@ -171,7 +179,7 @@ class _SendSmtp(Action):
             content += '{}\r\n'.format(msgline)
 
         # Construct the SMTP connection.
-        server = smtplib.SMTP(host, None, None, self.timeout)
+        server = smtplib.SMTP(host, port, None, self.timeout)
 
         # Send the message. Log warnings for unknown recipients.
         try:
