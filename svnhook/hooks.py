@@ -5,7 +5,7 @@ __copyright__ = 'Copyright 2012, Geoff Rowell'
 __license__   = 'Apache'
 __version__   = '3.00'
 __status__    = 'Development'
-__all__       = ['PreCommit', 'StartCommit']
+__all__       = ['PostCommit', 'PreCommit', 'StartCommit']
 
 from filters import Filter
 from contexts import *
@@ -17,7 +17,7 @@ import os
 import re
 import yaml
 
-from xml.etree.ElementTree import ElementTree
+from xml.etree.ElementTree import ElementTree, ParseError
 
 logger = logging.getLogger()
 
@@ -55,8 +55,15 @@ class SvnHook(object):
         else:
             logging.basicConfig()
 
-        # Read and parse the hook configuration file.
-        self.cfg = ElementTree(file=cfgfile)
+        # Read and parse the hook configuration file. If it has a
+        # parse error, make sure to log it - before rethrowing it.
+        try:
+            self.cfg = ElementTree(file=cfgfile)
+        except ParseError:
+            logger.fatal(
+                'Unable to parse hook configuration file!',
+                exc_info=True)
+            raise
 
         # Hang onto the context for use in the actions.
         self.context = context
@@ -142,5 +149,35 @@ class PreCommit(SvnHook):
 
         # Perform parent initialization.
         super(PreCommit, self).__init__(context, args.cfgfile)
+
+class PostCommit(SvnHook):
+    """Post-Commit Hook Handler"""
+
+    def __init__(self):
+
+        # Define how to process the command line.
+        cmdline = argparse.ArgumentParser(
+            description='Handle post-commit hook calls.')
+
+        cmdline.add_argument(
+            '--cfgfile', required=True,
+            help='Path name of the hook configuration file')
+
+        cmdline.add_argument(
+            'repospath', help='Path name of the repository root')
+        cmdline.add_argument(
+            'revision', help='Number of the completed revision')
+
+        # Parse the command line.
+        args = cmdline.parse_args()
+
+        # Construct the hook context.
+        tokens = dict(os.environ)
+        tokens['ReposPath'] = args.repospath
+        tokens['Revision']  = args.revision
+        context = CtxRevision(tokens)
+
+        # Perform parent initialization.
+        super(PostCommit, self).__init__(context, args.cfgfile)
 
 ########################### end of file ##############################

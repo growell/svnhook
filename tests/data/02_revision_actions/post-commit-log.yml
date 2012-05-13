@@ -3,7 +3,7 @@ formatters:
   brief:
     format: '%(levelname)-8s - %(message)s'
   default:
-    format : '%(asctime)s [%(levelname)s] %(name)s - %(message)s'
+    format : '%(asctime)s [%(levelname)s] %(module)s(%(lineno)d) - %(message)s'
     datefmt: '%Y-%m-%d %H:%M:%S'
 handlers:
   console:
@@ -13,7 +13,7 @@ handlers:
   file:
     class      : logging.handlers.TimedRotatingFileHandler
     formatter  : default
-    filename   : logs/start-commit.log
+    filename   : logs/post-commit.log
     when       : midnight
     backupCount: 3
 root:
