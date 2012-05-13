@@ -2,13 +2,16 @@
 ######################################################################
 # SvnHook Test Case Core Classes and Functions
 ######################################################################
-__all__ = ['HookTestCase', 'LogScanner', 'rmtree']
+__all__ = ['HookTestCase', 'SmtpTestCase', 'LogScanner', 'rmtree']
 
 import re
 import errno, os, sys, shutil, stat
 import subprocess
+import StringIO, mailbox, email
 from textwrap import dedent
 import unittest
+
+from smtpsink import SmtpSink
 
 # Define the data root.
 datadir = os.path.normpath(os.path.join(
@@ -25,10 +28,10 @@ class HookTestCase(unittest.TestCase):
     def setUp(self, repoid, username='user', password='password'):
         """Initialize the test repository and working copy.
 
-        Arguments:
-        repoid -- Identifier for the repository and data set.
-        username -- Working copy user name (default=user).
-        password -- Working copy password  (default=password).
+        Args:
+            repoid: Identifier for the repository and data set.
+            username: Working copy user name.
+            password: Working copy password.
 
         """
         # Initialize the test attributes.
@@ -107,10 +110,10 @@ class HookTestCase(unittest.TestCase):
     def writeConf(self, filename, content, raw=False):
         """Write content into a repository configuration file.
 
-        Arguments:
-        filename -- File name of the 'conf' directory file.
-        content  -- Content to store in the file.
-        raw -- Flag request for no dedent (default=False).
+        Args:
+            filename: File name of the 'conf' directory file.
+            content: Content to store in the file.
+            raw: Flag request for no dedent.
 
         """
         filepath = os.path.join(self.repopath, 'conf', filename)
@@ -121,24 +124,20 @@ class HookTestCase(unittest.TestCase):
     def getLogScanner(self, filename):
         """Get the scanner object for a log file.
 
-        Arguments:
-        filename -- File name of the 'logs' directory file.
-
-        Returns:
-        Log file scanner object.
+        Args:
+            filename: File name of the 'logs' directory file.
 
         """
-        return LogScanner(os.path.join(self.repopath, 'logs', filename))
+        return LogScanner(
+            os.path.join(self.repopath, 'logs', filename))
 
     def callHook(self, hookname, *args, **kwargs):
         """Call a hook script directly.
 
-        Arguments:
-        hookname -- Base name of the pre-loaded hook script.
-        *args -- Hook-specific arguments.
+        Args:
+            hookname: Base name of the pre-loaded hook script.
 
-        Returns:
-        Subprocess object produced by hook script execution.
+        Returns: Subprocess object produced by hook script execution.
 
         """
         if hookname not in self.hooks:
@@ -169,8 +168,8 @@ class HookTestCase(unittest.TestCase):
     def addWcItem(self, pathname):
         """Schedule working copy items for addition.
 
-        Arguments:
-        pathname -- Relative path name of the item.
+        Args:
+            pathname: Relative path name of the item.
 
         """
         fullpath = os.path.join(self.wcpath, pathname)
@@ -179,8 +178,8 @@ class HookTestCase(unittest.TestCase):
     def rmWcItem(self, pathname):
         """Schedule working copy items for deletion.
 
-        Arguments:
-        pathname -- Relative path name of the item.
+        Args:
+            pathname: Relative path name of the item.
 
         """
         fullpath = os.path.join(self.wcpath, pathname)
@@ -189,10 +188,10 @@ class HookTestCase(unittest.TestCase):
     def setWcProperty(self, propname, propval, pathname='.'):
         """Set a working copy property.
 
-        Arguments:
-        propname -- Name of the property.
-        propval -- Value of the property.
-        pathname -- Relative path name of target (default='.').
+        Args:
+            propname: Name of the property.
+            propval: Value of the property.
+            pathname: Relative path name of target.
 
         """
         fullpath = os.path.join(self.wcpath, pathname)
@@ -202,9 +201,9 @@ class HookTestCase(unittest.TestCase):
     def delWcProperty(self, propname, pathname='.'):
         """Delete a working copy property.
 
-        Arguments:
-        propname -- Name of the property.
-        pathname -- Relative path name of target (default='.').
+        Args:
+            propname: Name of the property.
+            pathname: Relative path name of target.
 
         """
         fullpath = os.path.join(self.wcpath, pathname)
@@ -218,8 +217,8 @@ class HookTestCase(unittest.TestCase):
     def commitWc(self, message='', *args, **kwargs):
         """Commit working copy changes.
 
-        Arguments:
-        message -- Log message for commit (default='').
+        Args:
+            message: Log message for commit.
 
         """
         options = ['-m', message]
@@ -239,9 +238,9 @@ class HookTestCase(unittest.TestCase):
     def makeWcFile(self, pathname, content=''):
         """Create/Replace a working copy file.
 
-        Arguments:
-        pathname -- Relative path name of the file.
-        content -- Content of the file (default='').
+        Args:
+            pathname: Relative path name of the file.
+            content: Content of the file.
 
         """
         fullpath = os.path.join(self.wcpath, pathname)
@@ -256,8 +255,8 @@ class HookTestCase(unittest.TestCase):
     def makeWcFolder(self, pathname):
         """Create/Replace a working copy folder.
 
-        Arguments:
-        pathname -- Relative path name of the folder.
+        Args:
+            pathname: Relative path name of the folder.
 
         """
         fullpath = os.path.join(self.wcpath, pathname)
@@ -267,9 +266,9 @@ class HookTestCase(unittest.TestCase):
     def addWcFile(self, pathname, content=''):
         """Create a working copy file and add it.
 
-        Arguments:
-        pathname -- Relative path name of the file.
-        content -- Content of the file (default='').
+        Args:
+            pathname: Relative path name of the file.
+            content: Content of the file.
 
         """
         self.makeWcFile(pathname, content)
@@ -278,12 +277,88 @@ class HookTestCase(unittest.TestCase):
     def addWcFolder(self, pathname):
         """Create a working copy folder and add it.
 
-        Arguments:
-        pathname -- Relative path name of the folder.
+        Args:
+            pathname: Relative path name of the folder.
 
         """
         self.makeWcFolder(pathname)
         self.addWcItem(pathname)
+
+class SmtpTestCase(HookTestCase):
+    """SvnHook Test Case with SMTP Server"""
+
+    def setUp(self, port=8025, *args, **kwargs):
+        # Initialize the base test case.
+        super(SmtpTestCase, self).setUp(*args, **kwargs)
+
+        # Construct the SMTP server.
+        self.smtpaddress = 'localhost', port
+        self.smtpserver = SmtpSink(port=port)
+
+        # Start the SMTP server thread.
+        self.smtpserver.start()
+
+        # Make sure the SMTP server is always shut down.
+        self.addCleanup(_stopSmtpServer, self)
+
+    def _stopSmtpServer(self):
+        # Stop the SMTP server thread.
+        self.smtpserver.stop()
+
+    def getMailbox(self):
+        """Get the Unix mailbox object containing received
+        messages."""
+        # Load the mailbox contents into an IO object.
+        mailboxFile =  StringIO.StringIO(
+            self.smtpserver.getMailboxContents())
+
+        # Construct a mailbox object from the contents.
+        return mailbox.PortableUnixMailbox(
+            mailboxFile, email.message_from_file)
+
+    def assertSubjectIn(self, subject, msg=None):
+        """Assert that a received message has the exact subject
+        line.
+
+        Args:
+            subject: Subject line of the message.
+            msg: Optional message to use on failure.
+
+        """
+        # Get the subject lines of the messages.
+        subjects = [re.match(
+                r'^Subject: (.+)$', message.as_string(), re.MULTILINE)
+                    for message in self.getMailbox()]
+
+        # Apply the assertion.
+        self.assertIn(subject, subjects, msg)
+
+    def assertBodyRegexpIn(self, regex, msg=None):
+        """Assert that a regular expression is in a received message
+        body. Header lines are not searched.
+
+        Args:
+            regex: Regular expression to search with.
+            msg: Optional message to use on failure.
+
+        """
+        # Defined the default failure message.
+        if msg == None:
+            msg = 'Regular expression not matched'\
+                ' by message bodies: ' + re
+
+        # Get the body sections of the messages.
+        bodies = [re.search(
+                r'\n\n(.+)$', message.as_string(), re.DOTALL)
+                  for message in self.getMailbox()]
+
+        # Search through the bodies for a match.
+        regexobj = re.compile(regex)
+        for body in bodies:
+            if regexobj.search(body) != None: return
+
+        # A match wasn't found. Indicate a failure.
+        self.fail(msg)
 
 class LogScanner(object):
     """SvnHook Log File Scanner"""
@@ -291,8 +366,8 @@ class LogScanner(object):
     def __init__(self, pathname):
         """Mark the end position of the log file.
 
-        Arguments:
-        pathname - Path name of the log file.
+        Args:
+            pathname: Path name of the log file.
 
         """
         self.pathname = pathname
@@ -303,12 +378,7 @@ class LogScanner(object):
             self.position = f.tell()
 
     def read(self):
-        """Get the added log file content.
-
-        Returns:
-        Lines added to the log file.
-
-        """
+        """Get the added log file content."""
         # Get the added content. Update the saved position.
         with open(self.pathname) as f:
             f.seak(self.position, os.SEEK_SET)
@@ -323,10 +393,11 @@ class LogScanner(object):
 def _rmtree_onerror(func, path, excinfo):
     """Handle an rmtree read-only error.
 
-    Arguments:
-    func -- Calling function.
-    path -- Path name of the target.
-    excinfo -- Exception information.
+    Args:
+        func: Calling function.
+        path: Path name of the target.
+        excinfo: Exception information.
+
     """
     excvalue = excinfo[1]
     if func in (os.rmdir, os.remove)\
@@ -339,8 +410,8 @@ def _rmtree_onerror(func, path, excinfo):
 def rmtree(path):
     """Reliably remove a non-empty directory.
 
-    Arguments:
-    path -- Path name of the directory.
+    Args:
+        path: Path name of the directory.
 
     """
     shutil.rmtree(path, onerror=_rmtree_onerror)
