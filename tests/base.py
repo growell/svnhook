@@ -22,7 +22,7 @@ if not os.path.isdir(tmpdir): os.makedirs(tmpdir)
 class HookTestCase(unittest.TestCase):
     """SvnHook Test Case Base Class"""
 
-    def setUpTest(self, repoid, username='user', password='password'):
+    def setUp(self, repoid, username='user', password='password'):
         """Initialize the test repository and working copy.
 
         Arguments:
@@ -31,6 +31,7 @@ class HookTestCase(unittest.TestCase):
         password -- Working copy password  (default=password).
 
         """
+        # Initialize the test attributes.
         self.repoid = repoid
         self.username = username
         self.password = password
@@ -100,8 +101,8 @@ class HookTestCase(unittest.TestCase):
         # used to set the default commit user name.
         subprocess.check_call(
             ['svn', 'checkout', self.repourl, self.wcpath,
-             '--username', self.username, '--password', self.password],
-            stdout=subprocess.PIPE)
+             '--non-interactive', '--username', self.username,
+             '--password', self.password], stdout=subprocess.PIPE)
 
     def writeConf(self, filename, content, raw=False):
         """Write content into a repository configuration file.

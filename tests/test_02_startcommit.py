@@ -18,7 +18,7 @@ testconf = 'start-commit.xml'
 class TestStartCommit(HookTestCase):
 
     def setUp(self):
-        self.setUpTest(
+        super(TestStartCommit, self).setUp(
             re.sub(r'^test_?(.+)\.[^\.]+$', r'\1',
                    os.path.basename(__file__)))
 
