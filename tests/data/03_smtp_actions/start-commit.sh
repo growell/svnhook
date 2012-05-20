@@ -49,6 +49,7 @@
 # culprit may be unusual (or missing) environment variables.
 
 cd "$1"
-python ../../../bin/start-commit "$1" "$2" "$3" --cfgfile=conf/start-commit.xml
+HOOK=$SVNHOOK_HOME/bin/svnhook-start-commit
+python $HOOK "$1" "$2" "$3" --cfgfile=conf/start-commit.xml
 
 ########################### end of file ##############################
