@@ -23,14 +23,30 @@ class Action(object):
     def expand(self, text):
         """Use current context to expand a string.
 
-        Arguments:
-        text -- String to be expanded.
+        Args:
+          text: String to be expanded.
 
-        Returns:
-        Original string with tokens replaced.
-
+        Returns: Original string with tokens replaced.
         """
         return self.context.expand(text)
+
+    def get_boolean(self, name, default=False):
+        """Evaluate a boolean attribute of this tag.
+
+        Args:
+          name: Name of the attribute.
+          default: State to assume when attribute not present.
+
+        Returns: Effective boolean value of the attribute.
+        """
+        # Determine the default string value.
+        if default: default = '1'
+        else: default = '0'
+
+        # Evaluate the attribute.
+        return re.match(r'(1|true|yes)$',
+                        self.thistag.get(name, default),
+                        re.IGNORECASE) != None
 
 class SetToken(Action):
 
@@ -50,9 +66,7 @@ class SetToken(Action):
     def run(self):
         """Set a token to be used in template substitutions.
 
-        Returns:
-        Exit code (zero) of the action.
-
+        Returns: Exit code (zero) of the action.
         """
         # Set the token from the raw value.
         self.context.tokens[self.name] = self.value
@@ -81,9 +95,7 @@ class SendError(Action):
     def run(self):
         """Send a STDERR message to Subversion.
 
-        Returns:
-        Exit code (non-zero) of the action.
-
+        Returns: Exit code (non-zero) of the action.
         """
         # Apply any tokens.
         errormsg = self.expand(self.errormsg)
@@ -147,9 +159,7 @@ class _SendSmtp(Action):
     def run(self):
         """Send a mail message.
 
-        Returns:
-        Exit code (zero) of the action.
-
+        Returns: Exit code (zero) of the action.
         """
         # Expand the message details
         host = self.expand(self.host)
@@ -210,29 +220,26 @@ class SendSmtp(_SendSmtp):
     def getMessage(self):
         """Get the message body from the expanded tag content.
 
-        Returns:
-        Multi-line message, provided as tag content, with tokens
-        expanded.
-
+        Returns: Multi-line message, provided as tag content, with
+        tokens expanded.
         """
         return self.expand(self.message)
 
 class SendLogSmtp(_SendSmtp):
 
     def __init__(self, *args, **kwargs):
-        super(SendSmtp, self).__init__(*args, **kwargs)
+        super(SendLogSmtp, self).__init__(*args, **kwargs)
 
         # Get the verbose format flag.
-        self.verbose = self.thistag.get('verbose', default=True)
+        self.verbose = self.get_boolean('verbose', default=True)
 
     def getMessage(self):
-        """Get the log for the current change.
+        """Get the log entry for the current revision.
 
-        Returns:
-        Log message associated with the current context.
-
+        Returns: Formatted log entry associated with the current
+        revision.
         """
-        return self.context.get_log_message(verbose=self.verbose)
+        return self.context.get_log(verbose=self.verbose)
 
 class ExecuteCmd(Action):
 
@@ -252,9 +259,7 @@ class ExecuteCmd(Action):
     def run(self):
         """Execute a system command line.
 
-        Returns:
-        Exit code of the action.
-
+        Returns: Masked exit code of the action.
         """
         # Apply tokens to the command line.
         cmdline = self.expand(self.cmdline)
@@ -309,9 +314,7 @@ class SetRevisionFile(Action):
     def run(self):
         """Write the current revision number into a file.
 
-        Returns:
-        Exit code (zero) of the action.
-
+        Returns: Exit code (zero) of the action.
         """
         # Get the revision file path name.
         revfile = self.expand(self.file)

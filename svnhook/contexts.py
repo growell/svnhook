@@ -18,23 +18,31 @@ class Context(object):
     def __init__(self, tokens):
         """Create a tag context.
 
-        Arguments:
-        tokens -- Dictionary of base tokens.
-
+        Args:
+          tokens: Dictionary of base tokens.
         """
         # Create a deep copy of the tokens.
         self.tokens = dict(tokens)
 
+        # All of the hooks provide this. Simplify access.
+        self.repospath = tokens['ReposPath']
+
+        # Transform the repository path into a file protocol URL.
+        # This is needed to utilize regular "svn" commands.
+        if self.repospath[:1] == '/':
+            self.reposurl = 'file://' + self.repospath
+        else:
+            self.reposurl = 'file:///'\
+                + re.sub(r'\\', r'/', self.repospath)
+
     def expand(self, template, depth=1):
         """Apply tokens to a template string.
 
-        Arguments:
-        template -- String containing tokens.
-        depth -- Incremental recursion depth count (default 1).
+        Args:
+          template: String containing tokens.
+          depth: Incremental recursion depth count.
 
-        Returns:
-        Template string with token substitutions.
-
+        Returns: Template string with token substitutions.
         """
         # Determine if nothing's left to do.
         if re.search(r'\$\{\w+\}', template) == None:
@@ -52,12 +60,10 @@ class Context(object):
     def execute(self, cmdline):
         """Execute a system call.
 
-        Arguments:
-        cmdline -- Command line to execute.
+        Args:
+          cmdline: Command line to execute.
 
-        Returns:
-        Output produced by the command.
-
+        Returns: Output produced by the command.
         """
         logger.debug('Execute: ' + cmdline)
         try:
@@ -85,9 +91,10 @@ class Context(object):
     def get_author(self, cmdline):
         """Get the author of repository changes.
 
-        Arguments:
-        cmdline -- Svnlook command to acquire author name.
+        Args:
+          cmdline: Svnlook command to acquire author name.
 
+        Returns: Output produced by the command.
         """
         # When first requested, cache the author name.
         if 'Author' not in self.tokens:
@@ -100,9 +107,10 @@ class Context(object):
     def get_changes(self, cmdline):
         """Get the list of repository changes.
 
-        Arguments:
-        cmdline -- Svnlook command to acquire change listing.
+        Args:
+          cmdline: Svnlook command to acquire change listing.
 
+        Returns: Output produced by the command.
         """
         # When first requested, cache the list of changes.
         if 'Changes' not in self.tokens:
@@ -133,23 +141,13 @@ class Context(object):
         # Return the cached list.
         return self.tokens['Changes']
 
-    def get_file_content(self, cmdline):
-        """Get the contents of a repository file.
-
-        Arguments:
-        cmdline -- Svnlook command to acquire file content.
-
-        """
-        # To limit memory consumption, the file is always retrieved
-        # from the repository.
-        return self.execute(cmdline);
-
     def get_log_message(self, cmdline):
         """Get the log message of a repository change.
 
-        Arguments:
-        cmdline -- Svnlook command to acquire log message.
+        Args:
+          cmdline: Svnlook command to acquire log message.
 
+        Returns: Output produced by the command.
         """
         # When first requested, cache the log message.
         if 'LogMsg' not in self.tokens:
@@ -165,147 +163,144 @@ class CtxStandard(Context):
     def get_author(self):
         """Get the author of the last revision.
 
-        Returns:
-        author -- User name of the revision author.
-
+        Returns: User name of the revision author.
         """
         return super(CtxStandard, self).get_author(
-            'svnlook author "{}"'.format(self.tokens['ReposPath']))
+            'svnlook author "{}"'.format(self.repospath))
 
     def get_changes(self):
         """Get the list of changes in the last revision.
 
-        Returns:
-        changes -- List of change objects for the changes.
-
+        Returns: List of change objects for the changes.
         """
         return super(CtxStandard, self).get_changes(
-            'svnlook changes "{}"'.format(self.tokens['ReposPath']))
+            'svnlook changes "{}"'.format(self.repospath))
 
     def get_file_content(self):
         """Get the content of a file in the last revision.
 
-        Returns:
-        content -- Content of the revision file.
-
+        Returns: Content of the revision file.
         """
-        return super(CtxStandard, self).get_file_content(
+        # To limit memory consumption, the file is always retrieved
+        # from the repository.
+        return super(CtxStandard, self).execute(
             'svnlook cat "{}" "{}"'.format(
-                self.tokens['ReposPath'],
+                self.repospath,
                 self.tokens['Path']))
 
-    def get_log_message(self):
+    def get_log_message(self, verbose=False):
         """Get the log message of the last revision.
 
-        Returns:
-        logmsg -- Log message of the revision.
-
+        Returns: Log message of the revision.
         """
         return super(CtxStandard, self).get_log_message(
-            'svnlook log "{}"'.format(self.tokens['ReposPath']))
+            'svnlook log "{}"'.format(self.repospath))
 
 class CtxRevision(Context):
     """Context class for hooks with a revision."""
 
+    def __init__(self, tokens):
+        super(CtxRevision, self).__init__(tokens)
+        self.revision = tokens['Revision']
+
     def get_author(self):
         """Get the author of the revision.
 
-        Returns:
-        author -- User name of the revision author.
-
+        Returns: User name of the revision author.
         """
         return super(CtxRevision, self).get_author(
             'svnlook author -r {} "{}"'.format(
-                self.tokens['Revision'],
-                self.tokens['ReposPath']))
+                self.revision, self.repospath))
 
     def get_changes(self):
         """Get the list of changes in the revision.
 
-        Returns:
-        changes -- List of change objects for the changes.
-
+        Returns: List of change objects for the changes.
         """
         return super(CtxRevision, self).get_changes(
             'svnlook changes -r {} "{}"'.format(
-                self.tokens['Revision'],
-                self.tokens['ReposPath']))
+                self.revision, self.repospath))
 
     def get_file_content(self):
         """Get the content of a file in the revision.
 
-        Returns:
-        content -- Content of the revision file.
-
+        Returns: Content of the revision file.
         """
-        return super(CtxRevision, self).get_file_content(
+        # To limit memory consumption, the file is always retrieved
+        # from the repository.
+        return super(CtxRevision, self).execute(
             'svnlook cat -r {} "{}" "{}"'.format(
-                self.tokens['Revision'],
-                self.tokens['ReposPath'],
-                self.tokens['Path']))
+                self.revision, self.repospath, self.tokens['Path']))
 
-    def get_log_message(self):
+    def get_log_message(self, verbose=False):
         """Get the log message of the revision.
 
-        Returns:
-        logmsg -- Log message of the revision.
-
+        Returns: Log message of the revision.
         """
         return super(CtxRevision, self).get_log_message(
             'svnlook log -r {} "{}"'.format(
-                self.tokens['Revision'],
-                self.tokens['ReposPath']))
+                self.revision, self.repospath))
+
+    def get_log(self, verbose=False):
+        """Get the formatted log entry for the revision.
+
+        Args:
+          verbose: Flag requesting changed path info.
+
+        Returns: Log information for the revision.
+        """
+        if verbose:
+            cmdline = 'svn log -r {} {} --verbose'.format(
+                self.revision, self.reposurl)
+        else:
+            cmdline = 'svn log -r {} {}'.format(
+                self.revision, self.reposurl)
+        return super(CtxRevision, self).execute(cmdline)
 
 class CtxTransaction(Context):
     """Context class for hooks with a transaction."""
 
+    def __init__(self, tokens):
+        super(CtxTransaction, self).__init__(tokens)
+        self.transaction = tokens['Transaction']
+
     def get_author(self):
         """Get the author of the transaction.
 
-        Returns:
-        author -- User name of the transaction author.
-
+        Returns: User name of the transaction author.
         """
         return super(CtxTransaction, self).get_author(
             'svnlook author -t "{}" "{}"'.format(
-                self.tokens['Transaction'],
-                self.tokens['ReposPath']))
+                self.transaction, self.repospath))
 
     def get_changes(self):
         """Get the list of changes in the transaction.
 
-        Returns:
-        changes -- List of change objects for the changes.
-
+        Returns: List of change objects for the changes.
         """
         return super(CtxTransaction, self).get_changes(
             'svnlook changes -t "{}" "{}"'.format(
-                self.tokens['Transaction'],
-                self.tokens['ReposPath']))
+                self.transaction, self.repospath))
 
     def get_file_content(self):
         """Get the content of a file in the transaction.
 
-        Returns:
-        content -- Content of the transaction file.
-
+        Returns: Content of the transaction file.
         """
-        return super(CtxTransaction, self).get_file_content(
+        # To limit memory consumption, the file is always retrieved
+        # from the repository.
+        return super(CtxTransaction, self).execute(
             'svnlook cat -t "{}" "{}" "{}"'.format(
-                self.tokens['Transaction'],
-                self.tokens['ReposPath'],
+                self.transaction, self.repospath,
                 self.tokens['Path']))
 
-    def get_log_message(self):
+    def get_log_message(self, verbose=False):
         """Get the log message of the transaction.
 
-        Returns:
-        logmsg -- Log message of the transaction.
-
+        Returns: Log message of the transaction.
         """
         return super(CtxTransaction, self).get_log_message(
             'svnlook log -t "{}" "{}"'.format(
-                self.tokens['Transaction'],
-                self.tokens['ReposPath']))
+                self.transaction, self.repospath))
 
 ########################### end of file ##############################

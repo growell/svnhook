@@ -371,6 +371,21 @@ class SmtpTestCase(HookTestCase):
         self.assertRegexpMatches(
             message.get_payload(None, True).rstrip(), regexp, msg)
 
+    def assertBodyNotRegexp(self, message, regexp, msg=None):
+        """Assert that a message body doesn't match a regular
+        expression.
+
+        Args:
+            message: Message to be checked.
+            regexp: Regular expression to match against the message
+              body.
+            msg: Optional message to use on failure.
+        """
+        # Assert against the decoded, non-multipart, content. Trim off
+        # the terminal whitespace (two linefeeds).
+        self.assertNotRegexpMatches(
+            message.get_payload(None, True).rstrip(), regexp, msg)
+
 class LogScanner(object):
     """SvnHook Log File Scanner"""
 
