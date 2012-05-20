@@ -13,7 +13,7 @@ from contexts import *
 import argparse
 import logging
 import logging.config
-import os
+import os, sys
 import re
 import yaml
 
@@ -54,6 +54,9 @@ class SvnHook(object):
             logging.config.fileConfig(logconffile)
         else:
             logging.basicConfig()
+
+        # For debugging, log the raw Python call.
+        logger.debug('sys.argv: ' + ' '.join(sys.argv))
 
         # Read and parse the hook configuration file. If it has a
         # parse error, make sure to log it - before rethrowing it.
