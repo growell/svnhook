@@ -71,7 +71,8 @@ class HookTestCase(unittest.TestCase):
                 # Load a repository dump file.
                 if datafile.endswith('.dmp'):
                     subprocess.check_call(
-                        ['svnadmin', 'load', self.repopath],
+                        ['svnadmin', 'load', self.repopath,
+                         '--force-uuid', '--quiet'],
                         stdin=open(datapath))
 
                 # Load a hook configuration file.
