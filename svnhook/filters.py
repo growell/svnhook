@@ -56,7 +56,7 @@ class Filter(actions.Action):
             try:
                 exitcode = action(self.context, childtag).run()
             except Exception as e:
-                logger.critical(e)
+                logger.exception(e)
                 sys.stderr.write('Internal hook error.'
                                  + ' Please notify administrator.')
                 return -1
