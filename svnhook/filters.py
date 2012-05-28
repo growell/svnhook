@@ -6,12 +6,11 @@ __version__ = '3.00'
 __all__     = ['Filter']
 
 import actions
-from regextag import RegexTag
 
 import inspect
 import logging
 import re
-import sys
+import sys, subprocess, shlex, errno
 
 logger = logging.getLogger()
 
@@ -25,13 +24,10 @@ class Filter(actions.Action):
     """
 
     def run(self):
-        """Execute child actions.
+        """Execute child actions, until one of them sets a non-zero
+        exit code.
 
-        Stop if a child action indicates a non-zero exit code.
-
-        Returns:
-        Current exit code of the filter.
-
+        Returns: Exit code of the filter.
         """
         # Execute the child actions.
         exitcode = 0
@@ -69,8 +65,126 @@ class Filter(actions.Action):
         # Return the current exit code.
         return exitcode
 
+class FilterAddNameCase(Filter):
+    """Added Entries Name Case Filter Class
+
+    Look for added (not replaced) entries whose names differ only by
+    case with existing entries. Most often used to avoid problems with
+    checkouts on case-insensitive (i.e. Windows) operating systems.
+
+    Applies To: pre-commit
+    Input Tokens: ReposPath
+    Output Tokens: ParentFolder, AddName, ExistingName
+    """
+
+    def __init__(self, *args, **kwargs):
+        # Construct the base instance.
+        super(FilterAddNameCase, self).__init__(*args, **kwargs)
+
+        # Initialize the repository listing cache.
+        self.listings = dict();
+
+    def get_listing(self, folder):
+        """Get the existing entries in a repository folder.
+
+        Args:
+          folder: Path name of the repository folder.
+
+        Returns: Map of uppercased existing folder entry names
+        versus original folder entry names.
+        """
+        # If the listing was previously produced, return it.
+        if folder in self.listings: return self.listings[folder]
+
+        # This is a new folder. Start with an empty list.
+        listing = self.listings[folder] = dict()
+
+        # Request the parent folder listing.
+        cmdline = 'svnlook tree "{}" "{}" --non-recursive'\
+            .format(self.context.repospath, parent)
+        logger.debug('Execute: ' + cmdline)
+        try:
+            p = subprocess.Popen(
+                shlex.split(cmdline),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                shell=False)
+
+        # If unable to execute, complain.
+        except Exception as e:
+            logger.error(e)
+            raise e
+
+        # The process started, wait for it to finish.
+        p.wait()
+
+        # The parent folder may be added, as part of this
+        # revision. Treat the "file not found" error as
+        # returning an empty listing - so we don't ask for it
+        # again.
+        if p.returncode == errno.ENOENT: return listing
+        elif p.returncode != 0:
+            errstr = p.stderr.read().strip()
+            msg = 'Command failed: {}: {}'.format(cmdline, errstr)
+            logger.error(msg)
+            raise RuntimeError(msg)
+
+        # Parse the folder listing.
+        for line in p.stdout.read():
+
+            # Skip blank lines and headers.
+            match = re.match(r'\s(\S+)/?$', line)
+            if match == None: continue
+
+            # Add the entry to the listing.
+            name = match.group(1)
+            listing[name.upper()] = name
+
+        return listing
+
+    def run(self):
+        """Look for a name case conflict.
+
+        Returns: Exit code from filter and child actions.
+        """
+        # Look for a match with the changed items.
+        matched = False
+        for change in self.context.get_changes():
+
+            # Ignore anything that isn't added. Ignore replacements.
+            if (not change.is_add()) or change.replaced: continue
+
+            # Determine the parent folder and base name.
+            folder, name = re.match(
+                r'(.*)/(.+/?)', change.path).group(1,2)
+
+            # Skip entries not in the case-insensitive listing.
+            listing = self.get_listing(folder)
+            if name.upper() not in listing: continue
+
+            # Add tokens for the conflict details.
+            self.context.tokens['ParentFolder'] = folder
+            self.context.tokens['AddName'] = name
+            self.context.tokens['ExistingName']\
+                = listing[name.upper()]
+            matched = True
+            break
+
+        # A match wasn't found, don't do the child actions.
+        if not matched: return 0
+
+        # Perform the child actions.
+        return super(FilterAddNameCase, self).run()
+
 class FilterAuthor(Filter):
-    """Author Name Filter Class"""
+    """Author Name Filter Class
+
+    Look for a match with the current commit author.
+
+    Applies To: pre-commit, post-commit
+    Input Tags: AuthorRegex
+    Output Tokens: Author
+    """
 
     def __init__(self, *args, **kwargs):
         """Read parameters from filter configuration."""
@@ -102,7 +216,14 @@ class FilterAuthor(Filter):
         return super(FilterAuthor, self).run()
 
 class FilterCapabilities(Filter):
-    """Client Capabilities Filter Class"""
+    """Client Capabilities Filter Class
+
+    Look for a match with the client capabilities.
+
+    Applies To: start-commit
+    Input Tokens: Capabilities
+    Input Tags: CapabilitiesRegex
+    """
 
     def __init__(self, *args, **kwargs):
         """Read parameters from filter configuration."""
@@ -134,17 +255,64 @@ class FilterCapabilities(Filter):
         self.context.tokens['Capabilities'] = capabilities
         return super(FilterCapabilities, self).run()
 
-class FilterChanges(Filter):
-    """Change List Filter Class"""
+class FilterChgType(Filter):
+    """RevProp Change Type Filter Class
+
+    Look for a revision property change type.
+
+    Applies To: pre-revprop-change, post-revprop-change
+    Input Tokens: ChgType
+    Input Tags: ChgTypeRegex
+    """
+
+    def __init__(self, *args, **kwargs):
+        """Read parameters from filter configuration."""
+        # Construct the base instance.
+        super(FilterChgType, self).__init__(*args, **kwargs)
+
+        # Construct a regular expression tag evaluator.
+        regextag = self.thistag.find('ChgTypeRegex')
+        if regextag == None:
+            raise ValueError('Required tag missing: ChgTypeRegex')
+        self.regex = RegexTag(regextag)
+
+    def run(self):
+        """If revprop change types match, run actions.
+
+        Returns: Exit code produced by filter and child actions.
+        """
+        # Get the change type string.
+        chgtype = self.context.tokens['ChgType']
+        logger.debug('ChgType = "{}"'.format(chgtype))
+
+        # If the capabilities don't match, do nothing.
+        if not self.regex.match(chgtype): return 0
+
+        # Perform the child actions.
+        return super(FilterChgType, self).run()
+
+class FilterCommitList(Filter):
+    """Commit List Filter Class
+
+    Look for a match in the list of commit list paths.
+
+    Input tokens: ReposPath, Transaction, Revision
+    Input tags: PathRegex, ChgTypeRegex
+    Output tokens: Path, ChgType
+    """
 
     def __init__(self, *args, **kwargs):
         """Read parameters from filter configuration."""
         # Construct the base instance.
         super(FilterChanges, self).__init__(*args, **kwargs)
 
+        # Save the "stop on first match" flag.
+        self.matchfirst = self.get_boolean('matchFirst')
+        logger.debug('matchFirst = ' + self.matchfirst)
+
         # Construct a regular expression tag evaluator for the path
         # names.
-        pathregextag = self.thistag.find('ChgPathRegex')
+        pathregextag = self.thistag.find('PathRegex')
         if pathregextag != None:
             self.pathregex = RegexTag(pathregextag)
         else:
@@ -166,15 +334,12 @@ class FilterChanges(Filter):
     def run(self):
         """Filter actions based on changes.
 
-        Returns:
-        Exit code produced by filter and child actions.
-
+        Returns: Exit code produced by filter and child actions.
         """
         # Get the dictionary of changes.
         changes = self.context.get_changes()
 
         # Compare the changes to the regular expressions.
-        ismatch = False
         for [chgpath, chgtype] in changes:
             logger.debug('ChgPath = "{}"'.format(chgpath))
             logger.debug('ChgType = "{}"'.format(chgtype))
@@ -188,19 +353,18 @@ class FilterChanges(Filter):
                 continue
 
             # Save the triggering change details.
-            self.context.tokens['ChgPath'] = chgpath
+            self.context.tokens['Path'] = chgpath
             self.context.tokens['ChgType'] = chgtype
 
-            # Indicate that the child action should be run and stop
+            # Execute the child actions. If they produce a non-zero
+            # exit code, or if only looking for the first match, stop
             # checking.
-            ismatch = True
-            break
+            exitcode = super(FilterCommitList, self).run()
+            if exitcode or self.matchfirst: return exitcode
 
-        # If nothing matched, don't do anything.
-        if not ismatch: return 0
-
-        # Execute the child actions.
-        return super(FilterChanges, self).run()
+        # Either nothing matched, or the child actions were
+        # successful.
+        return 0
 
 class FilterLockTokens(Filter):
     """Lock Token Filter Class"""
@@ -361,5 +525,57 @@ class FilterUser(Filter):
 
         # Execute the child actions.
         return super(FilterUser, self).run()
+
+class RegexTag(object):
+    """Regular Expression Tag Class
+
+    Evaluate text against regular expression details provided by a
+    hook configuration XML tag.
+    """
+
+    def __init__(self, regextag, *args):
+        """Construct instance from regular expression tag.
+
+        Args:
+          regextag: Element instance for the regex tag.
+          *args: Regular expression flags.
+        """
+        if regextag.text == None:
+            raise ValueError(
+                'Required tag content missing: {}'.format(regextag.tag))
+
+        # Compile the regular expression.
+        self.regex = re.compile(regextag.text, *args)
+
+        # Determine the true/false sense to apply to the result.
+        self.sense = (re.match(r'(1|true|yes)$',
+                              regextag.get('sense', default='1'),
+                              re.IGNORECASE) != None)
+
+    def match(self, text):
+        """Compare start of the text to the regular expression.
+
+        Args:
+          text: Text to be evaluated.
+
+        Returns: Boolean result of the comparison.
+        """
+        if self.sense:
+            return (self.regex.match(text) != None)
+        else:
+            return (self.regex.match(text) == None)
+
+    def search(self, text):
+        """Compare all of the text to the regular expression.
+
+        Args:
+          text: Text to be evaluated.
+
+        Returns: Boolean result of the comparison.
+        """
+        if self.sense:
+            return (self.regex.search(text) != None)
+        else:
+            return (self.regex.search(text) == None)
 
 ########################### end of file ##############################
