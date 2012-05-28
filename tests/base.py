@@ -168,6 +168,46 @@ class HookTestCase(unittest.TestCase):
         # Pass back the process object.
         return p
 
+    def makeRepoFolder(self, pathname, *args, **kwargs):
+        """Directly add a folder to the repository.
+
+        Args:
+            pathname: Relative path name of the folder.
+
+        Returns: Process object used to add the folder.
+        """
+        # Default the commit message to an empty string.
+        try:
+            message = kwargs['message']
+            del kwargs['message']
+        except KeyError:
+            message = ''
+
+        # Construct the base command.
+        fullurl = '/'.join([self.repourl, pathname])
+        cmd = ['svn', 'mkdir', fullurl, '-m', message]
+
+        # Apply any non-value options.
+        for arg in args:
+            if arg[:1]=='-': cmd.append(arg)
+            elif len(arg)==1: cmd.append('-' + arg)
+            else: cmd.append('--' + arg)
+
+        # Apply any valued options.
+        for option in sorted(kwargs.keys()):
+            if len(option)==1: cmd.append('-' + option)
+            else: cmd.append('--' + option)
+            cmd.append(kwargs[option])
+
+        # Start the command. Wait for it to finish. A hook failure
+        # should run the command, but return a non-zero exit code.
+        # Details should be provided via the STDERR pipe.
+        p = subprocess.Popen(
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        p.wait()
+
+        return p
+
     def addWcItem(self, pathname):
         """Schedule working copy items for addition.
 
@@ -236,7 +276,7 @@ class HookTestCase(unittest.TestCase):
             pathname: Relative path name of the directory.
         """
         fullpath = os.path.join(self.wcpath, pathname)
-        shutil.rmtree(fullpath, True)
+        rmtree(fullpath)
 
     def setWcProperty(self, propname, propval, pathname='.'):
         """Set a working copy property.
@@ -344,7 +384,7 @@ class HookTestCase(unittest.TestCase):
             pathname: Relative path name of the folder.
         """
         fullpath = os.path.join(self.wcpath, pathname)
-        if os.isdir(fullpath): rmtree(fullpath)
+        if os.path.isdir(fullpath): rmtree(fullpath)
         os.makedirs(fullpath)
 
     def addWcFile(self, pathname, content=''):
