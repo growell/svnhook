@@ -7,7 +7,7 @@ using the previously-determined format.
 __version__ = '3.00'
 __all__     = ['ChangeItem']
 
-import logging
+import logging, re
 
 logger = logging.getLogger()
 
@@ -23,7 +23,7 @@ class ChangeItem(object):
         """
         # If the delimiter index isn't known, figure it out. Scan the
         # characters of the first change line.
-        if not self.delimidx:
+        if not hasattr(self, 'delimidx'):
             self.delimidx = state = 0
             for chgchar in chgline:
 

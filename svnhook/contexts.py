@@ -174,7 +174,7 @@ class CtxStandard(Context):
         Returns: List of change objects for the changes.
         """
         return super(CtxStandard, self).get_changes(
-            'svnlook changes "{}"'.format(self.repospath))
+            'svnlook changed "{}"'.format(self.repospath))
 
     def get_file_content(self):
         """Get the content of a file in the last revision.
@@ -218,7 +218,7 @@ class CtxRevision(Context):
         Returns: List of change objects for the changes.
         """
         return super(CtxRevision, self).get_changes(
-            'svnlook changes -r {} "{}"'.format(
+            'svnlook changed -r {} "{}"'.format(
                 self.revision, self.repospath))
 
     def get_file_content(self):
@@ -279,7 +279,7 @@ class CtxTransaction(Context):
         Returns: List of change objects for the changes.
         """
         return super(CtxTransaction, self).get_changes(
-            'svnlook changes -t "{}" "{}"'.format(
+            'svnlook changed -t "{}" "{}"'.format(
                 self.transaction, self.repospath))
 
     def get_file_content(self):

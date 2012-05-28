@@ -280,7 +280,7 @@ class HookTestCase(unittest.TestCase):
             *args: Additional commit arguments.
             **kwargs: Additional named options.
 
-        Returns: Output produced by Subversion command.
+        Returns: Process object that ran Subversion command.
         """
         # Default the commit message to an empty string.
         try:
@@ -304,8 +304,14 @@ class HookTestCase(unittest.TestCase):
             else: cmd.append('--' + option)
             cmd.append(kwargs[option])
 
-        # Run the command.
-        return subprocess.check_output(cmd)
+        # Start the command. Wait for it to finish. A hook failure
+        # should run the commit command, but return a non-zero exit
+        # code. Details should be provided via the STDERR pipe.
+        p = subprocess.Popen(
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        p.wait()
+
+        return p
 
     def updateWc(self):
         """Update the entire working copy.

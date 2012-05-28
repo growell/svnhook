@@ -29,10 +29,10 @@ class TestFilterAddNameCase(HookTestCase):
         self.addWcFile('fileA2.txt')
 
         # Attempt to commit the change.
-        try:
-            self.commitWc()
-        except CalledProcessError as e:
-            self.fail('Failed to add non-conflicting file.')
+        p = self.commitWc()
+        self.assertEqual(
+            p.returncode, 0,
+            'Failed to add non-conflicting file.')
 
     def test_02_replace(self):
         """Replace a file. This shouldn't case a conflict."""
@@ -43,10 +43,10 @@ class TestFilterAddNameCase(HookTestCase):
         self.mvWcItem('fileB.txt', 'fileA.txt')
 
         # Attempt to commit the change.
-        try:
-            self.commitWc()
-        except CalledProcessError as e:
-            self.fail('Failed to replace non-conflicting file.')
+        p = self.commitWc()
+        self.assertEqual(
+            p.returncode, 0,
+            'Failed to replace non-conflicting file.')
 
     def test_03_file_conflict(self):
         """Add a file with a different name case."""
@@ -57,8 +57,19 @@ class TestFilterAddNameCase(HookTestCase):
         self.addWcFile('FileA.txt')
 
         # Attempt to commit the change.
-        with self.assertRaises(CalledProcessError):
-            self.commitWc()
+        p = self.commitWc()
+
+        # Check for the expected failure.
+        self.assertNotEqual(
+            p.returncode, 0,
+            'Expected non-zero exit code not found!')
+
+        # Check for the expected error details (via SendError).
+        errstr = p.stderr.read()
+        self.assertRegexpMatches(errstr, r'Name case conflict')
+        self.assertRegexpMatches(errstr, r'Folder\.+: /')
+        self.assertRegexpMatches(errstr, r'Existing: fileA\.txt')
+        self.assertRegexpMatches(errstr, r'Added\.+: FileA\.txt')
 
 # Allow manual execution of tests.
 if __name__=='__main__':

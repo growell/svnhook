@@ -74,7 +74,7 @@ class FilterAddNameCase(Filter):
 
     Applies To: pre-commit
     Input Tokens: ReposPath
-    Output Tokens: ParentFolder, AddName, ExistingName
+    Output Tokens: ParentFolder, AddedName, ExistingName
     """
 
     def __init__(self, *args, **kwargs):
@@ -101,7 +101,7 @@ class FilterAddNameCase(Filter):
 
         # Request the parent folder listing.
         cmdline = 'svnlook tree "{}" "{}" --non-recursive'\
-            .format(self.context.repospath, parent)
+            .format(self.context.repospath, folder)
         logger.debug('Execute: ' + cmdline)
         try:
             p = subprocess.Popen(
@@ -130,10 +130,11 @@ class FilterAddNameCase(Filter):
             raise RuntimeError(msg)
 
         # Parse the folder listing.
-        for line in p.stdout.read():
+        for line in p.stdout.readlines():
+            logger.debug('line = "{}"'.format(line.rstrip()))
 
             # Skip blank lines and headers.
-            match = re.match(r'\s(\S+)/?$', line)
+            match = re.match(r'\s(\S+)/?$', line.rstrip())
             if match == None: continue
 
             # Add the entry to the listing.
@@ -156,7 +157,10 @@ class FilterAddNameCase(Filter):
 
             # Determine the parent folder and base name.
             folder, name = re.match(
-                r'(.*)/(.+/?)', change.path).group(1,2)
+                r'(.*/)?(.+/?)$', change.path).group(1,2)
+            if folder == None: folder = '/'
+            logger.debug('folder = "{}", name = "{}"'\
+                             .format(folder, name))
 
             # Skip entries not in the case-insensitive listing.
             listing = self.get_listing(folder)
@@ -164,7 +168,7 @@ class FilterAddNameCase(Filter):
 
             # Add tokens for the conflict details.
             self.context.tokens['ParentFolder'] = folder
-            self.context.tokens['AddName'] = name
+            self.context.tokens['AddedName'] = name
             self.context.tokens['ExistingName']\
                 = listing[name.upper()]
             matched = True
