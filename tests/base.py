@@ -219,15 +219,13 @@ class HookTestCase(unittest.TestCase):
         Args:
             message: Log message for commit.
         """
-        options = ['-m', message]
+        cmd = ['svn', 'commit', self.wcpath, '-m', message]
+        cmd += list(args)
         for option in sorted(kwargs.keys()):
-            if option[:1] == '-': options.append(option)
-            elif len(option) == 1: options.append('-' + option)
-            else: options.append('--' + option)
-            options.append(kwargs[option])
-
-        subprocess.check_call(
-            ['svn', 'commit', self.wcpath, options])
+            if len(option)==1: cmd.append('-' + option)
+            else: cmd.append('--' + option)
+            cmd.append(kwargs[option])
+        subprocess.check_call(cmd)
 
     def updateWc(self):
         """Update the entire working copy."""
@@ -243,7 +241,8 @@ class HookTestCase(unittest.TestCase):
         fullpath = os.path.join(self.wcpath, pathname)
 
         # Create any intermediate folders.
-        os.mkdirs(os.path.dirname(fullpath))
+        filedir = os.path.dirname(fullpath)
+        if not os.path.isdir(filedir): os.makedirs(filedir)
 
         # Create/update the file.
         with open(fullpath, 'w') as f:
@@ -257,7 +256,7 @@ class HookTestCase(unittest.TestCase):
         """
         fullpath = os.path.join(self.wcpath, pathname)
         if os.isdir(fullpath): rmtree(fullpath)
-        os.mkdirs(fullpath)
+        os.makedirs(fullpath)
 
     def addWcFile(self, pathname, content=''):
         """Create a working copy file and add it.
