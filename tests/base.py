@@ -218,6 +218,26 @@ class HookTestCase(unittest.TestCase):
         fullpath = os.path.join(self.wcpath, pathname)
         return subprocess.check_output(['svn', 'rm', fullpath])
 
+    def rmWcFsFile(self, pathname):
+        """Remove a working copy file without scheduling it for
+        removal from Subversion.
+
+        Args:
+            pathname: Relative path name of the file.
+        """
+        fullpath = os.path.join(self.wcpath, pathname)
+        os.remove(fullpath)
+
+    def rmWcFsDir(self, pathname):
+        """Recursively remove a working copy directory without
+        scheduling it for removal from Subversion.
+
+        Args:
+            pathname: Relative path name of the directory.
+        """
+        fullpath = os.path.join(self.wcpath, pathname)
+        shutil.rmtree(fullpath, True)
+
     def setWcProperty(self, propname, propval, pathname='.'):
         """Set a working copy property.
 
