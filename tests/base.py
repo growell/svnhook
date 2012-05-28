@@ -9,7 +9,7 @@ import errno, os, sys, shutil, stat
 import subprocess
 import StringIO, mailbox, email
 from textwrap import dedent
-import unittest
+import unittest, pprint
 
 from smtpsink import SmtpSink
 
@@ -61,7 +61,7 @@ class HookTestCase(unittest.TestCase):
         if os.path.isdir(self.wcpath): rmtree(self.wcpath)
             
         # Construct the test repository.
-        subprocess.check_call(['svnadmin', 'create', self.repopath])
+        subprocess.check_output(['svnadmin', 'create', self.repopath])
 
         # Create the standard repository log file directory.
         os.mkdir(os.path.join(self.repopath, 'logs'))
@@ -76,7 +76,7 @@ class HookTestCase(unittest.TestCase):
 
                 # Load a repository dump file.
                 if datafile.endswith('.dmp'):
-                    subprocess.check_call(
+                    subprocess.check_output(
                         ['svnadmin', 'load', self.repopath,
                          '--force-uuid', '--quiet'],
                         stdin=open(datapath))
@@ -108,10 +108,10 @@ class HookTestCase(unittest.TestCase):
 
         # Create the initial working copy. Explicit credentials are
         # used to set the default commit user name.
-        subprocess.check_call(
+        subprocess.check_output(
             ['svn', 'checkout', self.repourl, self.wcpath,
              '--non-interactive', '--username', self.username,
-             '--password', self.password], stdout=subprocess.PIPE)
+             '--password', self.password])
 
     def writeConf(self, filename, content, raw=False):
         """Write content into a repository configuration file.
@@ -173,18 +173,50 @@ class HookTestCase(unittest.TestCase):
 
         Args:
             pathname: Relative path name of the item.
+
+        Returns: Output produced by Subversion command.
         """
         fullpath = os.path.join(self.wcpath, pathname)
-        subprocess.check_call(['svn', 'add', fullpath])
+        return subprocess.check_output(['svn', 'add', fullpath])
+
+    def cpWcItem(self, srcpathname, destpathname):
+        """Copy a working copy item.
+
+        Args:
+            srcpathname: Relative path name of the source item.
+            destpathname: Relative path name of the destination.
+
+        Returns: Output produced by Subversion command.
+        """
+        source = os.path.join(self.wcpath, srcpathname)
+        destination = os.path.join(self.wcpath, destpathname)
+        return subprocess.check_output(
+            ['svn', 'cp', source, destination])
+
+    def mvWcItem(self, srcpathname, destpathname):
+        """Move/Rename a working copy item.
+
+        Args:
+            srcpathname: Relative path name of the source item.
+            destpathname: Relative path name of the destination.
+
+        Returns: Output produced by Subversion command.
+        """
+        source = os.path.join(self.wcpath, srcpathname)
+        destination = os.path.join(self.wcpath, destpathname)
+        return subprocess.check_output(
+            ['svn', 'mv', source, destination])
 
     def rmWcItem(self, pathname):
         """Schedule working copy items for deletion.
 
         Args:
             pathname: Relative path name of the item.
+
+        Returns: Output produced by Subversion command.
         """
         fullpath = os.path.join(self.wcpath, pathname)
-        subprocess.check_call(['svn', 'rm', fullpath])
+        return subprocess.check_output(['svn', 'rm', fullpath])
 
     def setWcProperty(self, propname, propval, pathname='.'):
         """Set a working copy property.
@@ -193,9 +225,11 @@ class HookTestCase(unittest.TestCase):
             propname: Name of the property.
             propval: Value of the property.
             pathname: Relative path name of target.
+
+        Returns: Output produced by Subversion command.
         """
         fullpath = os.path.join(self.wcpath, pathname)
-        subprocess.check_call(
+        return subprocess.check_output(
             ['svn', 'propset', propname, propval, fullpath])
 
     def delWcProperty(self, propname, pathname='.'):
@@ -204,32 +238,61 @@ class HookTestCase(unittest.TestCase):
         Args:
             propname: Name of the property.
             pathname: Relative path name of target.
+
+        Returns: Output produced by Subversion command.
         """
         fullpath = os.path.join(self.wcpath, pathname)
-        subprocess.check_call(
+        return subprocess.check_output(
             ['svn', 'propdel', propname, fullpath])
 
     def revertWc(self):
-        """Revert all working copy changes."""
-        subprocess.check_call(['svn', 'revert', self.wcpath, '-R'])
+        """Revert all working copy changes.
 
-    def commitWc(self, message='', *args, **kwargs):
+        Returns: Output produced by Subversion command.
+        """
+        return subprocess.check_output(
+            ['svn', 'revert', self.wcpath, '-R'])
+
+    def commitWc(self, *args, **kwargs):
         """Commit working copy changes.
 
         Args:
-            message: Log message for commit.
+            *args: Additional commit arguments.
+            **kwargs: Additional named options.
+
+        Returns: Output produced by Subversion command.
         """
+        # Default the commit message to an empty string.
+        try:
+            message = kwargs['message']
+            del kwargs['message']
+        except KeyError:
+            message = ''
+
+        # Construct the base command.
         cmd = ['svn', 'commit', self.wcpath, '-m', message]
-        cmd += list(args)
+
+        # Apply any non-value options.
+        for arg in args:
+            if arg[:1]=='-': cmd.append(arg)
+            elif len(arg)==1: cmd.append('-' + arg)
+            else: cmd.append('--' + arg)
+
+        # Apply any valued options.
         for option in sorted(kwargs.keys()):
             if len(option)==1: cmd.append('-' + option)
             else: cmd.append('--' + option)
             cmd.append(kwargs[option])
-        subprocess.check_call(cmd)
+
+        # Run the command.
+        return subprocess.check_output(cmd)
 
     def updateWc(self):
-        """Update the entire working copy."""
-        subprocess.check_call(['svn', 'update', self.wcpath])
+        """Update the entire working copy.
+
+        Returns: Output produced by Subversion command.
+        """
+        return subprocess.check_output(['svn', 'update', self.wcpath])
 
     def makeWcFile(self, pathname, content=''):
         """Create/Replace a working copy file.
@@ -264,18 +327,22 @@ class HookTestCase(unittest.TestCase):
         Args:
             pathname: Relative path name of the file.
             content: Content of the file.
+
+        Returns: Output produced by Subversion command.
         """
         self.makeWcFile(pathname, content)
-        self.addWcItem(pathname)
+        return self.addWcItem(pathname)
 
     def addWcFolder(self, pathname):
         """Create a working copy folder and add it.
 
         Args:
             pathname: Relative path name of the folder.
+
+        Returns: Output produced by Subversion command.
         """
         self.makeWcFolder(pathname)
-        self.addWcItem(pathname)
+        return self.addWcItem(pathname)
 
 class SmtpTestCase(HookTestCase):
     """SvnHook Test Case with SMTP Server"""
