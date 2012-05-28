@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Actions>
+
+  <!-- Prevent case conflicts with an existing entry. -->
+  <FilterAddNameCase>
+    <SendError>
+      Name case conflict with existing repository entry!
+
+      Folder..: ${ParentFolder}
+      Existing: ${ExistingName}
+      Added...: ${AddedName}
+    </SendError>
+  </FilterAddNameCase>
+
+</Actions>
