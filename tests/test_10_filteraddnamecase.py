@@ -20,7 +20,7 @@ class TestFilterAddNameCase(HookTestCase):
                    os.path.basename(__file__)))
 
     def test_01_baseline(self):
-        """Add a file that shouldn't cause a conflict."""
+        """Ignore dissimilar file name addition."""
         # The test suite files include a hook configuration that
         # uses the tested filter. This filter requires no inputs,
         # other than a pending transaction.
@@ -35,7 +35,7 @@ class TestFilterAddNameCase(HookTestCase):
             'Failed to add non-conflicting file.')
 
     def test_02_replace(self):
-        """Replace a file. This shouldn't case a conflict."""
+        """Ignore file replacement."""
         # Remove an existing file.
         self.rmWcItem('fileA.txt')
 
@@ -49,7 +49,7 @@ class TestFilterAddNameCase(HookTestCase):
             'Failed to replace non-conflicting file.')
 
     def test_03_file_conflict(self):
-        """Add a file with a different name case."""
+        """Detect file-file name conflict."""
         # File-system remove the existing file.
         self.rmWcFsFile('fileA.txt')
 
@@ -70,6 +70,48 @@ class TestFilterAddNameCase(HookTestCase):
         self.assertRegexpMatches(errstr, r'Folder\.+: /')
         self.assertRegexpMatches(errstr, r'Existing: fileA\.txt')
         self.assertRegexpMatches(errstr, r'Added\.+: FileA\.txt')
+
+    def test_04_dir_file_conflict(self):
+        """Detect folder-file name conflict."""
+        # Add a folder that has a case conflict with an existing file.
+        self.rmWcFsFile('fileA.txt')
+        self.addWcFolder('FileA.txt')
+
+        # Attempt to commit the change.
+        p = self.commitWc()
+
+        # Check for the expected failure.
+        self.assertNotEqual(
+            p.returncode, 0,
+            'Expected non-zero exit code not found!')
+
+        # Check for the expected error details (via SendError). Note
+        # the trailing slash on the "Added" name.
+        errstr = p.stderr.read()
+        self.assertRegexpMatches(errstr, r'Name case conflict')
+        self.assertRegexpMatches(errstr, r'Folder\.+: /')
+        self.assertRegexpMatches(errstr, r'Existing: fileA\.txt')
+        self.assertRegexpMatches(errstr, r'Added\.+: FileA\.txt/')
+
+    def test_05_dir_conflict(self):
+        """Detect folder-folder name conflict."""
+        # Directly add a folder that has a case conflict with an
+        # existing folder. It's too hard/impossible to do this via the
+        # working copy of case-insensitive file systems.
+        p = self.makeRepoFolder('dIRa')
+
+        # Check for the expected failure.
+        self.assertNotEqual(
+            p.returncode, 0,
+            'Expected non-zero exit code not found!')
+
+        # Check for the expected error details (via SendError). Note
+        # the trailing slash on the "Added" name.
+        errstr = p.stderr.read()
+        self.assertRegexpMatches(errstr, r'Name case conflict')
+        self.assertRegexpMatches(errstr, r'Folder\.+: /')
+        self.assertRegexpMatches(errstr, r'Existing: dirA/')
+        self.assertRegexpMatches(errstr, r'Added\.+: dIRa/')
 
 # Allow manual execution of tests.
 if __name__=='__main__':

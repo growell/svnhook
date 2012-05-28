@@ -134,12 +134,12 @@ class FilterAddNameCase(Filter):
             logger.debug('line = "{}"'.format(line.rstrip()))
 
             # Skip blank lines and headers.
-            match = re.match(r'\s(\S+)/?$', line.rstrip())
+            match = re.match(r'\s((\S+?)/?)$', line.rstrip())
             if match == None: continue
 
             # Add the entry to the listing.
-            name = match.group(1)
-            listing[name.upper()] = name
+            name, value = match.group(2,1)
+            listing[name.upper()] = value
 
         return listing
 
@@ -156,11 +156,12 @@ class FilterAddNameCase(Filter):
             if (not change.is_add()) or change.replaced: continue
 
             # Determine the parent folder and base name.
-            folder, name = re.match(
-                r'(.*/)?(.+/?)$', change.path).group(1,2)
+            folder, typedname, name = re.match(
+                r'(.*/)?((.+?)/?)$', change.path).group(1,2,3)
             if folder == None: folder = '/'
-            logger.debug('folder = "{}", name = "{}"'\
-                             .format(folder, name))
+            logger.debug(
+                'folder = "{}", typedname = "{}", name = "{}"'\
+                    .format(folder, typedname, name))
 
             # Skip entries not in the case-insensitive listing.
             listing = self.get_listing(folder)
@@ -168,7 +169,7 @@ class FilterAddNameCase(Filter):
 
             # Add tokens for the conflict details.
             self.context.tokens['ParentFolder'] = folder
-            self.context.tokens['AddedName'] = name
+            self.context.tokens['AddedName'] = typedname
             self.context.tokens['ExistingName']\
                 = listing[name.upper()]
             matched = True
