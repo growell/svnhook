@@ -15,10 +15,10 @@ from tests.base import HookTestCase
 testhook = 'start-commit'
 testconf = 'start-commit.xml'
 
-class TestStartCommit(HookTestCase):
+class TestFilterCapabilities(HookTestCase):
 
     def setUp(self):
-        super(TestStartCommit, self).setUp(
+        super(TestFilterCapabilities, self).setUp(
             re.sub(r'^test_?(.+)\.[^\.]+$', r'\1',
                    os.path.basename(__file__)))
 
@@ -139,7 +139,7 @@ class TestStartCommit(HookTestCase):
 # Allow manual execution of tests.
 if __name__=='__main__':
     suite = unittest.TestLoader()\
-        .loadTestsFromTestCase(TestStartCommit)
+        .loadTestsFromTestCase(TestFilterCapabilities)
     unittest.TextTestRunner(verbosity=2).run(suite)
 
 ########################### end of file ##############################
