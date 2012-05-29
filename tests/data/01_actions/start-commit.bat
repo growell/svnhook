@@ -50,7 +50,7 @@ REM If you're having unexpected problems with a hook program, the
 REM culprit may be unusual (or missing) environment variables.
 
 cd /d %1
-set HOOK=..\..\..\bin\svnhook-start-commit
+set HOOK=..\..\..\..\bin\svnhook-start-commit
 python "%HOOK%" %1 %2 %3 --cfgfile=conf\start-commit.xml
 exit %errorlevel%
 
