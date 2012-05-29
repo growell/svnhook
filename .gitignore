@@ -1,6 +1,7 @@
-#*
+.#*
+\#*
 *~
 *.pyc
 MANIFEST
-dist/**
-tests/tmp
+dist/*
+tests/tmp/
