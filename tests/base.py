@@ -25,6 +25,9 @@ if not os.path.isdir(tmpdir): os.makedirs(tmpdir)
 class HookTestCase(unittest.TestCase):
     """SvnHook Test Case Base Class"""
 
+    # Test Case Index
+    tcindex = 0
+
     def setUp(self, repoid, username='user', password='password'):
         """Initialize the test repository and working copy.
 
@@ -33,27 +36,33 @@ class HookTestCase(unittest.TestCase):
             username: Working copy user name.
             password: Working copy password.
         """
+        # Allocate a test case index.
+        HookTestCase.tcindex += 1
+
         # Initialize the test attributes.
         self.repoid = repoid
+        self.tcindex = HookTestCase.tcindex
         self.username = username
         self.password = password
+        self.hooks = {}
 
-        self.repopath = os.path.join(tmpdir, self.repoid + '-repo')
+        # Construct the test artifact directory.
+        workdir = os.path.join(
+            tmpdir, '{}.{:02d}'.format(self.repoid, self.tcindex))
+        if os.path.isdir(workdir): rmtree(workdir)
+        os.makedirs(workdir)
+
+        # Define the working repository.
+        self.repopath = os.path.join(workdir, 'repo')
         if self.repopath[:1] == '/':
             self.repourl = 'file://' + self.repopath
         else:
             self.repourl = 'file:///'\
                 + re.sub(r'\\', r'/', self.repopath)
-        self.wcpath = os.path.join(tmpdir, self.repoid + '-wc')
 
-        self.hooks = {}
+        # Define the working copy.
+        self.wcpath = os.path.join(workdir, 'wc')
 
-        # If the repository already exists, delete it.
-        if os.path.isdir(self.repopath): rmtree(self.repopath)
-            
-        # If the working copy already exists, delete it.
-        if os.path.isdir(self.wcpath): rmtree(self.wcpath)
-            
         # Construct the test repository.
         subprocess.check_output(['svnadmin', 'create', self.repopath])
 
