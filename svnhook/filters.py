@@ -218,6 +218,91 @@ class FilterAuthor(Filter):
         # Execute the child actions.
         return super(FilterAuthor, self).run()
 
+class FilterBreakUnlock(Filter):
+    """Broken Lock Filter Class
+
+    Determine if a file lock is removed by a non-owner.
+
+    Applies To: pre-unlock
+    Input Tokens: ReposPath, Path, User
+    Output Tokens: LockOwner
+    """
+
+    def __init__(self, *args, **kwargs):
+        """Read parameters from filter configuration."""
+        # Construct the base instance.
+        super(FilterBreakUnlock, self).__init__(*args, **kwargs)
+
+        # Get the comparison sense flag.
+        self.sense = self.get_boolean('sense', default=True)
+        logger.debug('sense = {}'.format(self.sense))
+
+    def get_lock_owner(self):
+        """Get the owner of the lock token. Since this is a low
+        volume hook, don't cache the results.
+
+        Returns: Owner of the Path lock, or None.
+        """
+        # Request the path lock details.
+        cmdline = 'svnlook lock "{}" "{}"'.format(
+            self.context.repospath, self.context.tokens['Path'])
+        logger.debug('Execute: ' + cmdline)
+        try:
+            p = subprocess.Popen(
+                shlex.split(cmdline),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                shell=False)
+
+        # If unable to execute, complain.
+        except Exception as e:
+            logger.error(e)
+            raise e
+
+        # The process started, wait for it to finish.
+        p.wait()
+
+        # Handle a command failure.
+        if p.returncode != 0:
+            errstr = p.stderr.read().strip()
+            msg = 'Command failed: {}: {}'.format(cmdline, errstr)
+            logger.error(msg)
+            raise RuntimeError(msg)
+
+        # Extract the lock owner name.
+        for line in p.stdout.readlines():
+            logger.debug('line = "{}"'.format(line.rstrip()))
+            
+            # Skip the other lines.
+            owner = re.match(r'Owner:\s+(\S+)', line.rstrip())
+            if not owner: continue
+
+            # Pass back the owner name.
+            return owner.group(1)
+
+        # No owner found.
+        return None
+
+    def run(self):
+        """Based on user versus lock owner, run child actions.
+
+        Returns: Exit code from filter or child actions.
+        """
+        # Get the current user and lock owner name.
+        user = self.context.tokens['User']
+        owner = self.get_lock_owner()
+
+        logger.debug('owner = "{}"'.format(owner))
+        logger.debug(' user = "{}"'.format(user))
+
+        # Check for a condition mismatch.
+        if (sense and owner == user)\
+                or ((not sense) and owner != user): return 0
+
+        # Execute the child actions.
+        self.context.tokens['LockOwner'] = owner
+        return super(FilterBreakUnlock, self).run()
+
 class FilterCapabilities(Filter):
     """Client Capabilities Filter Class
 
@@ -243,9 +328,7 @@ class FilterCapabilities(Filter):
     def run(self):
         """If client capabilities match, run actions.
 
-        Returns:
-        Exit code produced by filter and child actions.
-
+        Returns: Exit code produced by filter and child actions.
         """
         # Get the capabilities string.
         capabilities = self.context.tokens['Capabilities']
