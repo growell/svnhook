@@ -59,7 +59,7 @@
 # culprit may be unusual (or missing) environment variables.
 
 cd "$1"
-HOOK=$SVNHOOK_HOME/bin/svnhook-pre-commit
+HOOK=../../../bin/svnhook-pre-commit
 python $HOOK "$1" "$2" --cfgfile=conf/pre-commit.xml
 
 ########################### end of file ##############################

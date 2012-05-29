@@ -38,7 +38,7 @@
 # culprit may be unusual (or missing) environment variables.
 
 cd "$1"
-HOOK=$SVNHOOK_HOME/bin/svnhook-post-commit
+HOOK=../../../bin/svnhook-post-commit
 python $HOOK "$1" "$2" --cfgfile=conf/post-commit.xml
 
 ########################### end of file ##############################
