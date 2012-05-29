@@ -187,6 +187,7 @@ class FilterAuthor(Filter):
     Look for a match with the current commit author.
 
     Applies To: pre-commit, post-commit
+    Input Tokens: ReposPath, Transaction or Revision
     Input Tags: AuthorRegex
     Output Tokens: Author
     """
@@ -205,19 +206,16 @@ class FilterAuthor(Filter):
     def run(self):
         """If author conditions match, run child actions.
 
-        Returns:
-        Exit code produced by filter and child actions.
-
+        Returns: Exit code produced by filter and child actions.
         """
-        # Get the author name.
+        # Get the author of the transaction or revision. This will
+        # cache the author name in the "Author" token.
         author = self.context.get_author()
-        logger.debug('Author = "{}"'.format(author))
 
-        # If the author doesn't match don't do anything.
+        # If the author doesn't match, don't do anything.
         if not self.regex.search(author): return 0
 
         # Execute the child actions.
-        self.context.tokens['Author'] = author
         return super(FilterAuthor, self).run()
 
 class FilterCapabilities(Filter):
