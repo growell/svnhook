@@ -73,7 +73,7 @@ class FilterAddNameCase(Filter):
     checkouts on case-insensitive (i.e. Windows) operating systems.
 
     Applies To: pre-commit
-    Input Tokens: ReposPath
+    Input Tokens: ReposPath, Transaction
     Output Tokens: ParentFolder, AddedName, ExistingName
     """
 
@@ -254,10 +254,9 @@ class FilterCapabilities(Filter):
         logger.debug('Capabilities = "{}"'.format(capabilities))
 
         # If the capabilities don't match, do nothing.
-        if not self.regex.match(capabilities): return 0
+        if not self.regex.search(capabilities): return 0
 
         # Perform the child actions.
-        self.context.tokens['Capabilities'] = capabilities
         return super(FilterCapabilities, self).run()
 
 class FilterChgType(Filter):
