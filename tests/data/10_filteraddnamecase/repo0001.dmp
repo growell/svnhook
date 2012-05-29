@@ -1,23 +1,24 @@
 SVN-fs-dump-format-version: 2
 
-UUID: f0a2ea3c-c5a5-624a-a842-92ace1b839b3
+UUID: 5bd782e7-a466-4a8f-ae00-895538950be0
 
 Revision-number: 1
-Prop-content-length: 101
-Content-length: 101
+Prop-content-length: 117
+Content-length: 117
 
+K 8
+svn:date
+V 27
+2012-05-29T15:31:18.504100Z
 K 7
 svn:log
-V 0
+V 15
+Initial import
 
 K 10
 svn:author
 V 7
 growell
-K 8
-svn:date
-V 27
-2012-05-28T16:57:53.316333Z
 PROPS-END
 
 Node-path: dirA
@@ -42,25 +43,23 @@ Node-path: fileA.txt
 Node-kind: file
 Node-action: add
 Prop-content-length: 10
-Text-content-length: 3
-Text-content-md5: bc949ea893a9384070c31f083ccefd26
-Text-content-sha1: cbb8391cb65c20e2c05a2f29211e55c49939c3db
-Content-length: 13
+Text-content-length: 0
+Text-content-md5: d41d8cd98f00b204e9800998ecf8427e
+Text-content-sha1: da39a3ee5e6b4b0d3255bfef95601890afd80709
+Content-length: 10
 
 PROPS-END
- 
 
 
 Node-path: fileB.txt
 Node-kind: file
 Node-action: add
 Prop-content-length: 10
-Text-content-length: 3
-Text-content-md5: bc949ea893a9384070c31f083ccefd26
-Text-content-sha1: cbb8391cb65c20e2c05a2f29211e55c49939c3db
-Content-length: 13
+Text-content-length: 0
+Text-content-md5: d41d8cd98f00b204e9800998ecf8427e
+Text-content-sha1: da39a3ee5e6b4b0d3255bfef95601890afd80709
+Content-length: 10
 
 PROPS-END
- 
 
 
