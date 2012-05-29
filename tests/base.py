@@ -14,16 +14,10 @@ import unittest, pprint
 from smtpsink import SmtpSink
 
 # Define the directory locations.
-homedir = os.path.abspath(os.path.join(
-        os.path.dirname(__file__), '..'))
 datadir = os.path.normpath(os.path.join(
         os.path.dirname(__file__), 'data'))
 tmpdir = os.path.abspath(os.path.join(
         os.path.dirname(__file__), 'tmp'))
-
-# Set the SVNHOOK_HOME environment variable. This is used by the
-# test hook scripts to locate their SvnHook Python scripts.
-os.environ['SVNHOOK_HOME'] = homedir
 
 # If needed, create the temporary directory.
 if not os.path.isdir(tmpdir): os.makedirs(tmpdir)
