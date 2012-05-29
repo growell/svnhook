@@ -25,8 +25,8 @@ if not os.path.isdir(tmpdir): os.makedirs(tmpdir)
 class HookTestCase(unittest.TestCase):
     """SvnHook Test Case Base Class"""
 
-    # Test Case Index
-    tcindex = 0
+    # Per-Suite Test Case Indexes
+    tcindexes = dict()
 
     def setUp(self, repoid, username='user', password='password'):
         """Initialize the test repository and working copy.
@@ -36,16 +36,20 @@ class HookTestCase(unittest.TestCase):
             username: Working copy user name.
             password: Working copy password.
         """
-        # Allocate a test case index.
-        HookTestCase.tcindex += 1
-
         # Initialize the test attributes.
         self.repoid = repoid
-        self.tcindex = HookTestCase.tcindex
         self.username = username
         self.password = password
         self.hooks = {}
 
+        # Allocate a test case index.
+        try:
+            HookTestCase.tcindexes[self.repoid] += 1
+        except KeyError:
+            HookTestCase.tcindexes[self.repoid] = 1
+
+        self.tcindex = HookTestCase.tcindexes[self.repoid]
+        
         # Construct the test artifact directory.
         workdir = os.path.join(
             tmpdir, '{}.{:02d}'.format(self.repoid, self.tcindex))
