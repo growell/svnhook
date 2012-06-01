@@ -1,8 +1,0 @@
-The following sections detail OS-specific installation notes.
-
-UBUNTU
-------
-The following additional Python packages are required:
-
-  python-yaml
-    YAML processing for Python. Used for logging.
