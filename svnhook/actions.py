@@ -48,6 +48,70 @@ class Action(object):
                         self.thistag.get(name, default),
                         re.IGNORECASE) != None
 
+class ExecuteCmd(Action):
+
+    def __init__(self, *args, **kwargs):
+        super(ExecuteCmd, self).__init__(*args, **kwargs)
+
+        # Get the command line.
+        if self.thistag.text == None:
+            raise ValueError(
+                'Required tag content missing: ExecuteCmd')
+        self.cmdline = self.thistag.text
+
+        # Get the minimum exit code needed to signal a hook failure.
+        self.errorlevel = int(
+            self.thistag.get('errorLevel', default=1))
+
+    def run(self):
+        """Execute a system command line.
+
+        Returns: Masked exit code of the action.
+        """
+        # Apply tokens to the command line.
+        cmdline = self.expand(self.cmdline)
+
+        # Get the command line fields. On Windows, the shell split
+        # function has a nasty habit of decoding escapes
+        # (backslashes). Avoid messing up Windows path delimiters by
+        # escaping them.
+        if sys.platform.startswith('win'):
+            cmd = shlex.split(re.sub(r'\\', r'\\\\', cmdline))
+        else:
+            cmd = shlex.split(cmdline)
+
+        # Execute the command. If the process fails to start, it'll
+        # throw an OSError. Treat that as a non-maskable hook failure.
+        # The subprocess is run without a shell, because doing
+        # otherwise would return the exit code of the shell process
+        # - not the exit code of the command.
+        logger.debug('cmd={}, errorlevel={}'
+                      .format(cmd, self.errorlevel))
+
+        p = subprocess.Popen(cmd,
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE,
+                             shell=False)
+
+        # The process started, wait for it to finish.
+        p.wait()
+
+        # Compare the process exit code to the error level.
+        if p.returncode >= self.errorlevel:
+            errstr = p.stderr.read()
+            logger.error(errstr)
+
+            # Output the client message.
+            sys.stderr.write(errstr)
+
+            # Return the terminal exit code.
+            return p.returncode
+        else:
+            logger.debug('exit code={}'.format(p.returncode))
+
+        # Indicate a non-terminal action.
+        return 0
+
 class SetToken(Action):
 
     def __init__(self, *args, **kwargs):
@@ -240,59 +304,6 @@ class SendLogSmtp(_SendSmtp):
         revision.
         """
         return self.context.get_log(verbose=self.verbose)
-
-class ExecuteCmd(Action):
-
-    def __init__(self, *args, **kwargs):
-        super(ExecuteCmd, self).__init__(*args, **kwargs)
-
-        # Get the command line.
-        if self.thistag.text == None:
-            raise ValueError(
-                'Required tag content missing: ExecuteCmd')
-        self.cmdline = self.thistag.text
-
-        # Get the minimum exit code needed to signal a hook failure.
-        self.errorlevel = int(
-            self.thistag.get('errorLevel', default=1))
-
-    def run(self):
-        """Execute a system command line.
-
-        Returns: Masked exit code of the action.
-        """
-        # Apply tokens to the command line.
-        cmdline = self.expand(self.cmdline)
-
-        # Execute the tokenized system command. If the process fails
-        # to start, it'll throw an OSError. Treat that as a
-        # non-maskable hook failure.
-        logger.debug('cmdline="{}", errorlevel={}'
-                      .format(cmdline, self.errorlevel))
-
-        p = subprocess.Popen(shlex.split(cmdline),
-                             stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE,
-                             shell=False)
-
-        # The process started, wait for it to finish.
-        p.wait()
-
-        # Compare the process exit code to the error level.
-        if p.returncode >= self.errorlevel:
-            errstr = p.stderr.read()
-            logger.error(errstr)
-
-            # Output the client message.
-            sys.stderr.write(errstr)
-
-            # Return the terminal exit code.
-            return p.returncode
-        else:
-            logger.debug('exit code={}'.format(p.returncode))
-
-        # Indicate a non-terminal action.
-        return 0
 
 class SetRevisionFile(Action):
 
