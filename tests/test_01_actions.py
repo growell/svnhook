@@ -148,15 +148,13 @@ class TestActions(HookTestCase):
 
     def test_06_executecmd(self):
         """Execute a successful system command."""
-        # Define the hook configuration. Please note that the test
-        # command is designed to work on most OSes.
-        dirpath = os.path.join(self.repopath, 'HelloWorld')
+        # Define the hook configuration.
         self.writeConf(testconf, '''\
           <?xml version="1.0"?>
           <Actions>
-            <ExecuteCmd>mkdir {}</ExecuteCmd>
+            <ExecuteCmd><![CDATA[{} --version]]></ExecuteCmd>
           </Actions>
-          '''.format(dirpath))
+          '''.format(sys.executable))
 
         # Call the script that uses the configuration.
         p = self.callHook(testhook,
@@ -166,10 +164,6 @@ class TestActions(HookTestCase):
         self.assertTrue(
             p.returncode == 0,
             'Exit code is not correct: {}'.format(p.returncode))
-
-        # Verify that the command ran.
-        self.assertTrue(os.path.isdir(dirpath),
-            'Command test directory not found: "{}"'.format(dirpath))
 
     def test_07_executecmd(self):
         """Execute an unmasked failing system command."""
