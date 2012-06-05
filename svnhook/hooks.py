@@ -5,8 +5,10 @@ __copyright__ = 'Copyright 2012, Geoff Rowell'
 __license__   = 'Apache'
 __version__   = '3.00'
 __status__    = 'Development'
-__all__       = ['PostCommit', 'PreCommit', 'StartCommit',
-                 'PreLock', 'PostLock', 'PreUnlock', 'PostUnlock']
+__all__       = ['StartCommit', 'PreCommit', 'PostCommit',
+                 'PreRevPropChange', 'PostRevPropChange',
+                 'PreLock', 'PostLock',
+                 'PreUnlock', 'PostUnlock']
 
 from filters import Filter
 from contexts import *
@@ -184,6 +186,90 @@ class PostCommit(SvnHook):
         # Perform parent initialization.
         super(PostCommit, self).__init__(context, args.cfgfile)
 
+class PreRevPropChange(SvnHook):
+    """Pre-RevProp-Change Hook Handler"""
+
+    def __init__(self):
+
+        # Define how to process the command line.
+        cmdline = argparse.ArgumentParser(
+            description='Handle pre-revprop-change hook calls.')
+
+        cmdline.add_argument(
+            '--cfgfile', required=True,
+            help='Path name of the hook configuration file')
+
+        cmdline.add_argument(
+            'repospath', help='Path name of the repository root')
+        cmdline.add_argument(
+            'revision', type=int,
+            help='Revision to be changed')
+        cmdline.add_argument(
+            'user', help='Name of user making the change')
+        cmdline.add_argument(
+            'propname', help='Name of the revision property')
+        cmdline.add_argument(
+            'action', choices=['A', 'M', 'D'],
+            help='Type of change (A=add, M=modify, D=delete)')
+
+        # Parse the command line.
+        args = cmdline.parse_args()
+
+        # Construct the hook context.
+        tokens = dict(os.environ)
+        tokens['ReposPath']    = args.repospath
+        tokens['Revision']     = args.revision
+        tokens['User']         = args.user
+        tokens['RevPropName']  = args.propname
+        tokens['ChgType']      = args.action
+        tokens['RevPropValue'] = sys.stdin.read()
+        context = CtxRevision(tokens)
+
+        # Perform parent initialization.
+        super(PreRevPropChange, self).__init__(context, args.cfgfile)
+
+class PostRevPropChange(SvnHook):
+    """Post-RevProp-Change Hook Handler"""
+
+    def __init__(self):
+
+        # Define how to process the command line.
+        cmdline = argparse.ArgumentParser(
+            description='Handle post-revprop-change hook calls.')
+
+        cmdline.add_argument(
+            '--cfgfile', required=True,
+            help='Path name of the hook configuration file')
+
+        cmdline.add_argument(
+            'repospath', help='Path name of the repository root')
+        cmdline.add_argument(
+            'revision', type=int,
+            help='Revision that was changed')
+        cmdline.add_argument(
+            'user', help='Name of user that made the change')
+        cmdline.add_argument(
+            'propname', help='Name of the revision property')
+        cmdline.add_argument(
+            'action', choices=['A', 'M', 'D'],
+            help='Type of change (A=add, M=modify, D=delete)')
+
+        # Parse the command line.
+        args = cmdline.parse_args()
+
+        # Construct the hook context.
+        tokens = dict(os.environ)
+        tokens['ReposPath']    = args.repospath
+        tokens['Revision']     = args.revision
+        tokens['User']         = args.user
+        tokens['RevPropName']  = args.propname
+        tokens['ChgType']      = args.action
+        tokens['RevPropValue'] = sys.stdin.readlines()
+        context = CtxRevision(tokens)
+
+        # Perform parent initialization.
+        super(PostRevPropChange, self).__init__(context, args.cfgfile)
+
 class PreLock(SvnHook):
     """Pre-Lock Hook Handler"""
 
@@ -249,7 +335,8 @@ class PostLock(SvnHook):
         tokens = dict(os.environ)
         tokens['ReposPath'] = args.repospath
         tokens['User']      = args.user
-        tokens['Paths']     = sys.stdin.readlines()
+        tokens['Paths']     = [
+            line.strip() for line in sys.stdin.readlines()]
         context = CtxStandard(tokens)
 
         # Perform parent initialization.
@@ -288,7 +375,7 @@ class PreUnlock(SvnHook):
         tokens['ReposPath']   = args.repospath
         tokens['Path']        = args.path
         tokens['User']        = args.user
-        tokens['Token']       = args.token
+        tokens['LockToken']   = args.token
         tokens['BreakUnlock'] = args.breakunlock
         context = CtxStandard(tokens)
 
@@ -320,7 +407,8 @@ class PostLock(SvnHook):
         tokens = dict(os.environ)
         tokens['ReposPath'] = args.repospath
         tokens['User']      = args.user
-        tokens['Paths']     = sys.stdin.readlines()
+        tokens['Paths']     = [
+            line.strip() for line in sys.stdin.readlines()]
         context = CtxStandard(tokens)
 
         # Perform parent initialization.

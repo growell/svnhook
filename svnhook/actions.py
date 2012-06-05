@@ -332,7 +332,7 @@ class SetRevisionFile(Action):
 
         # Write the revision number into the file.
         with open(revfile, 'w') as f:
-            f.write(self.revision + '\n')
+            f.write('{}\n'.format(self.revision))
 
         logger.info('Wrote revision #{} to "{}".'.format(
                 self.revision, revfile))
