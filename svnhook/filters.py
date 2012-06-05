@@ -328,6 +328,42 @@ class FilterChgType(Filter):
         # Perform the child actions.
         return super(FilterChgType, self).run()
 
+class FilterComment(Filter):
+    """Lock Comment Filter Class
+
+    Look for a lock comment.
+
+    Applies To: pre-lock
+    Input Tokens: Comment
+    Input Tags: CommentRegex
+    """
+
+    def __init__(self, *args, **kwargs):
+        """Read parameters from filter configuration."""
+        # Construct the base instance.
+        super(FilterComment, self).__init__(*args, **kwargs)
+
+        # Construct a regular expression tag evaluator.
+        regextag = self.thistag.find('CommentRegex')
+        if regextag == None:
+            raise ValueError('Required tag missing: CommentRegex')
+        self.regex = RegexTag(regextag)
+
+        # Get the lock comment.
+        self.comment = self.context.tokens['Comment']
+        logger.debug('Comment = "{}"'.format(self.comment))
+
+    def run(self):
+        """If lock comment matches, run actions.
+
+        Returns: Exit code produced by filter and child actions.
+        """
+        # If the comment doesn't match, do nothing.
+        if not self.regex.match(self.chgtype): return 0
+
+        # Perform the child actions.
+        return super(FilterComment, self).run()
+
 class FilterCommitList(Filter):
     """Commit List Filter Class
 
