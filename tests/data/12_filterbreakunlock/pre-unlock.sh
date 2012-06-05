@@ -34,6 +34,6 @@
 
 cd "$1"
 HOOK=../../../../bin/svnhook-pre-unlock
-python $HOOK "$1" "$2" "$3" "$4" $5 --cfgfile=conf/pre-commit.xml
+python $HOOK "$1" "$2" "$3" "$4" $5 --cfgfile=conf/pre-unlock.xml
 
 ########################### end of file ##############################

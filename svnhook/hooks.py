@@ -5,7 +5,7 @@ __copyright__ = 'Copyright 2012, Geoff Rowell'
 __license__   = 'Apache'
 __version__   = '3.00'
 __status__    = 'Development'
-__all__       = ['PostCommit', 'PreCommit', 'StartCommit']
+__all__       = ['PostCommit', 'PreCommit', 'PreUnlock', 'StartCommit']
 
 from filters import Filter
 from contexts import *
@@ -182,5 +182,45 @@ class PostCommit(SvnHook):
 
         # Perform parent initialization.
         super(PostCommit, self).__init__(context, args.cfgfile)
+
+class PreUnlock(SvnHook):
+    """Pre-Unlock Hook Handler"""
+
+    def __init__(self):
+
+        # Define how to process the command line.
+        cmdline = argparse.ArgumentParser(
+            description='Handle pre-unlock hook calls.')
+
+        cmdline.add_argument(
+            '--cfgfile', required=True,
+            help='Path name of the hook configuration file')
+
+        cmdline.add_argument(
+            'repospath', help='Path name of the repository root')
+        cmdline.add_argument(
+            'path', help='Repository path to be unlocked')
+        cmdline.add_argument(
+            'user', help='Name of user removing the lock')
+        cmdline.add_argument(
+            'token', help='Lock token to be removed')
+        cmdline.add_argument(
+            'breakunlock', choices=['0', '1'],
+            help='Owned by other user flag')
+
+        # Parse the command line.
+        args = cmdline.parse_args()
+
+        # Construct the hook context.
+        tokens = dict(os.environ)
+        tokens['ReposPath']   = args.repospath
+        tokens['Path']        = args.path
+        tokens['User']        = args.user
+        tokens['Token']       = args.token
+        tokens['BreakUnlock'] = args.breakunlock
+        context = CtxStandard(tokens)
+
+        # Perform parent initialization.
+        super(PreUnlock, self).__init__(context, args.cfgfile)
 
 ########################### end of file ##############################
