@@ -5,7 +5,8 @@ __copyright__ = 'Copyright 2012, Geoff Rowell'
 __license__   = 'Apache'
 __version__   = '3.00'
 __status__    = 'Development'
-__all__       = ['PostCommit', 'PreCommit', 'PreUnlock', 'StartCommit']
+__all__       = ['PostCommit', 'PreCommit', 'StartCommit',
+                 'PreLock', 'PostLock', 'PreUnlock', 'PostUnlock']
 
 from filters import Filter
 from contexts import *
@@ -134,7 +135,6 @@ class PreCommit(SvnHook):
         args = cmdline.parse_args()
 
         # Parse the STDIN data.
-
         locktokens = []
         intotokens = False
         for inline in sys.stdin.read():
@@ -169,7 +169,8 @@ class PostCommit(SvnHook):
         cmdline.add_argument(
             'repospath', help='Path name of the repository root')
         cmdline.add_argument(
-            'revision', help='Number of the completed revision')
+            'revision', type=int,
+            help='Number of the completed revision')
 
         # Parse the command line.
         args = cmdline.parse_args()
@@ -182,6 +183,77 @@ class PostCommit(SvnHook):
 
         # Perform parent initialization.
         super(PostCommit, self).__init__(context, args.cfgfile)
+
+class PreLock(SvnHook):
+    """Pre-Lock Hook Handler"""
+
+    def __init__(self):
+
+        # Define how to process the command line.
+        cmdline = argparse.ArgumentParser(
+            description='Handle pre-lock hook calls.')
+
+        cmdline.add_argument(
+            '--cfgfile', required=True,
+            help='Path name of the hook configuration file')
+
+        cmdline.add_argument(
+            'repospath', help='Path name of the repository root')
+        cmdline.add_argument(
+            'path', help='Repository path to be locked')
+        cmdline.add_argument(
+            'user', help='Name of user adding the lock')
+        cmdline.add_argument(
+            'comment', help='Optional lock comment')
+        cmdline.add_argument(
+            'steallock', choices=['0', '1'],
+            help='Taking lock from other user flag')
+
+        # Parse the command line.
+        args = cmdline.parse_args()
+
+        # Construct the hook context.
+        tokens = dict(os.environ)
+        tokens['ReposPath'] = args.repospath
+        tokens['Path']      = args.path
+        tokens['User']      = args.user
+        tokens['Comment']   = args.comment
+        tokens['StealLock'] = args.steallock
+        context = CtxStandard(tokens)
+
+        # Perform parent initialization.
+        super(PreLock, self).__init__(context, args.cfgfile)
+
+class PostLock(SvnHook):
+    """Post-Lock Hook Handler"""
+
+    def __init__(self):
+
+        # Define how to process the command line.
+        cmdline = argparse.ArgumentParser(
+            description='Handle post-lock hook calls.')
+
+        cmdline.add_argument(
+            '--cfgfile', required=True,
+            help='Path name of the hook configuration file')
+
+        cmdline.add_argument(
+            'repospath', help='Path name of the repository root')
+        cmdline.add_argument(
+            'user', help='Name of user who added the lock')
+
+        # Parse the command line.
+        args = cmdline.parse_args()
+
+        # Construct the hook context.
+        tokens = dict(os.environ)
+        tokens['ReposPath'] = args.repospath
+        tokens['User']      = args.user
+        tokens['Paths']     = sys.stdin.readlines()
+        context = CtxStandard(tokens)
+
+        # Perform parent initialization.
+        super(PostLock, self).__init__(context, args.cfgfile)
 
 class PreUnlock(SvnHook):
     """Pre-Unlock Hook Handler"""
@@ -222,5 +294,36 @@ class PreUnlock(SvnHook):
 
         # Perform parent initialization.
         super(PreUnlock, self).__init__(context, args.cfgfile)
+
+class PostLock(SvnHook):
+    """Post-Unlock Hook Handler"""
+
+    def __init__(self):
+
+        # Define how to process the command line.
+        cmdline = argparse.ArgumentParser(
+            description='Handle post-unlock hook calls.')
+
+        cmdline.add_argument(
+            '--cfgfile', required=True,
+            help='Path name of the hook configuration file')
+
+        cmdline.add_argument(
+            'repospath', help='Path name of the repository root')
+        cmdline.add_argument(
+            'user', help='Name of user who removed the lock')
+
+        # Parse the command line.
+        args = cmdline.parse_args()
+
+        # Construct the hook context.
+        tokens = dict(os.environ)
+        tokens['ReposPath'] = args.repospath
+        tokens['User']      = args.user
+        tokens['Paths']     = sys.stdin.readlines()
+        context = CtxStandard(tokens)
+
+        # Perform parent initialization.
+        super(PostUnlock, self).__init__(context, args.cfgfile)
 
 ########################### end of file ##############################
