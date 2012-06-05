@@ -264,7 +264,7 @@ class PostRevPropChange(SvnHook):
         tokens['User']         = args.user
         tokens['RevPropName']  = args.propname
         tokens['ChgType']      = args.action
-        tokens['RevPropValue'] = sys.stdin.readlines()
+        tokens['RevPropValue'] = sys.stdin.read()
         context = CtxRevision(tokens)
 
         # Perform parent initialization.
