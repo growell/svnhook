@@ -38,9 +38,10 @@ class TestFilterCapabilities(HookTestCase):
         # Call the script with a mismatch.
         p = self.callHook(testhook,
                           self.repopath, self.username, '')
+        (stdoutdata, stderrdata) = p.communicate()
+        p.wait()
 
         # Verify the proper error is returned.
-        (stdoutdata, stderrdata) = p.communicate()
         self.assertRegexpMatches(
             stderrdata, r'Capability missing',
             'Expected error message not found')
@@ -66,9 +67,10 @@ class TestFilterCapabilities(HookTestCase):
         # matches the desired capability.
         p = self.callHook(testhook,
                           self.repopath, self.username, 'mergeinfo')
+        (stdoutdata, stderrdata) = p.communicate()
+        p.wait()
 
         # Verify that no error message is returned.
-        (stdoutdata, stderrdata) = p.communicate()
         self.assertNotRegexpMatches(
             stderrdata, r'\S',
             'Unexpected error message found')
@@ -96,9 +98,10 @@ class TestFilterCapabilities(HookTestCase):
         p = self.callHook(testhook,
                           self.repopath, self.username,
                           'mindread:mergeinfo:emote')
+        (stdoutdata, stderrdata) = p.communicate()
+        p.wait()
 
         # Verify that no error message is returned.
-        (stdoutdata, stderrdata) = p.communicate()
         self.assertNotRegexpMatches(
             stderrdata, r'\S',
             'Unexpected error message found')
@@ -125,9 +128,10 @@ class TestFilterCapabilities(HookTestCase):
         p = self.callHook(testhook,
                           self.repopath, self.username,
                           'MindRead:MergeInfo:Emote')
+        (stdoutdata, stderrdata) = p.communicate()
+        p.wait()
 
         # Verify the proper error is returned.
-        (stdoutdata, stderrdata) = p.communicate()
         self.assertRegexpMatches(
             stderrdata, r'Capability missing',
             'Expected error message not found')

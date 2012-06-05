@@ -206,6 +206,7 @@ class FilterAuthor(Filter):
         # Get the author of the transaction or revision. This will
         # cache the author name in the "Author" token.
         self.author = self.context.get_author()
+        logger.debug('Author = "{}"'.format(self.author))
 
     def run(self):
         """If author conditions match, run child actions.
@@ -219,7 +220,7 @@ class FilterAuthor(Filter):
         return super(FilterAuthor, self).run()
 
 class FilterBreakUnlock(Filter):
-    """Break Lock Flag Filter Class
+    """Break Unlock Flag Filter Class
 
     Determine if removing another user's path lock.
 
@@ -239,7 +240,7 @@ class FilterBreakUnlock(Filter):
         # Get the filter parameters.
         self.breakunlock = (
             self.context.tokens['BreakUnlock'] == '1')
-        logger.debug('breakunlock = {}'.format(self.breakunlock))
+        logger.debug('BreakUnlock = {}'.format(self.breakunlock))
 
     def run(self):
         """If the flag matches the filter sense, run child actions.
@@ -276,17 +277,17 @@ class FilterCapabilities(Filter):
                 'Required tag missing: CapabilitiesRegex')
         self.regex = RegexTag(regextag)
 
+        # Get the capabilities string.
+        self.capabilities = self.context.tokens['Capabilities']
+        logger.debug('Capabilities = "{}"'.format(self.capabilities))
+
     def run(self):
         """If client capabilities match, run actions.
 
         Returns: Exit code produced by filter and child actions.
         """
-        # Get the capabilities string.
-        capabilities = self.context.tokens['Capabilities']
-        logger.debug('Capabilities = "{}"'.format(capabilities))
-
         # If the capabilities don't match, do nothing.
-        if not self.regex.search(capabilities): return 0
+        if not self.regex.search(self.capabilities): return 0
 
         # Perform the child actions.
         return super(FilterCapabilities, self).run()
@@ -312,17 +313,17 @@ class FilterChgType(Filter):
             raise ValueError('Required tag missing: ChgTypeRegex')
         self.regex = RegexTag(regextag)
 
+        # Get the change type string.
+        self.chgtype = self.context.tokens['ChgType']
+        logger.debug('ChgType = "{}"'.format(self.chgtype))
+
     def run(self):
         """If revprop change types match, run actions.
 
         Returns: Exit code produced by filter and child actions.
         """
-        # Get the change type string.
-        chgtype = self.context.tokens['ChgType']
-        logger.debug('ChgType = "{}"'.format(chgtype))
-
-        # If the capabilities don't match, do nothing.
-        if not self.regex.match(chgtype): return 0
+        # If the change type doesn't match, do nothing.
+        if not self.regex.match(self.chgtype): return 0
 
         # Perform the child actions.
         return super(FilterChgType, self).run()

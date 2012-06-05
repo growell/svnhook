@@ -38,6 +38,8 @@ class TestActions(HookTestCase):
         # Call the script that uses the configuration.
         p = self.callHook(testhook,
                           self.repopath, self.username, '')
+        (stdoutdata, stderrdata) = p.communicate()
+        p.wait()
 
         # Check for the default exit code.
         self.assertTrue(
@@ -45,7 +47,6 @@ class TestActions(HookTestCase):
             'Exit code not default (1): {}'.format(p.returncode))
 
         # Verify the proper error is returned.
-        (stdoutdata, stderrdata) = p.communicate()
         self.assertEqual(
             stderrdata, errmsg,
             'Error output not correct: "{}"'.format(stderrdata))
@@ -66,6 +67,8 @@ class TestActions(HookTestCase):
         # Call the script that uses the configuration.
         p = self.callHook(testhook,
                           self.repopath, self.username, '')
+        (stdoutdata, stderrdata) = p.communicate()
+        p.wait()
 
         # Check for the default exit code.
         self.assertTrue(
@@ -73,7 +76,6 @@ class TestActions(HookTestCase):
             'Exit code not correct: {}'.format(p.returncode))
 
         # Verify the proper error is returned.
-        (stdoutdata, stderrdata) = p.communicate()
         self.assertEqual(
             stderrdata, errmsg,
             'Error output not correct: "{}"'.format(stderrdata))
@@ -91,6 +93,8 @@ class TestActions(HookTestCase):
         # Call the script that uses the configuration.
         p = self.callHook(testhook,
                           self.repopath, self.username, '')
+        (stdoutdata, stderrdata) = p.communicate()
+        p.wait()
 
         # Check for the default exit code.
         self.assertTrue(
@@ -98,7 +102,6 @@ class TestActions(HookTestCase):
             'Exit code is not correct: {}'.format(p.returncode))
 
         # Verify the proper error is returned.
-        (stdoutdata, stderrdata) = p.communicate()
         self.assertEqual(
             stderrdata, '',
             'Error output not empty: "{}"'.format(stderrdata))
@@ -139,9 +142,10 @@ class TestActions(HookTestCase):
         # Call the script that uses the configuration.
         p = self.callHook(testhook,
                           self.repopath, self.username, '')
+        (stdoutdata, stderrdata) = p.communicate()
+        p.wait()
 
         # Verify the proper error is returned.
-        (stdoutdata, stderrdata) = p.communicate()
         self.assertEqual(
             stderrdata, 'She said, "I feel joy!"',
             'Error output not correct: "{}"'.format(stderrdata))
@@ -159,6 +163,7 @@ class TestActions(HookTestCase):
         # Call the script that uses the configuration.
         p = self.callHook(testhook,
                           self.repopath, self.username, '')
+        p.wait()
 
         # Check for the default exit code.
         self.assertTrue(
@@ -180,6 +185,7 @@ class TestActions(HookTestCase):
         # Call the script that uses the configuration.
         p = self.callHook(testhook,
                           self.repopath, self.username, '')
+        p.wait()
 
         # Check for the expected exit code.
         self.assertTrue(
@@ -200,6 +206,7 @@ class TestActions(HookTestCase):
         # Call the script that uses the configuration.
         p = self.callHook(testhook,
                           self.repopath, self.username, '')
+        p.wait()
 
         # Check for the expected exit code.
         self.assertTrue(

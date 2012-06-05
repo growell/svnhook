@@ -37,9 +37,10 @@ class TestFilterBreakUnlock(HookTestCase):
         p = self.callHook(
             'pre-unlock', self.repopath, '/file1.txt',
             self.username, 'mytoken', '1')
+        (stdoutdata, stderrdata) = p.communicate()
+        p.wait()
 
         # Verify the proper error message is returned.
-        (stdoutdata, stderrdata) = p.communicate()
         self.assertRegexpMatches(
             stderrdata, r'Cannot remove other user',
             'Expected error message not found')
@@ -66,6 +67,8 @@ class TestFilterBreakUnlock(HookTestCase):
         p = self.callHook(
             'pre-unlock', self.repopath, '/file1.txt',
             self.username, 'mytoken', '0')
+        (stdoutdata, stderrdata) = p.communicate()
+        p.wait()
 
         # Verify a failure isn't indicated.
         self.assertTrue(
@@ -73,7 +76,6 @@ class TestFilterBreakUnlock(HookTestCase):
             'Expected success exit code not found')
 
         # Verify an error message isn't returned.
-        (stdoutdata, stderrdata) = p.communicate()
         self.assertNotRegexpMatches(
             stderrdata, r'\S',
             'Unexpected error message found')
@@ -95,9 +97,10 @@ class TestFilterBreakUnlock(HookTestCase):
         p = self.callHook(
             'pre-unlock', self.repopath, '/file2.txt',
             self.username, 'mytoken', '1')
+        (stdoutdata, stderrdata) = p.communicate()
+        p.wait()
 
         # Verify the proper error message is returned.
-        (stdoutdata, stderrdata) = p.communicate()
         self.assertRegexpMatches(
             stderrdata, r'Cannot remove other user',
             'Expected error message not found')
@@ -124,9 +127,10 @@ class TestFilterBreakUnlock(HookTestCase):
         p = self.callHook(
             'pre-unlock', self.repopath, '/file2.txt',
             self.username, 'mytoken', '0')
+        (stdoutdata, stderrdata) = p.communicate()
+        p.wait()
 
         # Verify the proper error message is returned.
-        (stdoutdata, stderrdata) = p.communicate()
         self.assertRegexpMatches(
             stderrdata, r'Cannot remove your own',
             'Expected error message not found')
@@ -153,6 +157,8 @@ class TestFilterBreakUnlock(HookTestCase):
         p = self.callHook(
             'pre-unlock', self.repopath, '/file2.txt',
             self.username, 'mytoken', '1')
+        (stdoutdata, stderrdata) = p.communicate()
+        p.wait()
 
         # Verify a failure isn't indicated.
         self.assertTrue(
@@ -160,7 +166,6 @@ class TestFilterBreakUnlock(HookTestCase):
             'Unexpected error exit code found')
 
         # Verify an error message isn't returned.
-        (stdoutdata, stderrdata) = p.communicate()
         self.assertNotRegexpMatches(
             stderrdata, r'\S',
             'Unexpected error message found')
