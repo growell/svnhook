@@ -439,6 +439,48 @@ class FilterCommitList(Filter):
         # successful.
         return 0
 
+class FilterFileContent(Filter):
+    """File Content Filter Class
+
+    Check for content in an included file.
+
+    Applies To: pre-commit, post-commit,
+      pre-lock, post-lock, pre-unlock, post-unlock
+    Input Tokens: ReposPath, Transaction, Revision, Path
+    """
+
+    def __init__(self, *args, **kwargs):
+        """Get the filter execution parameters."""
+        # Construct the base instance.
+        super(FilterFileContent, self).__init__(*args, **kwargs)
+
+        # Get the regular expression tag evaluator.
+        regextag = self.thistag.find('ContentRegex')
+        if regextag == None:
+            raise ValueError('Required tag missing: ContentRegex')
+        self.regex = RegexTag(regextag)
+
+        # Get the current path. (This may point to a folder.)
+        self.path = self.context.tokens['Path']
+        logger.debug('Path = "{}"'.format(self.path))
+        
+    def run(self):
+        """Filter actions based on file content.
+
+        Returns: Exit code produced by filter and child actions.
+        """
+        # Silently ignore folder paths.
+        if re.match(r'/$', self.path): return 0
+
+        # Get the indicated file content.
+        content = self.context.get_file_content(self.path)
+
+        # If the content doesn't match, do nothing.
+        if not self.regex.match(content): return 0
+
+        # Perform the child actions.
+        return super(FilterContent, self).run()
+
 class FilterLockOwner(Filter):
     """Lock Owner Filter Class
 
