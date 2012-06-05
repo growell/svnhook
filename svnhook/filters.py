@@ -381,7 +381,7 @@ class FilterCommitList(Filter):
 
         # Save the "stop on first match" flag.
         self.matchfirst = self.get_boolean('matchFirst')
-        logger.debug('matchFirst = ' + self.matchfirst)
+        logger.debug('matchFirst = {}'.format(self.matchfirst))
 
         # Construct a regular expression tag evaluator for the path
         # names.
@@ -413,12 +413,12 @@ class FilterCommitList(Filter):
         changes = self.context.get_changes()
 
         # Compare the changes to the regular expressions.
-        for [chgpath, chgtype] in changes:
-            logger.debug('ChgPath = "{}"'.format(chgpath))
+        for [path, chgtype] in changes:
+            logger.debug('Path = "{}"'.format(path))
             logger.debug('ChgType = "{}"'.format(chgtype))
 
             # Check for a change path mismatch.
-            if self.pathregex and not pathregex.search(chgpath):
+            if self.pathregex and not pathregex.search(path):
                 continue
 
             # Check for a change type mismatch.
@@ -426,7 +426,7 @@ class FilterCommitList(Filter):
                 continue
 
             # Save the triggering change details.
-            self.context.tokens['Path'] = chgpath
+            self.context.tokens['Path'] = path
             self.context.tokens['ChgType'] = chgtype
 
             # Execute the child actions. If they produce a non-zero
