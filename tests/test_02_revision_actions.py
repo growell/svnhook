@@ -42,6 +42,7 @@ class TestActions(HookTestCase):
 
         # Call the script that uses the configuration.
         p = self.callHook(testhook, self.repopath, self.revision)
+        p.wait()
 
         # Check for the default exit code.
         self.assertEqual(

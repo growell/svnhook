@@ -152,27 +152,18 @@ class HookTestCase(unittest.TestCase):
         """
         if hookname not in self.hooks:
             raise KeyError('Hook script not found: ' + hookname)
-        cmd = [self.hooks[hookname]] + list(args)
+        cmd = [self.hooks[hookname]] + map(str, args)
 
-        # Handle passing STDIN to the script.
-        if 'stdin' in kwargs.keys():
-            p = subprocess.Popen(cmd,
-                                 stdin=kwargs['stdin'],
-                                 stdout=subprocess.PIPE,
-                                 stderr=subprocess.PIPE,
-                                 shell=False)
+        # Start the hook script process.
+        p = subprocess.Popen(cmd,
+                             stdin=subprocess.PIPE,
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE,
+                             shell=False)
 
-        # Handle a script without STDIN data.
-        else:
-            p = subprocess.Popen(cmd,
-                                 stdout=subprocess.PIPE,
-                                 stderr=subprocess.PIPE,
-                                 shell=False)
-
-        # Wait for the script to finish.
-        p.wait()
-
-        # Pass back the process object.
+        # Pass back the running process object.
+        # NOTE: We don't wait for it to finish, because it may be
+        #       waiting on some data from STDIN.
         return p
 
     def makeRepoFolder(self, pathname, *args, **kwargs):

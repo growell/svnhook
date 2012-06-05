@@ -47,9 +47,10 @@ class TestActions(SmtpTestCase):
         # Call the script that uses the configuration.
         p = self.callHook(testhook,
                           self.repopath, self.username, '')
+        p.wait()
 
         # Check for the default exit code.
-        self.assertIs(
+        self.assertEqual(
             p.returncode, 0,
             'Exit code not correct: {}'.format(p.returncode))
 
@@ -90,9 +91,10 @@ class TestActions(SmtpTestCase):
         # Call the script that uses the configuration.
         p = self.callHook(testhook,
                           self.repopath, self.username, '')
+        p.wait()
 
         # Check for the default exit code.
-        self.assertIs(
+        self.assertEqual(
             p.returncode, 0,
             'Exit code not correct: {}'.format(p.returncode))
 
