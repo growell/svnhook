@@ -359,7 +359,7 @@ class FilterComment(Filter):
         Returns: Exit code produced by filter and child actions.
         """
         # If the comment doesn't match, do nothing.
-        if not self.regex.match(self.chgtype): return 0
+        if not self.regex.search(self.comment): return 0
 
         # Perform the child actions.
         return super(FilterComment, self).run()
@@ -476,7 +476,7 @@ class FilterFileContent(Filter):
         content = self.context.get_file_content(self.path)
 
         # If the content doesn't match, do nothing.
-        if not self.regex.match(content): return 0
+        if not self.regex.search(content): return 0
 
         # Perform the child actions.
         return super(FilterContent, self).run()
