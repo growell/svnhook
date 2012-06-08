@@ -133,14 +133,38 @@ class HookTestCase(unittest.TestCase):
             if raw: f.write(content)
             else: f.write(dedent(content))
 
-    def getLogScanner(self, filename):
-        """Get the scanner object for a log file.
+    def getHookLog(self, hookname):
+        """Get the log file path name for a hook script.
 
         Args:
-            filename: File name of the 'logs' directory file.
+            hookname: Base name of the hook script.
+
+        Returns: Path name of the log file.
         """
-        return LogScanner(
-            os.path.join(self.repopath, 'logs', filename))
+        return os.path.join(
+            self.repopath, 'logs', hookname + '.log')
+
+    def assertLogRegexp(self, hookname, regexp, msg=None):
+        """Assert that hook log matches a regular expression.
+
+        Args:
+            hookname: Base name of the hook script.
+            regexp: Regular expression to search for.
+            msg: Assertion message when not matched.
+        """
+        with open(self.getHookLog(hookname)) as f:
+            self.assertRegexpMatches(f.read(), regexp, msg)
+
+    def assertLogNotRegexp(self, hookname, regexp, msg=None):
+        """Assert that hook log doesn't match a regular expression.
+
+        Args:
+            hookname: Base name of the hook script.
+            regexp: Regular expression to search for.
+            msg: Assertion message when matched.
+        """
+        with open(self.getHookLog(hookname)) as f:
+            self.assertNotRegexpMatches(f.read(), regexp, msg)
 
     def callHook(self, hookname, *args, **kwargs):
         """Call a hook script directly.
@@ -340,7 +364,7 @@ class HookTestCase(unittest.TestCase):
         for option in sorted(kwargs.keys()):
             if len(option)==1: cmd.append('-' + option)
             else: cmd.append('--' + option)
-            cmd.append(kwargs[option])
+            cmd.append(str(kwargs[option]))
 
         # Start the command. Wait for it to finish. A hook failure
         # should run the commit command, but return a non-zero exit

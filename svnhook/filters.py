@@ -369,6 +369,7 @@ class FilterCommitList(Filter):
 
     Look for a match in the list of commit list paths.
 
+    Applies To: pre-commit, post-commit
     Input tokens: ReposPath, Transaction, Revision
     Input tags: PathRegex, ChgTypeRegex
     Output tokens: Path, ChgType
@@ -377,7 +378,7 @@ class FilterCommitList(Filter):
     def __init__(self, *args, **kwargs):
         """Read parameters from filter configuration."""
         # Construct the base instance.
-        super(FilterChanges, self).__init__(*args, **kwargs)
+        super(FilterCommitList, self).__init__(*args, **kwargs)
 
         # Save the "stop on first match" flag.
         self.matchfirst = self.get_boolean('matchFirst')
