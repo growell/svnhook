@@ -178,6 +178,6 @@ class TestFilterComment(HookTestCase):
 if __name__=='__main__':
     for tclass in [TestFilterComment]:
         suite = unittest.TestLoader().loadTestsFromTestCase(tclass)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+        unittest.TextTestRunner(verbosity=2).run(suite)
 
 ########################### end of file ##############################
