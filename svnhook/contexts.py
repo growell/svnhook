@@ -35,27 +35,43 @@ class Context(object):
             self.reposurl = 'file:///'\
                 + re.sub(r'\\', r'/', self.repospath)
 
-    def expand(self, template, depth=1):
-        """Apply tokens to a template string.
+    def expand(self, text, depth=1):
+        """Expand tokens found in a string.
 
         Args:
-          template: String containing tokens.
+          text: String that may contain tokens.
           depth: Incremental recursion depth count.
 
-        Returns: Template string with token substitutions.
+        Returns: String with token replacements.
         """
-        # Determine if nothing's left to do.
-        if re.search(r'\$\{\w+\}', template) == None:
-            return template
-
         # Limit the recursion depth.
         if depth > 12: raise RuntimeError(
-            'Maximum token recursion depth exceeded')
+            'Maximum token recursion depth exceeded: '\
+                'text = "{}", tokens = {}'.format(text, self.tokens))
 
-        # Replace the next level of tokens.
-        return self.expand(
-            Template(template).safe_substitute(self.tokens),
-            depth + 1)
+        # Get the case-insensitive tokens, and their values, as found
+        # in the template. This removes any duplicates and ignores any
+        # unknown tokens.
+        found = dict()
+        for match in re.finditer(r'\$\{(\w+)\}', text):
+            token = match.group(1).upper()
+            if token not in found:
+                try:
+                    found[token] = self.tokens[token]
+                except KeyError:
+                    continue
+
+        # When no replacements need to be made, stop recursion and
+        # pass back the fully-expanded template.
+        if len(found) == 0: return text
+
+        # Replace all instances of the tokens.
+        for (token, value) in found.items():
+            text = re.sub(r'\$\{' + token + r'\}',
+                   value, text, flags=re.IGNORECASE)
+
+        # Try another level of expansion.
+        return self.expand(text, depth + 1)
 
     def execute(self, cmdline):
         """Execute a system call.
