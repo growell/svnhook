@@ -112,31 +112,31 @@ class Context(object):
 
         Returns: Output produced by the command.
         """
-        # When first requested, cache the list of changes.
-        if 'Changes' not in self.tokens:
+        # If available, use the cached list of changes.
+        if 'Changes' in self.tokens: return self.tokens['Changes']
 
-            # Track the items added and deleted.
-            addpaths = dict()
-            deletepaths = dict()
+        # Track the items added and deleted.
+        addpaths = dict()
+        deletepaths = dict()
 
-            # Parse the change listing output.
-            self.tokens['Changes'] = []
-            for chgline in self.execute(cmdline).splitlines():
+        # Parse the change listing output.
+        self.tokens['Changes'] = []
+        for chgline in self.execute(cmdline).splitlines():
 
-                # Construct the change item instance.
-                item = ChangeItem(chgline)
+            # Construct the change item instance.
+            item = ChangeItem(chgline)
 
-                # Add the change item to the list of changes.
-                self.tokens['Changes'].append(item)
+            # Add the change item to the list of changes.
+            self.tokens['Changes'].append(item)
 
-                # Track the added and deleted items.
-                if item.is_add(): addpaths[item.path] = item
-                if item.is_delete(): deletepaths[item.path] = item
+            # Track the added and deleted items.
+            if item.is_add(): addpaths[item.path] = item
+            if item.is_delete(): deletepaths[item.path] = item
 
-                # If the path shows in both lists, it's a replacement.
-                if item.path in addpaths and item.path in deletepaths:
-                    addpaths[item.path].replaced = True
-                    deletepaths[item.path].replaced = True
+            # If the path shows in both lists, it's a replacement.
+            if item.path in addpaths and item.path in deletepaths:
+                addpaths[item.path].replaced = True
+                deletepaths[item.path].replaced = True
 
         # Return the cached list.
         return self.tokens['Changes']
