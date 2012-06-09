@@ -2,8 +2,7 @@
 ######################################################################
 # Test Change Type Filter
 ######################################################################
-import os, re, sys, unittest, io
-from subprocess import CalledProcessError
+import os, re, sys, unittest
 
 # Prefer local modules.
 mylib = os.path.normpath(os.path.join(

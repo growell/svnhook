@@ -3,7 +3,6 @@
 # Test Commit Author Filter
 ######################################################################
 import os, re, sys, unittest, time
-from subprocess import CalledProcessError
 
 # Prefer local modules.
 mylib = os.path.normpath(os.path.join(
