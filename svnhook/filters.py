@@ -401,9 +401,9 @@ class FilterCommitList(Filter):
             self.typeregex = None
 
         # Require at least one regex tag.
-        if typeregex == None and pathregex == None:
+        if self.typeregex == None and self.pathregex == None:
             raise ValueError(
-                'Required tag missing: ChgPathRegex or ChgTypeRegex')
+                'Required tag missing: PathRegex or ChgTypeRegex')
 
     def run(self):
         """Filter actions based on changes.
@@ -414,21 +414,23 @@ class FilterCommitList(Filter):
         changes = self.context.get_changes()
 
         # Compare the changes to the regular expressions.
-        for [path, chgtype] in changes:
-            logger.debug('Path = "{}"'.format(path))
-            logger.debug('ChgType = "{}"'.format(chgtype))
+        for change in changes:
+            logger.debug('Path = "{}"'.format(change.path))
+            logger.debug('ChgType = "{}"'.format(change.type))
 
             # Check for a change path mismatch.
-            if self.pathregex and not pathregex.search(path):
+            if self.pathregex and\
+                    not self.pathregex.search(change.path):
                 continue
 
             # Check for a change type mismatch.
-            if self.typeregex and not typeregex.match(chgtype):
+            if self.typeregex and\
+                    not self.typeregex.match(change.type):
                 continue
 
             # Save the triggering change details.
-            self.context.tokens['Path'] = path
-            self.context.tokens['ChgType'] = chgtype
+            self.context.tokens['Path'] = change.path
+            self.context.tokens['ChgType'] = change.type
 
             # Execute the child actions. If they produce a non-zero
             # exit code, or if only looking for the first match, stop
