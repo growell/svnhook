@@ -64,9 +64,9 @@ class Context(object):
         if len(found) == 0: return text
 
         # Replace all instances of the tokens.
-        for (token, value) in found.items():
+        for token, value in found.items():
             text = re.sub(r'\$\{' + token + r'\}',
-                   value, text, flags=re.IGNORECASE)
+                   str(value), text, flags=re.IGNORECASE)
 
         # Try another level of expansion.
         return self.expand(text, depth + 1)
@@ -127,21 +127,21 @@ class Context(object):
         Returns: Output produced by the command.
         """
         # If available, use the cached list of changes.
-        if 'Changes' in self.tokens: return self.tokens['Changes']
+        if hasattr(self, 'changes'): return self.changes
 
         # Track the items added and deleted.
         addpaths = dict()
         deletepaths = dict()
 
         # Parse the change listing output.
-        self.tokens['Changes'] = []
+        self.changes = []
         for chgline in self.execute(cmdline).splitlines():
 
             # Construct the change item instance.
             item = ChangeItem(chgline)
 
             # Add the change item to the list of changes.
-            self.tokens['Changes'].append(item)
+            self.changes.append(item)
 
             # Track the added and deleted items.
             if item.is_add(): addpaths[item.path] = item
@@ -153,7 +153,7 @@ class Context(object):
                 deletepaths[item.path].replaced = True
 
         # Return the cached list.
-        return self.tokens['Changes']
+        return self.changes
 
     def get_log_message(self, cmdline):
         """Get the log message of a repository change.
@@ -320,6 +320,11 @@ class CtxTransaction(Context):
 class Tokens(dict):
     """Dictionary with Case-Insensitive Keys"""
 
+    def __init__(self, data=None):
+        super(Tokens, self).__init__()
+        if data:
+            for key, value in data.items(): self[key] = value
+        
     def __setitem__(self, key, value):
         super(Tokens, self).__setitem__(key.upper(), value)
 

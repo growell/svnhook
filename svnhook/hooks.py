@@ -106,7 +106,7 @@ class StartCommit(SvnHook):
 
         # Construct the hook context. Initialize the tokens with
         # the available environment variables and the hook arguments.
-        tokens = dict(os.environ)
+        tokens = Tokens(os.environ)
         tokens['ReposPath']    = args.repospath
         tokens['User']         = args.user
         tokens['Capabilities'] = args.capabilities
@@ -146,7 +146,7 @@ class PreCommit(SvnHook):
                 intotoken = True
 
         # Construct the hook context.
-        tokens = dict(os.environ)
+        tokens = Tokens(os.environ)
         tokens['ReposPath']   = args.repospath
         tokens['Transaction'] = args.txnname
         tokens['LockTokens']  = locktokens
@@ -178,7 +178,7 @@ class PostCommit(SvnHook):
         args = cmdline.parse_args()
 
         # Construct the hook context.
-        tokens = dict(os.environ)
+        tokens = Tokens(os.environ)
         tokens['ReposPath'] = args.repospath
         tokens['Revision']  = args.revision
         context = CtxRevision(tokens)
@@ -216,7 +216,7 @@ class PreRevPropChange(SvnHook):
         args = cmdline.parse_args()
 
         # Construct the hook context.
-        tokens = dict(os.environ)
+        tokens = Tokens(os.environ)
         tokens['ReposPath']    = args.repospath
         tokens['Revision']     = args.revision
         tokens['User']         = args.user
@@ -258,7 +258,7 @@ class PostRevPropChange(SvnHook):
         args = cmdline.parse_args()
 
         # Construct the hook context.
-        tokens = dict(os.environ)
+        tokens = Tokens(os.environ)
         tokens['ReposPath']    = args.repospath
         tokens['Revision']     = args.revision
         tokens['User']         = args.user
@@ -299,7 +299,7 @@ class PreLock(SvnHook):
         args = cmdline.parse_args()
 
         # Construct the hook context.
-        tokens = dict(os.environ)
+        tokens = Tokens(os.environ)
         tokens['ReposPath'] = args.repospath
         tokens['Path']      = args.path
         tokens['User']      = args.user
@@ -332,7 +332,7 @@ class PostLock(SvnHook):
         args = cmdline.parse_args()
 
         # Construct the hook context.
-        tokens = dict(os.environ)
+        tokens = Tokens(os.environ)
         tokens['ReposPath'] = args.repospath
         tokens['User']      = args.user
         tokens['Paths']     = [
@@ -371,7 +371,7 @@ class PreUnlock(SvnHook):
         args = cmdline.parse_args()
 
         # Construct the hook context.
-        tokens = dict(os.environ)
+        tokens = Tokens(os.environ)
         tokens['ReposPath']   = args.repospath
         tokens['Path']        = args.path
         tokens['User']        = args.user
@@ -404,7 +404,7 @@ class PostLock(SvnHook):
         args = cmdline.parse_args()
 
         # Construct the hook context.
-        tokens = dict(os.environ)
+        tokens = Tokens(os.environ)
         tokens['ReposPath'] = args.repospath
         tokens['User']      = args.user
         tokens['Paths']     = [
