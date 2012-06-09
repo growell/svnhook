@@ -1,14 +1,12 @@
 """Configuration Action Context Classes"""
 __version__ = '3.00'
-__all__     = ['CtxStandard', 'CtxRevision', 'CtxTransaction']
+__all__     = ['CtxStandard', 'CtxRevision', 'CtxTransaction', 'Tokens']
 
 from changeitem import ChangeItem
 
 import logging
 import re
 import shlex, subprocess
-
-from string import Template
 
 logger = logging.getLogger()
 
@@ -22,7 +20,7 @@ class Context(object):
           tokens: Dictionary of base tokens.
         """
         # Create a deep copy of the tokens.
-        self.tokens = dict(tokens)
+        self.tokens = Tokens(tokens)
 
         # All of the hooks provide this. Simplify access.
         self.repospath = tokens['ReposPath']
@@ -52,9 +50,9 @@ class Context(object):
         # Get the case-insensitive tokens, and their values, as found
         # in the template. This removes any duplicates and ignores any
         # unknown tokens.
-        found = dict()
+        found = Tokens()
         for match in re.finditer(r'\$\{(\w+)\}', text):
-            token = match.group(1).upper()
+            token = match.group(1)
             if token not in found:
                 try:
                     found[token] = self.tokens[token]
@@ -318,5 +316,20 @@ class CtxTransaction(Context):
         return super(CtxTransaction, self).get_log_message(
             'svnlook log -t "{}" "{}"'.format(
                 self.transaction, self.repospath))
+
+class Tokens(dict):
+    """Dictionary with Case-Insensitive Keys"""
+
+    def __setitem__(self, key, value):
+        super(Tokens, self).__setitem__(key.upper(), value)
+
+    def __getitem__(self, key):
+        return super(Tokens, self).__getitem__(key.upper())
+
+    def __delitem__(self, key):
+        super(Tokens, self).__delitem__(key.upper())
+
+    def __contains__(self, key):
+        return super(Tokens, self).__contains__(key.upper())
 
 ########################### end of file ##############################
