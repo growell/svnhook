@@ -173,6 +173,6 @@ class TestFilterBreakUnlock(HookTestCase):
 if __name__=='__main__':
     for tclass in [TestFilterBreakUnlock]:
         suite = unittest.TestLoader().loadTestsFromTestCase(tclass)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+        unittest.TextTestRunner(verbosity=2).run(suite)
 
 ########################### end of file ##############################
