@@ -2,8 +2,7 @@
 ######################################################################
 # Test Lock Comment Filter
 ######################################################################
-import os, re, sys, unittest, time
-from subprocess import CalledProcessError
+import os, re, sys, unittest
 
 # Prefer local modules.
 mylib = os.path.normpath(os.path.join(
