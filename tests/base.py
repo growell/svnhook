@@ -382,6 +382,57 @@ class HookTestCase(unittest.TestCase):
         """
         return subprocess.check_output(['svn', 'update', self.wcpath])
 
+    def lockWcPath(self, pathname, user='user',
+                   comment=None, force=False):
+        """Apply a working copy lock.
+
+        Args:
+            pathname: Relative path to be locked.
+            user: User requesting the lock.
+            comment: Comment associated with lock.
+            force: Steal lock from other user.
+
+        Returns: Completed Subversion command process.
+        """
+        # Get the full path to lock.
+        fullpath = os.path.join(self.wcpath, pathname)
+
+        # Construct the lock command.
+        cmd = ['svn', 'lock', fullpath, '--username', user]
+        if comment != None: cmd += ['--comment', comment]
+        if force: cmd += ['--force']
+
+        # Execute the command. Wait for it to finish.
+        p = subprocess.Popen(
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            shell=False)
+        p.wait()
+        return p
+
+    def unlockWcPath(self, pathname, user='user', force=False):
+        """Remove a working copy lock.
+
+        Args:
+            pathname: Relative path to be locked.
+            user: User requesting the lock.
+            force: Break lock of other user.
+
+        Returns: Completed Subversion command process.
+        """
+        # Get the full path to unlock.
+        fullpath = os.path.join(self.wcpath, pathname)
+
+        # Construct the unlock command.
+        cmd = ['svn', 'unlock', fullpath, '--username', user]
+        if force: cmd += ['--force']
+
+        # Execute the command. Wait for it to finish.
+        p = subprocess.Popen(
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            shell=False)
+        p.wait()
+        return p
+
     def makeWcFile(self, pathname, content=''):
         """Create/Replace a working copy file.
 
