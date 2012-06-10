@@ -1,8 +1,6 @@
-"""Configuration Action Context Classes"""
+"""Action Context Classes"""
 __version__ = '3.00'
 __all__     = ['CtxStandard', 'CtxRevision', 'CtxTransaction', 'Tokens']
-
-from changeitem import ChangeItem
 
 import logging
 import re
@@ -11,13 +9,13 @@ import shlex, subprocess
 logger = logging.getLogger()
 
 class Context(object):
-    """Base class for hook configuration actions."""
+    """Base Class for Hook Context"""
 
     def __init__(self, tokens):
         """Create a tag context.
 
         Args:
-          tokens: Dictionary of base tokens.
+          tokens: Set of base tokens.
         """
         # Create a deep copy of the tokens.
         self.tokens = Tokens(tokens)
@@ -172,7 +170,7 @@ class Context(object):
         return self.tokens['LogMsg']
 
 class CtxStandard(Context):
-    """Context class for hooks without revision or transaction."""
+    """Context for Hooks without Revision or Transaction"""
 
     def get_author(self):
         """Get the author of the last revision.
@@ -190,8 +188,11 @@ class CtxStandard(Context):
         return super(CtxStandard, self).get_changes(
             'svnlook changed "{}"'.format(self.repospath))
 
-    def get_file_content(self):
+    def get_file_content(self, path):
         """Get the content of a file in the last revision.
+
+        Args:
+            path: Repository path name of file.
 
         Returns: Content of the revision file.
         """
@@ -199,8 +200,7 @@ class CtxStandard(Context):
         # from the repository.
         return super(CtxStandard, self).execute(
             'svnlook cat "{}" "{}"'.format(
-                self.repospath,
-                self.tokens['Path']))
+                self.repospath, path))
 
     def get_log_message(self, verbose=False):
         """Get the log message of the last revision.
@@ -211,7 +211,7 @@ class CtxStandard(Context):
             'svnlook log "{}"'.format(self.repospath))
 
 class CtxRevision(Context):
-    """Context class for hooks with a revision."""
+    """Context for Hooks with a Revision"""
 
     def __init__(self, tokens):
         super(CtxRevision, self).__init__(tokens)
@@ -235,8 +235,11 @@ class CtxRevision(Context):
             'svnlook changed -r {} "{}"'.format(
                 self.revision, self.repospath))
 
-    def get_file_content(self):
+    def get_file_content(self, path):
         """Get the content of a file in the revision.
+
+        Args:
+            path: Repository path name of file.
 
         Returns: Content of the revision file.
         """
@@ -244,7 +247,7 @@ class CtxRevision(Context):
         # from the repository.
         return super(CtxRevision, self).execute(
             'svnlook cat -r {} "{}" "{}"'.format(
-                self.revision, self.repospath, self.tokens['Path']))
+                self.revision, self.repospath, path))
 
     def get_log_message(self, verbose=False):
         """Get the log message of the revision.
@@ -272,7 +275,7 @@ class CtxRevision(Context):
         return super(CtxRevision, self).execute(cmdline)
 
 class CtxTransaction(Context):
-    """Context class for hooks with a transaction."""
+    """Context for Hooks with a Transaction"""
 
     def __init__(self, tokens):
         super(CtxTransaction, self).__init__(tokens)
@@ -296,8 +299,11 @@ class CtxTransaction(Context):
             'svnlook changed -t "{}" "{}"'.format(
                 self.transaction, self.repospath))
 
-    def get_file_content(self):
+    def get_file_content(self, path):
         """Get the content of a file in the transaction.
+
+        Args:
+            path: Repository path name of file.
 
         Returns: Content of the transaction file.
         """
@@ -305,8 +311,7 @@ class CtxTransaction(Context):
         # from the repository.
         return super(CtxTransaction, self).execute(
             'svnlook cat -t "{}" "{}" "{}"'.format(
-                self.transaction, self.repospath,
-                self.tokens['Path']))
+                self.transaction, self.repospath, path))
 
     def get_log_message(self, verbose=False):
         """Get the log message of the transaction.
@@ -336,5 +341,68 @@ class Tokens(dict):
 
     def __contains__(self, key):
         return super(Tokens, self).__contains__(key.upper())
+
+class ChangeItem(object):
+    """Change Listing Item Class
+
+    Use the first "svnlook change" line to determine how to separate
+    the change flags from the change path. Subsequent change lines are
+    parsed using the previously-determined format.
+    """
+
+    def __init__(self, chgline):
+        """Parse a change line.
+
+        Args:
+            chgline: Svnlook line to parse.
+        """
+        # If the delimiter index isn't known, figure it out. Scan the
+        # characters of the first change line.
+        if not hasattr(self, 'delimidx'):
+            self.delimidx = state = 0
+            for chgchar in chgline:
+
+                # Look for the first non-space character.
+                if state == 0 and chgchar != ' ': state = 1
+
+                # Look for the next space character.
+                elif state == 1 and chgchar == ' ': state = 2
+
+                # Look for the first path character.
+                elif state == 2 and chgchar != ' ': break
+                
+                # Increment the delimiter position.
+                self.delimidx += 1
+
+        # Parse the change line.
+        self.type = chgline[:self.delimidx - 1]
+        self.path = chgline[self.delimidx:]
+
+        # Initialize the replaced path flag.
+        self.replaced = False
+
+    def is_add(self):
+        """Is the change an add operation?"""
+        return re.match(r'A', self.type) != None
+
+    def is_delete(self):
+        """Is the change a delete operation?"""
+        return re.match(r'D', self.type) != None
+
+    def is_update(self):
+        """Is the change a content or property update?"""
+        return re.search(r'U', self.type) != None
+
+    def is_update_content(self):
+        """Is the change a content update?"""
+        return re.match(r'U', self.type) != None
+
+    def is_update_property(self):
+        """Is the change a property update?"""
+        return re.match(r'_U', self.type) != None
+
+    def is_update_all(self):
+        """Is the change both a content and property update?"""
+        return re.match(r'UU', self.type) != None
 
 ########################### end of file ##############################
