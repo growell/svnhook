@@ -248,8 +248,8 @@ class FilterBreakUnlock(Filter):
         Returns: Exit code from filter or child actions.
         """
         # Check for a condition mismatch.
-        if (self.sense and (not self.breakunlock)) or\
-                ((not self.sense) and self.breakunlock):
+        if (self.sense and (not self.breakunlock)) \
+                or ((not self.sense) and self.breakunlock):
             return 0
 
         # Execute the child actions.
@@ -419,13 +419,13 @@ class FilterCommitList(Filter):
             logger.debug('ChgType = "{}"'.format(change.type))
 
             # Check for a change path mismatch.
-            if self.pathregex and\
-                    not self.pathregex.search(change.path):
+            if self.pathregex \
+                    and not self.pathregex.search(change.path):
                 continue
 
             # Check for a change type mismatch.
-            if self.typeregex and\
-                    not self.typeregex.match(change.type):
+            if self.typeregex \
+                    and not self.typeregex.match(change.type):
                 continue
 
             # Save the triggering change details.
@@ -489,8 +489,8 @@ class FilterLockOwner(Filter):
 
     Determine if the user is or is not the lock owner.
 
-    Applies To: pre-unlock
-    Input Tokens: ReposPath, User, Path
+    Applies To: pre-lock, pre-unlock
+    Input Tokens: ReposPath, Path, User
     Output Tokens: Owner
     """
 
@@ -505,17 +505,18 @@ class FilterLockOwner(Filter):
 
         # Get the lock location.
         self.repospath = self.context.tokens['ReposPath']
-        self.user = self.context.tokens['User']
         self.path = self.context.tokens['Path']
+
+        # Get the current user.
+        self.user = self.context.tokens['User']
 
         # Request the path lock details. Since this is a low-volume
         # hook, there's no need to cache the result.
-        cmdline = 'svnlook lock "{}" "{}"'.format(
-            self.repospath, self.path)
-        logger.debug('Execute: ' + cmdline)
+        cmd = ['svnlook', 'lock', self.repospath, self.path]
+        logger.debug('Execute: {}'.format(cmd))
         try:
             p = subprocess.Popen(
-                shlex.split(cmdline),
+                cmd,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 shell=False)
@@ -531,11 +532,12 @@ class FilterLockOwner(Filter):
         # Handle a command failure.
         if p.returncode != 0:
             errstr = p.stderr.read().strip()
-            msg = 'Command failed: {}: {}'.format(cmdline, errstr)
+            msg = 'Command failed: {}: {}'.format(cmd, errstr)
             logger.error(msg)
             raise RuntimeError(msg)
 
         # Extract the lock owner name.
+        self.owner = None
         for line in p.stdout.readlines():
             logger.debug('line = "{}"'.format(line.rstrip()))
             
@@ -543,13 +545,13 @@ class FilterLockOwner(Filter):
             owner = re.match(r'Owner:\s+(\S+)', line.rstrip())
             if not owner: continue
 
-            # Pass back the owner name.
-            self.context.tokens['Owner'] = owner.group(1)
-            break
+            # Save the lock owner and stop looking.
+            self.owner = owner.group(1)
+            logger.debug('owner = "{}"'.format(self.owner))
+            return
 
-        # (Make sure we have the owner.)
-        self.owner = self.context.tokens['Owner']
-        logger.debug('owner = "{}"'.format(self.owner))
+        # Log that it's a new lock.
+        logger.debug('owner = None')
 
     def run(self):
         """Filter actions based on lock ownership.
@@ -557,12 +559,14 @@ class FilterLockOwner(Filter):
         Returns: Exit code produced by filter and child actions.
         """
         # Determine if this filter doesn't apply.
-        if (self.sense and self.user != self.owner) or\
-                ((not self.sense) and self.user == self.owner):
+        if (self.owner == None \
+                or (self.sense and self.user != self.owner) \
+                or ((not self.sense) and self.user == self.owner)):
             return 0
 
         # Perform the child actions.
-        return super(FilterListOwner, self).run()
+        self.context.tokens['Owner'] = self.owner
+        return super(FilterLockOwner, self).run()
 
 class FilterLockTokens(Filter):
     """Lock Token Filter Class"""
