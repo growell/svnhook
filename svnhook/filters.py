@@ -473,7 +473,7 @@ class FilterFileContent(Filter):
         Returns: Exit code produced by filter and child actions.
         """
         # Silently ignore folder paths.
-        if re.match(r'/$', self.path): return 0
+        if re.search(r'/$', self.path): return 0
 
         # Get the indicated file content.
         content = self.context.get_file_content(self.path)
@@ -482,7 +482,7 @@ class FilterFileContent(Filter):
         if not self.regex.search(content): return 0
 
         # Perform the child actions.
-        return super(FilterContent, self).run()
+        return super(FilterFileContent, self).run()
 
 class FilterLockOwner(Filter):
     """Lock Owner Filter Class
