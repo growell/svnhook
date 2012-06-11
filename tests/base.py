@@ -335,24 +335,16 @@ class HookTestCase(unittest.TestCase):
         return subprocess.check_output(
             ['svn', 'revert', self.wcpath, '-R'])
 
-    def commitWc(self, *args, **kwargs):
+    def commitWc(self, msg='', *args, **kwargs):
         """Commit working copy changes.
 
         Args:
-            *args: Additional commit arguments.
-            **kwargs: Additional named options.
+            msg: Log message for the commit.
 
         Returns: Process object that ran Subversion command.
         """
-        # Default the commit message to an empty string.
-        try:
-            message = kwargs['message']
-            del kwargs['message']
-        except KeyError:
-            message = ''
-
         # Construct the base command.
-        cmd = ['svn', 'commit', self.wcpath, '-m', message]
+        cmd = ['svn', 'commit', self.wcpath, '-m', msg]
 
         # Apply any non-value options.
         for arg in args:
