@@ -382,7 +382,7 @@ class PreUnlock(SvnHook):
         # Perform parent initialization.
         super(PreUnlock, self).__init__(context, args.cfgfile)
 
-class PostLock(SvnHook):
+class PostUnlock(SvnHook):
     """Post-Unlock Hook Handler"""
 
     def __init__(self):
