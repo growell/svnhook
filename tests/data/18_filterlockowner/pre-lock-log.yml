@@ -12,5 +12,5 @@ handlers:
     backupCount: 3
 root:
   level   : DEBUG
-  # Console output would interfere with svnlook.
+  # STDOUT used to provide unique lock token.
   handlers: [file]
