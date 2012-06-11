@@ -643,7 +643,14 @@ class FilterLogMsg(Filter):
         return super(FilterLogMsg, self).run()
 
 class FilterPath(Filter):
-    """Single Path Filter Class"""
+    """Single Path Filter Class
+
+    Check for a match with a single path name.
+
+    Applies To: pre-lock, pre-unlock
+    Input Tags: PathRegex
+    Input Tokens: Path
+    """
 
     def __init__(self, *args, **kwargs):
         """Read parameters from filter configuration."""
@@ -656,6 +663,50 @@ class FilterPath(Filter):
             raise ValueError('Required tag missing: PathRegex')
         self.regex = RegexTag(regextag)
 
+        # Get the path name.
+        self.path = self.context.tokens['Path']
+        logger.debug('Path = "{}"'.format(self.path))
+
+    def run(self):
+        """Filter operations based on current path name.
+
+        Returns: Exit code produced by filter and child actions.
+        """
+        # If the path name doesn't match, do nothing.
+        if not self.regex.search(self.path): return
+
+        # Execute the child actions.
+        return super(FilterPath, self).run()
+
+class FilterPathList(Filter):
+    """Path List Filter Class
+
+    Check for a path in a list of paths.
+
+    Applies To: post-lock, post-unlock
+    Input Tags: PathRegex
+    Output Tokens: Path
+    """
+
+    def __init__(self, *args, **kwargs):
+        """Read parameters from filter configuration."""
+        # Construct the base instance.
+        super(FilterPathList, self).__init__(*args, **kwargs)
+
+        # Construct a regular expression tag evaluator.
+        regextag = self.thistag.find('PathRegex')
+        if regextag == None:
+            raise ValueError('Required tag missing: PathRegex')
+        self.regex = RegexTag(regextag)
+
+        # Get the "look for the first match" flag.
+        self.matchfirst = self.get_boolean('matchFirst')
+        logger.debug('matchfirst = {}'.format(self.matchfirst))
+
+        # Get the list of path names.
+        self.paths = self.context.tokens['Paths']
+        logger.debug('paths = {}'.format(self.paths))
+
     def run(self):
         """Filter operations based on current path name.
 
@@ -663,15 +714,22 @@ class FilterPath(Filter):
         Exit code produced by filter and child actions.
 
         """
-        # Get the path name.
-        path = self.context.tokens['Path']
-        logger.debug('Path = "{}"'.format(path))
+        # Look through the path names.
+        for path in self.paths:
 
-        # If the path name doesn't match, do nothing.
-        if not self.regex.search(path): return
+            # If the path name doesn't match, do nothing.
+            if not self.regex.search(path): return
 
-        # Execute the child actions.
-        return super(FilterPath, self).run()
+            # Execute the child actions.
+            self.context.tokens['Path'] = path
+            exitcode = super(FilterPathList, self).run()
+
+            # If only looking for the first, or an error is reported,
+            # bail out early.
+            if self.matchfirst or exitcode != 0: return exitcode
+
+        # None of the path names matched.
+        return 0
 
 class FilterUser(Filter):
     """User Name Filter Class"""
