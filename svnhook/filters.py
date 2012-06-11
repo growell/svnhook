@@ -370,9 +370,9 @@ class FilterCommitList(Filter):
     Look for a match in the list of commit list paths.
 
     Applies To: pre-commit, post-commit
-    Input tokens: ReposPath, Transaction, Revision
-    Input tags: PathRegex, ChgTypeRegex
-    Output tokens: Path, ChgType
+    Input Tags: PathRegex, ChgTypeRegex
+    Input Tokens: ReposPath, Transaction, Revision
+    Output Tokens: Path, ChgType
     """
 
     def __init__(self, *args, **kwargs):
@@ -568,75 +568,52 @@ class FilterLockOwner(Filter):
         self.context.tokens['Owner'] = self.owner
         return super(FilterLockOwner, self).run()
 
-class FilterLockTokens(Filter):
-    """Lock Token Filter Class"""
+class FilterLockToken(Filter):
+    """Lock Token Filter Class
+
+    Check the lock token name.
+
+    Applies To: pre-unlock
+    Input Tags: LockTokenRegex
+    Input Tokens: LockToken
+    """
 
     def __init__(self, *args, **kwargs):
         """Read parameters from filter configuration."""
         # Construct the base instance.
-        super(FilterLockTokens, self).__init__(*args, **kwargs)
+        super(FilterLockToken, self).__init__(*args, **kwargs)
 
         # Construct a regular expression tag evaluator for the names.
-        nameregextag = self.thistag.find('LockNameRegex')
-        if nameregextag != None:
-            self.nameregex = RegexTag(nameregextag)
-        else:
-            self.nameregex = None
+        regextag = self.thistag.find('LockTokenRegex')
+        if regextag == None:
+            raise ValueError('Required tag missing: LockTokenRegex')
+        self.regex = RegexTag(regextag)
 
-        # Construct a regular expression tag evaluator for the paths.
-        pathregextag = self.thistag.find('LockPathRegex')
-        if pathregextag != None:
-            self.pathregex = RegexTag(pathregextag)
-        else:
-            self.pathregex = None
-
-        # Require at least one regex tag.
-        if nameregex == None and pathregex == None:
-            raise ValueError('Required tag missing:'
-                             + ' LockNameRegex or LockPathRegex')
+        # Get the actual lock token.
+        self.locktoken = self.context.tokens['LockToken']
+        logger.debug('locktoken = "{}"'.format(self.locktoken))
 
     def run(self):
         """Filter actions based on lock tokens.
 
-        Returns:
-        Exit code produced by filter and child actions.
-
+        Returns: Exit code produced by filter and child actions.
         """
-        # Get the dictionary of changes.
-        changes = self.context.get_changes()
-
-        # Compare the changes to the regular expressions.
-        ismatch = False
-        for locktoken in self.context.tokens['LockTokens']:
-            [lockname, lockpath] = locktoken.split(r'\|')
-            logger.debug('LockName = "{}"'.format(lockname))
-            logger.debug('LockPath = "{}"'.format(lockpath))
-
-            # Check for a lock name mismatch.
-            if self.nameregex and not nameregex.match(lockname):
-                continue
-
-            # Check for a lock path mismatch.
-            if self.pathregex and not pathregex.search(lockpath):
-                continue
-
-            # Save the triggering change details.
-            self.context.tokens['LockName'] = lockname
-            self.context.tokens['LockPath'] = lockpath
-
-            # Indicate that the child action should be run and stop
-            # checking.
-            ismatch = True
-            break
-
-        # If nothing matched, don't do anything.
-        if not ismatch: return 0
+        # Handle a mismatch with the lock token.
+        if not self.regex.match(self.locktoken): return 0
 
         # Execute the child actions.
-        return super(FilterLockTokens, self).run()
+        return super(FilterLockToken, self).run()
 
 class FilterLogMsg(Filter):
-    """Log Message Filter Class"""
+    """Log Message Filter Class
+
+    Check the commit message.
+
+    Applies To: pre-commit, post-commit
+    Input Tags: LogMsgRegex
+    Input Tokens: ReposPath, Transaction or Revision
+    Output Tokens: LogMsg
+    """
 
     def __init__(self, *args, **kwargs):
         """Read parameters from filter configuration."""
@@ -649,21 +626,20 @@ class FilterLogMsg(Filter):
             raise ValueError('Required tag missing: LogMsgRegex')
         self.regex = RegexTag(regextag)
 
+        # Get the current log message.
+        self.logmsg = self.context.get_log_message()
+        logger.debug('logmsg = "{}"'.format(self.logmsg))
+
     def run(self):
         """Filter actions based on log message.
 
-        Returns:
-        Exit code produced by filter and child actions.
-
+        Returns: Exit code produced by filter and child actions.
         """
-        # Get the current log message.
-        logmsg = self.context.get_log_message()
-
         # If the log message doesn't match, don't do anything.
-        if not self.regex.search(logmsg): return 0
+        if not self.regex.search(self.logmsg): return 0
 
         # Execute the child actions.
-        self.context.tokens['LogMsg'] = logmsg
+        self.context.tokens['LogMsg'] = self.logmsg
         return super(FilterLogMsg, self).run()
 
 class FilterPath(Filter):
