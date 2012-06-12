@@ -710,10 +710,9 @@ class FilterPathList(Filter):
     def run(self):
         """Filter operations based on current path name.
 
-        Returns:
-        Exit code produced by filter and child actions.
-
+        Returns: Exit code produced by filter and child actions.
         """
+
         # Look through the path names.
         for path in self.paths:
 
@@ -723,6 +722,70 @@ class FilterPathList(Filter):
             # Execute the child actions.
             self.context.tokens['Path'] = path
             exitcode = super(FilterPathList, self).run()
+
+            # If only looking for the first, or an error is reported,
+            # bail out early.
+            if self.matchfirst or exitcode != 0: return exitcode
+
+        # None of the path names matched.
+        return 0
+
+class FilterPropList(Filter):
+    """Property List Filter Class
+
+    Check for a property in the list for a path.
+
+    Input Tags: PropNameRegex, PropValueRegex
+    Input Tokens: ReposPath, Path
+    Output Tokens: PropName, PropValue
+    """
+
+    def __init__(self, *args, **kwargs):
+        """Read parameters from filter configuration."""
+        # Construct the base instance.
+        super(FilterPropList, self).__init__(*args, **kwargs)
+
+        # Construct the regular expression tag evaluators.
+        nameregextag = self.thistag.find('PropNameRegex')
+        if nameregextag != None:
+            self.nameregex = RegexTag(nameregextag)
+        else:
+            self.nameregex = None
+
+        valueregextag = self.thistag.find('PropValueRegex')
+        if valueregextag != None:
+            self.valueregex = RegexTag(valueregextag)
+        else:
+            self.valueregex = None
+
+        # Make sure that at least one regular expression is specified.
+        if self.nameregex == None and self.valueregex == None:
+            raise ValueError('Required tag missing: '\
+                                 'PropNameRegex or PropValueRegex')
+
+        # Get the "look for the first match" flag.
+        self.matchfirst = self.get_boolean('matchFirst')
+        logger.debug('matchfirst = {}'.format(self.matchfirst))
+
+        # Get the path name.
+        self.path = self.context.tokens['Path']
+        logger.debug('path = {}'.format(self.path))
+
+    def run(self):
+        """Filter operations based on current path properties.
+
+        Returns: Exit code produced by filter and child actions.
+        """
+
+        # Look through the properties.
+        for path in self.paths:
+
+            # If the path name doesn't match, do nothing.
+            if not self.regex.search(path): return
+
+            # Execute the child actions.
+            self.context.tokens['Path'] = path
+            exitcode = super(FilterPropList, self).run()
 
             # If only looking for the first, or an error is reported,
             # bail out early.
