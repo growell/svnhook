@@ -13,7 +13,6 @@ if os.path.isdir(mylib): sys.path.insert(0, mylib)
 from svnhook.hooks import PostLock
 
 # Call the hook handler method.
-from svnhook import handle_post_lock
 if __name__=="__main__":
     PostLock().run()
 else:
