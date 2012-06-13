@@ -1,0 +1,70 @@
+SVN-fs-dump-format-version: 2
+
+UUID: c599577c-04c8-4032-b3ac-e2a46a7754ae
+
+Revision-number: 1
+Prop-content-length: 116
+Content-length: 116
+
+K 7
+svn:log
+V 14
+Initial import
+K 10
+svn:author
+V 7
+growell
+K 8
+svn:date
+V 27
+2012-06-10T15:22:39.952299Z
+PROPS-END
+
+Node-path: fileA1.txt
+Node-kind: file
+Node-action: add
+Prop-content-length: 10
+Text-content-length: 11
+Text-content-md5: e780cc0b20050b5da2dab62bd5cd728c
+Text-content-sha1: c24b46af51af865870bed812072b8012fa1e31dc
+Content-length: 21
+
+PROPS-END
+fileA1.txt
+
+
+Node-path: fileA2.txt
+Node-kind: file
+Node-action: add
+Prop-content-length: 10
+Text-content-length: 11
+Text-content-md5: 1a571355f2ee535ee56bbf3d59b8414e
+Text-content-sha1: 9de83d3cf3388b51592f0c37d2a718bb3a10ba69
+Content-length: 21
+
+PROPS-END
+fileA2.txt
+
+
+Node-path: folderA3
+Node-kind: dir
+Node-action: add
+Prop-content-length: 10
+Content-length: 10
+
+PROPS-END
+
+
+Node-path: folderA3/fileA3.txt
+Node-kind: file
+Node-action: add
+Prop-content-length: 10
+Text-content-length: 11
+Text-content-md5: b4bc01c409a8a010864be3b8b0fdc65d
+Text-content-sha1: d3257cce55bb64da7a4294d5e29b2188919fbee4
+Content-length: 21
+
+PROPS-END
+fileA3.txt
+
+
