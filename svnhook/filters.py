@@ -217,6 +217,7 @@ class FilterAuthor(Filter):
         if not self.regex.search(self.author): return 0
 
         # Execute the child actions.
+        self.context.tokens['Author'] = self.author
         return super(FilterAuthor, self).run()
 
 class FilterBreakUnlock(Filter):
@@ -776,22 +777,27 @@ class FilterPropList(Filter):
 
         Returns: Exit code produced by filter and child actions.
         """
-
         # Look through the properties.
-        for path in self.paths:
+        for name, value in self.context.get_properties():
 
-            # If the path name doesn't match, do nothing.
-            if not self.regex.search(path): return
+            # If the name doesn't match, skip this one.
+            if self.nameregex \
+                    and not self.nameregex.match(name): continue
+
+            # If the value doesn't match, skip this one.
+            if self.valueregex \
+                    and not self.valueregex.search(value): continue
 
             # Execute the child actions.
-            self.context.tokens['Path'] = path
+            self.context.tokens['PropName'] = name
+            self.context.tokens['PropValue'] = value
             exitcode = super(FilterPropList, self).run()
 
             # If only looking for the first, or an error is reported,
             # bail out early.
             if self.matchfirst or exitcode != 0: return exitcode
 
-        # None of the path names matched.
+        # Handle a non-error exit.
         return 0
 
 class FilterUser(Filter):

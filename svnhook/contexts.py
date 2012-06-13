@@ -77,6 +77,7 @@ class Context(object):
 
         Returns: Output produced by the command.
         """
+        cmd = [str(field) for field in cmd]
         logger.debug('Execute: {}'.format(cmd))
         try:
             p = subprocess.Popen(cmd,
@@ -100,26 +101,29 @@ class Context(object):
         # Return the STDOUT content.
         return p.stdout.read().strip()
 
-    def get_author(self, cmd):
+    def get_author(self, options=[]):
         """Get the author of repository changes.
 
         Args:
-          cmd: Svnlook command to acquire author name.
+          options: Svnlook command options.
 
         Returns: Output produced by the command.
         """
-        # When first requested, cache the author name.
-        if 'Author' not in self.tokens:
-            self.tokens['Author'] = self.execute(cmd)
+        # If available, use the cached author.
+        if hasattr(self, 'author'): return self.author
+
+        # Get the change author.
+        self.author = self.execute(
+            ['svnlook', 'author', self.repospath] + options)
 
         # Return the cached result.
-        return self.tokens['Author']
+        return self.author
 
-    def get_changes(self, cmd):
+    def get_changes(self, options=[]):
         """Get the list of repository changes.
 
         Args:
-          cmd: Svnlook command to acquire change listing.
+          options: Svnlook command options.
 
         Returns: Output produced by the command.
         """
@@ -132,7 +136,9 @@ class Context(object):
 
         # Parse the change listing output.
         self.changes = []
-        for chgline in self.execute(cmd).splitlines():
+        for chgline in self.execute(
+            ['svnlook', 'changed', self.repospath]
+            + options).splitlines():
 
             # Construct the change item instance.
             item = ChangeItem(chgline)
@@ -152,28 +158,45 @@ class Context(object):
         # Return the cached list.
         return self.changes
 
-    def get_log_message(self, cmd):
+    def get_file_content(self, path, options=[]):
+        """Get the content of a repository file.
+
+        Args:
+            path: Repository path name of file.
+
+        Returns: Content of the repository file.
+        """
+        # To limit memory consumption, the file is always retrieved
+        # from the repository.
+        return self.execute(
+            ['svnlook', 'cat', self.repospath, path] + options)
+
+    def get_log_message(self, options=[]):
         """Get the log message of a repository change.
 
         Args:
-          cmd: Svnlook command to acquire log message.
+          options: Svnlook command options.
 
         Returns: Output produced by the command.
         """
-        # When first requested, cache the log message.
-        if 'LogMsg' not in self.tokens:
-            self.tokens['LogMsg'] = self.execute(cmd)
+        # If available, use the cached log message.
+        if hasattr(self, 'logmsg'): return self.logmsg
+
+        # Get the change log message.
+        self.logmsg = self.execute(
+            ['svnlook', 'log', self.repospath] + options)
 
         # Return the cached result.
-        return self.tokens['LogMsg']
+        return self.logmsg
 
     def get_properties(self, path, options=[]):
         """Get the properties of a repository path.
 
         Args:
             path: Relative repository path name.
+            options: Svnlook command options.
 
-        Returns: Dictionary of repository properties.
+        Returns: Dictionary of repository path properties.
         """
         # Return previously cached results for the path. Otherwise,
         # create a path-keyed property cache.
@@ -185,13 +208,21 @@ class Context(object):
 
         # Get the list of path property names.
         for name in self.execute(
-            ['svnlook', 'proplist', path] + options).splitlines():
+            ['svnlook', 'proplist', self.repospath, path]
+            + options).splitlines():
 
             # Remove leading whitespace.
             name = name.lstrip()
 
             # Get the property value.
-            
+            value = self.execute(
+                ['svnlook', 'propget', name, self.repospath, path])
+
+            # Cache the property.
+            properties[name] = value
+
+        # Pass back the path-specific properties.
+        return properties
 
 class CtxStandard(Context):
     """Context for Hooks without Revision or Transaction"""
@@ -201,16 +232,14 @@ class CtxStandard(Context):
 
         Returns: User name of the revision author.
         """
-        return super(CtxStandard, self).get_author(
-            ['svnlook', 'author', self.repospath])
+        return super(CtxStandard, self).get_author()
 
     def get_changes(self):
         """Get the list of changes in the last revision.
 
         Returns: List of change objects for the changes.
         """
-        return super(CtxStandard, self).get_changes(
-            ['svnlook', 'changed', self.repospath])
+        return super(CtxStandard, self).get_changes()
 
     def get_file_content(self, path):
         """Get the content of a file in the last revision.
@@ -220,18 +249,24 @@ class CtxStandard(Context):
 
         Returns: Content of the revision file.
         """
-        # To limit memory consumption, the file is always retrieved
-        # from the repository.
-        return super(CtxStandard, self).execute(
-            ['svnlook', 'cat', self.repospath, path])
+        return super(CtxStandard, self).get_file_content(path)
 
-    def get_log_message(self, verbose=False):
+    def get_log_message(self):
         """Get the log message of the last revision.
 
         Returns: Log message of the revision.
         """
-        return super(CtxStandard, self).get_log_message(
-            ['svnlook', 'log', self.repospath])
+        return super(CtxStandard, self).get_log_message()
+
+    def get_properties(self, path):
+        """Get the properties of a repository path.
+
+        Args:
+            path: Relative repository path name.
+
+        Returns: Dictionary of repository path properties.
+        """
+        return super(CtxStandard, self).get_properties(path)
 
 class CtxRevision(Context):
     """Context for Hooks with a Revision"""
@@ -246,8 +281,7 @@ class CtxRevision(Context):
         Returns: User name of the revision author.
         """
         return super(CtxRevision, self).get_author(
-            ['svnlook', 'author', self.repospath,
-             '-r', self.revision])
+            ['-r', self.revision])
 
     def get_changes(self):
         """Get the list of changes in the revision.
@@ -255,8 +289,7 @@ class CtxRevision(Context):
         Returns: List of change objects for the changes.
         """
         return super(CtxRevision, self).get_changes(
-            ['svnlook', 'changed', self.repospath,
-             '-r', self.revision])
+            ['-r', self.revision])
 
     def get_file_content(self, path):
         """Get the content of a file in the revision.
@@ -266,20 +299,16 @@ class CtxRevision(Context):
 
         Returns: Content of the revision file.
         """
-        # To limit memory consumption, the file is always retrieved
-        # from the repository.
-        return super(CtxRevision, self).execute(
-            ['svnlook', 'cat', self.repospath, path,
-             '-r', self.revision])
+        return super(CtxRevision, self).get_file_content(
+            path, ['-r', self.revision])
 
-    def get_log_message(self, verbose=False):
+    def get_log_message(self):
         """Get the log message of the revision.
 
         Returns: Log message of the revision.
         """
         return super(CtxRevision, self).get_log_message(
-            ['svnlook', 'log', self.repospath,
-             '-r', self.revision])
+            ['-r', self.revision])
 
     def get_log(self, verbose=False):
         """Get the formatted log entry for the revision.
@@ -294,6 +323,17 @@ class CtxRevision(Context):
         if verbose: cmd += ['--verbose']
         return super(CtxRevision, self).execute(cmd)
 
+    def get_properties(self, path):
+        """Get the properties of a repository path.
+
+        Args:
+            path: Relative repository path name.
+
+        Returns: Dictionary of repository path properties.
+        """
+        return super(CtxRevision, self).get_properties(
+            path, ['-r', self.revision])
+
 class CtxTransaction(Context):
     """Context for Hooks with a Transaction"""
 
@@ -307,8 +347,7 @@ class CtxTransaction(Context):
         Returns: User name of the transaction author.
         """
         return super(CtxTransaction, self).get_author(
-            ['svnlook', 'author', self.repospath,
-             '-t', self.transaction])
+            ['-t', self.transaction])
 
     def get_changes(self):
         """Get the list of changes in the transaction.
@@ -316,8 +355,7 @@ class CtxTransaction(Context):
         Returns: List of change objects for the changes.
         """
         return super(CtxTransaction, self).get_changes(
-            ['svnlook', 'changed', self.repospath,
-             '-t', self.transaction])
+            ['-t', self.transaction])
 
     def get_file_content(self, path):
         """Get the content of a file in the transaction.
@@ -327,20 +365,27 @@ class CtxTransaction(Context):
 
         Returns: Content of the transaction file.
         """
-        # To limit memory consumption, the file is always retrieved
-        # from the repository.
-        return super(CtxTransaction, self).execute(
-            ['svnlook', 'cat', self.repospath, path,
-             '-t', self.transaction])
+        return super(CtxTransaction, self).get_file_content(
+            path, ['-t', self.transaction])
 
-    def get_log_message(self, verbose=False):
+    def get_log_message(self):
         """Get the log message of the transaction.
 
         Returns: Log message of the transaction.
         """
         return super(CtxTransaction, self).get_log_message(
-            ['svnlook', 'log', self.repospath,
-             '-t', self.transaction])
+            ['-t', self.transaction])
+
+    def get_properties(self, path):
+        """Get the properties of a repository path.
+
+        Args:
+            path: Relative repository path name.
+
+        Returns: Dictionary of repository path properties.
+        """
+        return super(CtxTransaction, self).get_properties(
+            path, ['-t', self.transaction])
 
 class Tokens(dict):
     """Dictionary with Case-Insensitive Keys"""
