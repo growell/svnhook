@@ -216,7 +216,8 @@ class Context(object):
 
             # Get the property value.
             value = self.execute(
-                ['svnlook', 'propget', name, self.repospath, path])
+                ['svnlook', 'propget', self.repospath, name, path]
+                + options)
 
             # Cache the property.
             properties[name] = value
