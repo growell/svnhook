@@ -72,7 +72,6 @@ class FilterAddNameCase(Filter):
     case with existing entries. Most often used to avoid problems with
     checkouts on case-insensitive (i.e. Windows) operating systems.
 
-    Applies To: pre-commit
     Input Tokens: ReposPath, Transaction
     Output Tokens: ParentFolder, AddedName, ExistingName
     """
@@ -186,7 +185,6 @@ class FilterAuthor(Filter):
 
     Look for a match with the current commit author.
 
-    Applies To: pre-commit, post-commit
     Input Tokens: ReposPath, Transaction or Revision
     Input Tags: AuthorRegex
     Output Tokens: Author
@@ -194,6 +192,7 @@ class FilterAuthor(Filter):
 
     def __init__(self, *args, **kwargs):
         """Read parameters from filter configuration."""
+
         # Construct the base instance.
         super(FilterAuthor, self).__init__(*args, **kwargs)
 
@@ -206,7 +205,7 @@ class FilterAuthor(Filter):
         # Get the author of the transaction or revision. This will
         # cache the author name in the "Author" token.
         self.author = self.context.get_author()
-        logger.debug('Author = "{}"'.format(self.author))
+        logger.debug('author = "{}"'.format(self.author))
 
     def run(self):
         """If author conditions match, run child actions.
@@ -225,12 +224,12 @@ class FilterBreakUnlock(Filter):
 
     Determine if removing another user's path lock.
 
-    Applies To: pre-unlock
     Input Tokens: BreakUnlock
     """
 
     def __init__(self, *args, **kwargs):
         """Read parameters from filter configuration."""
+
         # Construct the base instance.
         super(FilterBreakUnlock, self).__init__(*args, **kwargs)
 
@@ -241,7 +240,7 @@ class FilterBreakUnlock(Filter):
         # Get the filter parameters.
         self.breakunlock = (
             self.context.tokens['BreakUnlock'] == '1')
-        logger.debug('BreakUnlock = {}'.format(self.breakunlock))
+        logger.debug('breakunlock = {}'.format(self.breakunlock))
 
     def run(self):
         """If the flag matches the filter sense, run child actions.
@@ -261,13 +260,13 @@ class FilterCapabilities(Filter):
 
     Look for a match with the client capabilities.
 
-    Applies To: start-commit
     Input Tokens: Capabilities
     Input Tags: CapabilitiesRegex
     """
 
     def __init__(self, *args, **kwargs):
         """Read parameters from filter configuration."""
+
         # Construct the base instance.
         super(FilterCapabilities, self).__init__(*args, **kwargs)
 
@@ -280,7 +279,7 @@ class FilterCapabilities(Filter):
 
         # Get the capabilities string.
         self.capabilities = self.context.tokens['Capabilities']
-        logger.debug('Capabilities = "{}"'.format(self.capabilities))
+        logger.debug('capabilities = "{}"'.format(self.capabilities))
 
     def run(self):
         """If client capabilities match, run actions.
@@ -298,13 +297,13 @@ class FilterChgType(Filter):
 
     Look for a revision property change type.
 
-    Applies To: pre-revprop-change, post-revprop-change
     Input Tokens: ChgType
     Input Tags: ChgTypeRegex
     """
 
     def __init__(self, *args, **kwargs):
         """Read parameters from filter configuration."""
+
         # Construct the base instance.
         super(FilterChgType, self).__init__(*args, **kwargs)
 
@@ -316,7 +315,7 @@ class FilterChgType(Filter):
 
         # Get the change type string.
         self.chgtype = self.context.tokens['ChgType']
-        logger.debug('ChgType = "{}"'.format(self.chgtype))
+        logger.debug('chgtype = "{}"'.format(self.chgtype))
 
     def run(self):
         """If revprop change types match, run actions.
@@ -334,13 +333,13 @@ class FilterComment(Filter):
 
     Look for a lock comment.
 
-    Applies To: pre-lock
     Input Tokens: Comment
     Input Tags: CommentRegex
     """
 
     def __init__(self, *args, **kwargs):
         """Read parameters from filter configuration."""
+
         # Construct the base instance.
         super(FilterComment, self).__init__(*args, **kwargs)
 
@@ -352,7 +351,7 @@ class FilterComment(Filter):
 
         # Get the lock comment.
         self.comment = self.context.tokens['Comment']
-        logger.debug('Comment = "{}"'.format(self.comment))
+        logger.debug('comment = "{}"'.format(self.comment))
 
     def run(self):
         """If lock comment matches, run actions.
@@ -370,14 +369,14 @@ class FilterCommitList(Filter):
 
     Look for a match in the list of commit list paths.
 
-    Applies To: pre-commit, post-commit
-    Input Tags: PathRegex, ChgTypeRegex
     Input Tokens: ReposPath, Transaction, Revision
+    Input Tags: PathRegex, ChgTypeRegex
     Output Tokens: Path, ChgType
     """
 
     def __init__(self, *args, **kwargs):
         """Read parameters from filter configuration."""
+
         # Construct the base instance.
         super(FilterCommitList, self).__init__(*args, **kwargs)
 
@@ -416,8 +415,8 @@ class FilterCommitList(Filter):
 
         # Compare the changes to the regular expressions.
         for change in changes:
-            logger.debug('Path = "{}"'.format(change.path))
-            logger.debug('ChgType = "{}"'.format(change.type))
+            logger.debug('path = "{}"'.format(change.path))
+            logger.debug('chgtype = "{}"'.format(change.type))
 
             # Check for a change path mismatch.
             if self.pathregex \
@@ -448,13 +447,12 @@ class FilterFileContent(Filter):
 
     Check for content in an included file.
 
-    Applies To: pre-commit, post-commit,
-      pre-lock, post-lock, pre-unlock, post-unlock
     Input Tokens: ReposPath, Transaction, Revision, Path
     """
 
     def __init__(self, *args, **kwargs):
         """Get the filter execution parameters."""
+
         # Construct the base instance.
         super(FilterFileContent, self).__init__(*args, **kwargs)
 
@@ -466,7 +464,7 @@ class FilterFileContent(Filter):
 
         # Get the current path. (This may point to a folder.)
         self.path = self.context.tokens['Path']
-        logger.debug('Path = "{}"'.format(self.path))
+        logger.debug('path = "{}"'.format(self.path))
         
     def run(self):
         """Filter actions based on file content.
@@ -490,13 +488,13 @@ class FilterLockOwner(Filter):
 
     Determine if the user is or is not the lock owner.
 
-    Applies To: pre-lock, pre-unlock
     Input Tokens: ReposPath, Path, User
     Output Tokens: Owner
     """
 
     def __init__(self, *args, **kwargs):
         """Get the filter execution parameters."""
+
         # Construct the base instance.
         super(FilterLockOwner, self).__init__(*args, **kwargs)
 
@@ -574,13 +572,13 @@ class FilterLockToken(Filter):
 
     Check the lock token name.
 
-    Applies To: pre-unlock
-    Input Tags: LockTokenRegex
     Input Tokens: LockToken
+    Input Tags: LockTokenRegex
     """
 
     def __init__(self, *args, **kwargs):
         """Read parameters from filter configuration."""
+
         # Construct the base instance.
         super(FilterLockToken, self).__init__(*args, **kwargs)
 
@@ -610,14 +608,14 @@ class FilterLogMsg(Filter):
 
     Check the commit message.
 
-    Applies To: pre-commit, post-commit
-    Input Tags: LogMsgRegex
     Input Tokens: ReposPath, Transaction or Revision
+    Input Tags: LogMsgRegex
     Output Tokens: LogMsg
     """
 
     def __init__(self, *args, **kwargs):
         """Read parameters from filter configuration."""
+
         # Construct the base instance.
         super(FilterLogMsg, self).__init__(*args, **kwargs)
 
@@ -648,13 +646,13 @@ class FilterPath(Filter):
 
     Check for a match with a single path name.
 
-    Applies To: pre-lock, pre-unlock
-    Input Tags: PathRegex
     Input Tokens: Path
+    Input Tags: PathRegex
     """
 
     def __init__(self, *args, **kwargs):
         """Read parameters from filter configuration."""
+
         # Construct the base instance.
         super(FilterPath, self).__init__(*args, **kwargs)
 
@@ -666,7 +664,7 @@ class FilterPath(Filter):
 
         # Get the path name.
         self.path = self.context.tokens['Path']
-        logger.debug('Path = "{}"'.format(self.path))
+        logger.debug('path = "{}"'.format(self.path))
 
     def run(self):
         """Filter operations based on current path name.
@@ -684,13 +682,14 @@ class FilterPathList(Filter):
 
     Check for a path in a list of paths.
 
-    Applies To: post-lock, post-unlock
+    Input Tokens: Paths
     Input Tags: PathRegex
     Output Tokens: Path
     """
 
     def __init__(self, *args, **kwargs):
         """Read parameters from filter configuration."""
+
         # Construct the base instance.
         super(FilterPathList, self).__init__(*args, **kwargs)
 
@@ -713,7 +712,6 @@ class FilterPathList(Filter):
 
         Returns: Exit code produced by filter and child actions.
         """
-
         # Look through the path names.
         for path in self.paths:
 
@@ -743,6 +741,7 @@ class FilterPropList(Filter):
 
     def __init__(self, *args, **kwargs):
         """Read parameters from filter configuration."""
+
         # Construct the base instance.
         super(FilterPropList, self).__init__(*args, **kwargs)
 
@@ -801,11 +800,109 @@ class FilterPropList(Filter):
         # Handle a non-error exit.
         return 0
 
-class FilterUser(Filter):
-    """User Name Filter Class"""
+class FilterRevProp(Filter):
+    """Revision Property Filter Class
+
+    Check for a revision property match.
+
+    Input Tokens: RevPropName, RevPropValue
+    Input Tags: PropNameRegex, PropValueRegex
+    """
 
     def __init__(self, *args, **kwargs):
         """Read parameters from filter configuration."""
+
+        # Construct the base instance.
+        super(FilterRevProp, self).__init__(*args, **kwargs)
+
+        # Construct regular expression tag evaluators.
+        regextag = self.thistag.find('PropNameRegex')
+        if regextag != None:
+            self.nameregex = RegexTag(regextag)
+        else:
+            self.nameregex = None
+
+        regextag = self.thistag.find('PropValueRegex')
+        if regextag != None:
+            self.valueregex = RegexTag(regextag)
+        else:
+            self.valueregex = None
+
+        # Make sure that at least one regular expression is specified.
+        if self.nameregex == None and self.valueregex == None:
+            raise ValueError('Required tag missing: '\
+                                 'PropNameRegex or PropValueRegex')
+
+        # Save the revision property details.
+        self.propname = self.context.tokens['RevPropName']
+        logger.debug('propname = {}'.format(self.propname))
+        self.propvalue = self.context.tokens['RevPropValue']
+        logger.debug('propvalue = "{}"'.format(self.propvalue))
+
+    def run(self):
+        """Filter operations based on revision property.
+
+        Returns: Exit code produced by filter and child actions.
+        """
+        # If the name doesn't match, do nothing.
+        if self.nameregex and \
+                not self.nameregex.match(self.propname): return 0
+
+        # If the value doesn't match, do nothing.
+        if self.valueregex and \
+                not self.valueregex.match(self.propname): return 0
+
+        # Execute the child actions.
+        return super(FilterRevProp, self).run()
+
+class FilterStealLock(Filter):
+    """Steal Lock Flag Filter Class
+
+    Determine if taking over another user's path lock.
+
+    Input Tokens: StealLock
+    """
+
+    def __init__(self, *args, **kwargs):
+        """Read parameters from filter configuration."""
+
+        # Construct the base instance.
+        super(FilterStealLock, self).__init__(*args, **kwargs)
+
+        # Get the comparison sense flag.
+        self.sense = self.get_boolean('sense', default=True)
+        logger.debug('sense = {}'.format(self.sense))
+
+        # Get the filter parameters.
+        self.steallock = (
+            self.context.tokens['StealLock'] == '1')
+        logger.debug('steallock = {}'.format(self.steallock))
+
+    def run(self):
+        """If the flag matches the filter sense, run child actions.
+
+        Returns: Exit code from filter or child actions.
+        """
+        # Check for a condition mismatch.
+        if (self.sense and (not self.steallock)) \
+                or ((not self.sense) and self.steallock):
+            return 0
+
+        # Execute the child actions.
+        return super(FilterStealLock, self).run()
+
+class FilterUser(Filter):
+    """User Name Filter Class
+
+    Checks for a matching user name.
+
+    Input Tokens: User
+    Input Tags: UserRegex
+    """
+
+    def __init__(self, *args, **kwargs):
+        """Read parameters from filter configuration."""
+
         # Construct the base instance.
         super(FilterUser, self).__init__(*args, **kwargs)
 
@@ -815,19 +912,17 @@ class FilterUser(Filter):
             raise ValueError('Required tag missing: UserRegex')
         self.regex = RegexTag(regextag)
 
+        # Get the user name.
+        self.user = self.context.tokens['User']
+        logger.debug('user = "{}"'.format(user))
+
     def run(self):
         """Filter operations based on user name.
 
-        Returns:
-        Exit code produced by filter and child actions.
-
+        Returns: Exit code produced by filter and child actions.
         """
-        # Get the user name.
-        user = self.context.tokens['User']
-        logger.debug('User = "{}"'.format(user))
-
         # If the user name doesn't match, do nothing.
-        if not self.regex.search(user): return
+        if not self.regex.search(user): return 0
 
         # Execute the child actions.
         return super(FilterUser, self).run()
