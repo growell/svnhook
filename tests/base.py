@@ -475,6 +475,27 @@ class HookTestCase(unittest.TestCase):
         self.makeWcFolder(pathname)
         return self.addWcItem(pathname)
 
+    def setRevProperty(self, revision, name, value):
+        """Set a revision property.
+
+        Args:
+            revsion: Revision to hold the property.
+            name: Name of the property.
+            value: Value of the property.
+
+        Returns: Completed Subversion command process.
+        """
+        # Construct the set command.
+        cmd = ['svn', 'propset', '--revprop', '-r',
+               str(revision), name, value, self.repourl]
+
+        # Execute the command. Wait for it to finish.
+        p = subprocess.Popen(
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            shell=False)
+        p.wait()
+        return p
+
 class SmtpTestCase(HookTestCase):
     """SvnHook Test Case with SMTP Server"""
 
