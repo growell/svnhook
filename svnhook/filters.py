@@ -778,7 +778,8 @@ class FilterPropList(Filter):
         Returns: Exit code produced by filter and child actions.
         """
         # Look through the properties.
-        for name, value in self.context.get_properties():
+        for name, value in \
+                self.context.get_properties(self.path).items():
 
             # If the name doesn't match, skip this one.
             if self.nameregex \
