@@ -816,15 +816,15 @@ class FilterRevProp(Filter):
         super(FilterRevProp, self).__init__(*args, **kwargs)
 
         # Construct regular expression tag evaluators.
-        regextag = self.thistag.find('PropNameRegex')
-        if regextag != None:
-            self.nameregex = RegexTag(regextag)
+        nameregextag = self.thistag.find('PropNameRegex')
+        if nameregextag != None:
+            self.nameregex = RegexTag(nameregextag)
         else:
             self.nameregex = None
 
-        regextag = self.thistag.find('PropValueRegex')
-        if regextag != None:
-            self.valueregex = RegexTag(regextag)
+        valueregextag = self.thistag.find('PropValueRegex')
+        if valueregextag != None:
+            self.valueregex = RegexTag(valueregextag)
         else:
             self.valueregex = None
 
@@ -850,7 +850,7 @@ class FilterRevProp(Filter):
 
         # If the value doesn't match, do nothing.
         if self.valueregex and \
-                not self.valueregex.match(self.propname): return 0
+                not self.valueregex.search(self.propvalue): return 0
 
         # Execute the child actions.
         return super(FilterRevProp, self).run()
