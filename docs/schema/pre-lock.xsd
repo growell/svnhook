@@ -8,6 +8,7 @@
 	<!-- filters -->
 	<xs:element ref="FilterComment" />
 	<xs:element ref="FilterFileContent" />
+	<xs:element ref="FilterLockOwner" />
 	<xs:element ref="FilterPath" />
 	<xs:element ref="FilterPropList" />
 	<xs:element ref="FilterStealLock" />
@@ -31,6 +32,7 @@
 	  <!-- filters -->
 	  <xs:element ref="FilterComment" />
 	  <xs:element ref="FilterFileContent" />
+	  <xs:element ref="FilterLockOwner" />
 	  <xs:element ref="FilterPath" />
 	  <xs:element ref="FilterPropList" />
 	  <xs:element ref="FilterStealLock" />
@@ -53,7 +55,29 @@
 	  <!-- filters -->
 	  <xs:element ref="FilterComment" />
 	  <xs:element ref="FilterFileContent" />
+	  <xs:element ref="FilterLockOwner" />
 	  <xs:element ref="FilterPath" />
+	  <xs:element ref="FilterPropList" />
+	  <xs:element ref="FilterStealLock" />
+	  <xs:element ref="FilterUser" />
+	  <!-- actions -->
+	  <xs:element ref="ExecuteCmd" />
+	  <xs:element ref="SendError" maxOccurs="1" />
+	  <xs:element ref="SendSmtp" />
+	  <xs:element ref="SetToken" />
+	</xs:choice>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="FilterLockOwner">
+    <xs:complexType>
+      <xs:sequence>
+	<xs:choice maxOccurs="unbounded">
+	  <!-- filters -->
+	  <xs:element ref="FilterComment" />
+	  <xs:element ref="FilterFileContent" />
+	  <xs:element ref="FilterPathList" />
 	  <xs:element ref="FilterPropList" />
 	  <xs:element ref="FilterStealLock" />
 	  <xs:element ref="FilterUser" />
@@ -75,6 +99,7 @@
 	  <!-- filters -->
 	  <xs:element ref="FilterComment" />
 	  <xs:element ref="FilterFileContent" />
+	  <xs:element ref="FilterLockOwner" />
 	  <xs:element ref="FilterPath" />
 	  <xs:element ref="FilterPropList" />
 	  <xs:element ref="FilterStealLock" />
@@ -98,6 +123,7 @@
 	  <!-- filters -->
 	  <xs:element ref="FilterComment" />
 	  <xs:element ref="FilterFileContent" />
+	  <xs:element ref="FilterLockOwner" />
 	  <xs:element ref="FilterPath" />
 	  <xs:element ref="FilterPropList" />
 	  <xs:element ref="FilterStealLock" />
@@ -120,6 +146,7 @@
 	  <!-- filters -->
 	  <xs:element ref="FilterComment" />
 	  <xs:element ref="FilterFileContent" />
+	  <xs:element ref="FilterLockOwner" />
 	  <xs:element ref="FilterPath" />
 	  <xs:element ref="FilterPropList" />
 	  <xs:element ref="FilterUser" />
@@ -142,6 +169,7 @@
 	  <!-- filters -->
 	  <xs:element ref="FilterComment" />
 	  <xs:element ref="FilterFileContent" />
+	  <xs:element ref="FilterLockOwner" />
 	  <xs:element ref="FilterPath" />
 	  <xs:element ref="FilterPropList" />
 	  <xs:element ref="FilterStealLock" />
