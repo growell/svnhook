@@ -1,2 +1,3 @@
-include LICENSE README
+include LICENSE README README.md
 recursive-include bin *
+recursive-include schema *

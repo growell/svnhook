@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 ######################################################################
-# Test Break Unlock Filter
+# Test Steal Lock Filter
 ######################################################################
 import os, re, sys, unittest
 
@@ -9,13 +9,13 @@ mylib = os.path.normpath(os.path.join(
         os.path.dirname(__file__), '..'))
 if os.path.isdir(mylib): sys.path.insert(0, mylib)
 
-from tests.base import HookTestCase
+from test.base import HookTestCase
 
-class TestFilterBreakUnlock(HookTestCase):
-    """Break Unlock Filter Tests"""
+class TestFilterStealLock(HookTestCase):
+    """Steal Lock Filter Tests"""
 
     def setUp(self):
-        super(TestFilterBreakUnlock, self).setUp(
+        super(TestFilterStealLock, self).setUp(
             re.sub(r'^test_?(.+)\.[^\.]+$', r'\1',
                    os.path.basename(__file__)))
 
@@ -23,56 +23,58 @@ class TestFilterBreakUnlock(HookTestCase):
         """Default sense with set flag."""
 
         # Define the hook configuration.
-        self.writeConf('pre-unlock.xml', '''\
+        self.writeConf('pre-lock.xml', '''\
           <?xml version="1.0"?>
           <Actions>
-            <FilterBreakUnlock>
-              <SendError>Cannot remove other user's lock!</SendError>
-            </FilterBreakUnlock>
+            <FilterStealLock>
+              <SendError>Cannot steal other user's lock!</SendError>
+            </FilterStealLock>
           </Actions>
           ''')
 
         # Call the script with the flag set.
         p = self.callHook(
-            'pre-unlock', self.repopath, '/file1.txt',
-            self.username, 'mytoken', '1')
+            'pre-lock', self.repopath, '/fileA1.txt',
+            self.username, 'mytoken', 1)
         (stdoutdata, stderrdata) = p.communicate()
         p.wait()
 
         # Verify the proper error message is returned.
         self.assertRegexpMatches(
-            stderrdata, r'Cannot remove other user',
+            stderrdata, r'Cannot steal other user',
             'Expected error message not found')
 
-        # Verify a failure is indicated.
-        self.assertTrue(
-            p.returncode != 0,
-            'Unexpected success exit code found')
+        # Verify the exit code is correct.
+        self.assertEqual(
+            p.returncode, 1,
+            'Error exit code not found: '\
+            ' exit code = {}'.format(p.returncode))
 
     def test_02_default_mismatch(self):
         """Default sense with unset flag."""
 
         # Define the hook configuration.
-        self.writeConf('pre-unlock.xml', '''\
+        self.writeConf('pre-lock.xml', '''\
           <?xml version="1.0"?>
           <Actions>
-            <FilterBreakUnlock>
-              <SendError>Cannot remove other user's lock!</SendError>
-            </FilterBreakUnlock>
+            <FilterStealLock>
+              <SendError>Cannot steal other user's lock!</SendError>
+            </FilterStealLock>
           </Actions>
           ''')
 
         # Call the script with the flag unset.
         p = self.callHook(
-            'pre-unlock', self.repopath, '/file1.txt',
-            self.username, 'mytoken', '0')
+            'pre-lock', self.repopath, '/fileA1.txt',
+            self.username, 'mytoken', 0)
         (stdoutdata, stderrdata) = p.communicate()
         p.wait()
 
-        # Verify a failure isn't indicated.
-        self.assertTrue(
-            p.returncode == 0,
-            'Expected success exit code not found')
+        # Verify the exit code is correct.
+        self.assertEqual(
+            p.returncode, 0,
+            'Success exit code not found: '\
+            ' exit code = {}'.format(p.returncode))
 
         # Verify an error message isn't returned.
         self.assertNotRegexpMatches(
@@ -83,86 +85,89 @@ class TestFilterBreakUnlock(HookTestCase):
         """Explicit sense with matching set flag."""
 
         # Define the hook configuration.
-        self.writeConf('pre-unlock.xml', '''\
+        self.writeConf('pre-lock.xml', '''\
           <?xml version="1.0"?>
           <Actions>
-            <FilterBreakUnlock sense="true">
-              <SendError>Cannot remove other user's lock!</SendError>
-            </FilterBreakUnlock>
+            <FilterStealLock sense="true">
+              <SendError>Cannot steal other user's lock!</SendError>
+            </FilterStealLock>
           </Actions>
           ''')
 
         # Call the script with the flag set.
         p = self.callHook(
-            'pre-unlock', self.repopath, '/file2.txt',
-            self.username, 'mytoken', '1')
+            'pre-lock', self.repopath, '/fileA2.txt',
+            self.username, 'mytoken', 1)
         (stdoutdata, stderrdata) = p.communicate()
         p.wait()
 
         # Verify the proper error message is returned.
         self.assertRegexpMatches(
-            stderrdata, r'Cannot remove other user',
+            stderrdata, r'Cannot steal other user',
             'Expected error message not found')
 
-        # Verify a failure is indicated.
-        self.assertTrue(
-            p.returncode != 0,
-            'Unexpected success exit code found')
+        # Verify the exit code is correct.
+        self.assertEqual(
+            p.returncode, 1,
+            'Error exit code not found: '\
+            ' exit code = {}'.format(p.returncode))
 
     def test_04_explicit_match2(self):
         """Explicit sense with matching unset flag."""
 
         # Define the hook configuration.
-        self.writeConf('pre-unlock.xml', '''\
+        self.writeConf('pre-lock.xml', '''\
           <?xml version="1.0"?>
           <Actions>
-            <FilterBreakUnlock sense="false">
-              <SendError>Cannot remove your own lock?!</SendError>
-            </FilterBreakUnlock>
+            <FilterStealLock sense="false">
+              <SendError>Cannot get new locks?!</SendError>
+            </FilterStealLock>
           </Actions>
           ''')
 
         # Call the script with the flag unset.
         p = self.callHook(
-            'pre-unlock', self.repopath, '/file2.txt',
-            self.username, 'mytoken', '0')
+            'pre-lock', self.repopath, '/fileA2.txt',
+            self.username, 'mytoken', 0)
         (stdoutdata, stderrdata) = p.communicate()
         p.wait()
 
         # Verify the proper error message is returned.
         self.assertRegexpMatches(
-            stderrdata, r'Cannot remove your own',
+            stderrdata, r'Cannot get new locks',
             'Expected error message not found')
 
-        # Verify a failure isn't indicated.
-        self.assertTrue(
-            p.returncode != 0,
-            'Unexpected success exit code found')
+        # Verify the exit code is correct.
+        self.assertEqual(
+            p.returncode, 1,
+            'Error exit code not found: '\
+            ' exit code = {}'.format(p.returncode))
 
     def test_05_explicit_mismatch(self):
         """Explicit sense with mismatched set flag."""
 
         # Define the hook configuration.
-        self.writeConf('pre-unlock.xml', '''\
+        self.writeConf('pre-lock.xml', '''\
           <?xml version="1.0"?>
           <Actions>
-            <FilterBreakUnlock sense="false">
-              <SendError>Cannot remove your own lock?!</SendError>
-            </FilterBreakUnlock>
+            <FilterStealLock sense="false">
+              <SendError>Cannot get new locks?!</SendError>
+            </FilterStealLock>
           </Actions>
           ''')
 
         # Call the script with the flag set.
         p = self.callHook(
-            'pre-unlock', self.repopath, '/file2.txt',
-            self.username, 'mytoken', '1')
+            'pre-lock', self.repopath, '/fileA2.txt',
+            self.username, 'mytoken', 1)
         (stdoutdata, stderrdata) = p.communicate()
         p.wait()
 
-        # Verify a failure isn't indicated.
-        self.assertTrue(
-            p.returncode == 0,
-            'Unexpected error exit code found')
+        # Verify the exit code is correct.
+        self.assertEqual(
+            p.returncode, 0,
+            'Success exit code not found: '\
+            ' exit code = {}'.format(p.returncode))
 
         # Verify an error message isn't returned.
         self.assertNotRegexpMatches(
@@ -171,7 +176,7 @@ class TestFilterBreakUnlock(HookTestCase):
 
 # Allow manual execution of tests.
 if __name__=='__main__':
-    for tclass in [TestFilterBreakUnlock]:
+    for tclass in [TestFilterStealLock]:
         suite = unittest.TestLoader().loadTestsFromTestCase(tclass)
         unittest.TextTestRunner(verbosity=2).run(suite)
 
