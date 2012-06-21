@@ -910,11 +910,11 @@ class FilterUser(Filter):
         regextag = self.thistag.find('UserRegex')
         if regextag == None:
             raise ValueError('Required tag missing: UserRegex')
-        self.regex = RegexTag(regextag)
+        self.regex = RegexTag(regextag, re.IGNORECASE)
 
         # Get the user name.
         self.user = self.context.tokens['User']
-        logger.debug('user = "{}"'.format(user))
+        logger.debug('user = "{}"'.format(self.user))
 
     def run(self):
         """Filter operations based on user name.
@@ -922,7 +922,7 @@ class FilterUser(Filter):
         Returns: Exit code produced by filter and child actions.
         """
         # If the user name doesn't match, do nothing.
-        if not self.regex.search(user): return 0
+        if not self.regex.match(self.user): return 0
 
         # Execute the child actions.
         return super(FilterUser, self).run()
