@@ -25,18 +25,34 @@ class UnitTest(Command):
         errno = subprocess.call(cmd)
         raise SystemExit(errno)
 
-config = {
-    'description': 'Subversion Hook Framework',
-    'author': 'Geoff Rowell',
-    'url': 'http://sourceforge.net',
-    'download_url': 'http://github.com',
-    'author_email': 'geoff.rowell@gmail.com',
-    'version': '3.00',
-    'packages': ['svnhook'],
-    'scripts': [],
-    'name': 'svnhook',
-    'cmdclass': {'test': UnitTest},
-}
+# Subversion Hook Names
+hooknames = [
+    'post-commit',
+    'post-lock',
+    'post-revprop-change',
+    'post-unlock',
+    'pre-commit',
+    'pre-lock',
+    'pre-revprop-change',
+    'pre-unlock',
+    'start-commit',
+]
 
-setup(**config)
+# Package Parameters
+setup(
+    name='svnhook',
+    version='3.00',
+    author='Geoff Rowell',
+    author_email='geoff.rowell@gmail.com',
+    description='Subversion Hook Framework',
+    url='https://github.com/growell/svnhook',
+    download_url='git://github.com/growell/svnhook.git',
+    packages=['svnhook'],
+    scripts=['bin/svnhook-{}'.format(h) for h in hooknames],
+    data_files=[
+        ('schema', ['schema/{}.xsd'.format(h) for h in hooknames]),
+    ],
+    cmdclass={'test': UnitTest},
+)
+
 ########################### end of file ##############################

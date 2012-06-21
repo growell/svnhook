@@ -1,0 +1,7 @@
+=======
+SVNHOOK
+=======
+
+This is the Subversion Hook framework. It provides XML-configurable
+hook scripts for use with Subversion repositories. The scripts are
+designed to work on both Linux and Windows systems.

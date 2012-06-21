@@ -10,7 +10,7 @@ mylib = os.path.normpath(os.path.join(
         os.path.dirname(__file__), '..'))
 if os.path.isdir(mylib): sys.path.insert(0, mylib)
 
-from tests.base import SmtpTestCase
+from test.base import SmtpTestCase
 
 # Test Hook and Configuration File
 testhook = 'start-commit'

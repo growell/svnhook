@@ -3,5 +3,6 @@
 *~
 *.pyc
 MANIFEST
-dist/*
-tests/tmp/
+build/
+dist/
+test/tmp/
