@@ -2,8 +2,14 @@
 ######################################################################
 # Subversion Hook Framework Setup
 ######################################################################
+import sys
 from distutils.core import setup, Command
 
+# Require Python 2.7+.
+if sys.version_info < (2,7):
+    raise RuntimeError('Python 2.7+ required.')
+
+# "Run Unit Tests" Command
 class UnitTest(Command):
     description = 'Discover and/or run unit tests.'
     user_options = [
