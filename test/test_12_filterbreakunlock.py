@@ -40,7 +40,7 @@ class TestFilterBreakUnlock(HookTestCase):
         p.wait()
 
         # Verify the proper error message is returned.
-        self.assertRegexpMatches(
+        self.assertRegex(
             stderrdata, r'Cannot remove other user',
             'Expected error message not found')
 
@@ -75,8 +75,8 @@ class TestFilterBreakUnlock(HookTestCase):
             'Expected success exit code not found')
 
         # Verify an error message isn't returned.
-        self.assertNotRegexpMatches(
-            stderrdata, r'\S',
+        self.assertRegex(
+            stderrdata, r'(?s)^\s*$',
             'Unexpected error message found')
 
     def test_03_explicit_match(self):
@@ -100,7 +100,7 @@ class TestFilterBreakUnlock(HookTestCase):
         p.wait()
 
         # Verify the proper error message is returned.
-        self.assertRegexpMatches(
+        self.assertRegex(
             stderrdata, r'Cannot remove other user',
             'Expected error message not found')
 
@@ -130,7 +130,7 @@ class TestFilterBreakUnlock(HookTestCase):
         p.wait()
 
         # Verify the proper error message is returned.
-        self.assertRegexpMatches(
+        self.assertRegex(
             stderrdata, r'Cannot remove your own',
             'Expected error message not found')
 
@@ -165,8 +165,8 @@ class TestFilterBreakUnlock(HookTestCase):
             'Unexpected error exit code found')
 
         # Verify an error message isn't returned.
-        self.assertNotRegexpMatches(
-            stderrdata, r'\S',
+        self.assertRegex(
+            stderrdata, r'(?s)^\s*$',
             'Unexpected error message found')
 
 # Allow manual execution of tests.

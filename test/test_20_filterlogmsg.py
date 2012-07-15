@@ -45,10 +45,10 @@ class TestFilterLogMsg(HookTestCase):
         self.assertEqual(
             p.returncode, 1,
             'Error exit code not found:'\
-                ' exit code = {}'.format(p.returncode))
+                ' exit code = {0}'.format(p.returncode))
 
         # Verify that the proper error is indicated.
-        self.assertRegexpMatches(
+        self.assertRegex(
             p.stderr.read(), r'Internal hook error',
             'Internal error message not returned')
 
@@ -81,10 +81,10 @@ class TestFilterLogMsg(HookTestCase):
         self.assertEqual(
             p.returncode, 1,
             'Error exit code not found:'\
-                ' exit code = {}'.format(p.returncode))
+                ' exit code = {0}'.format(p.returncode))
 
         # Verify that the proper error is indicated.
-        self.assertRegexpMatches(
+        self.assertRegex(
             p.stderr.read(), r'Cannot expose secret!',
             'Expected error message not found')
 
@@ -112,11 +112,11 @@ class TestFilterLogMsg(HookTestCase):
         self.assertEqual(
             p.returncode, 0,
             'Success exit code not found:'\
-                ' exit code = {}'.format(p.returncode))
+                ' exit code = {0}'.format(p.returncode))
 
         # Verify that an error message isn't returned.
-        self.assertNotRegexpMatches(
-            p.stderr.read(), r'\S',
+        self.assertRegex(
+            p.stderr.read(), r'(?s)^\s*$',
             'Unexpected error message found')
 
     def test_04_no_required_msg(self):
@@ -143,10 +143,10 @@ class TestFilterLogMsg(HookTestCase):
         self.assertEqual(
             p.returncode, 1,
             'Error exit code not found:'\
-                ' exit code = {}'.format(p.returncode))
+                ' exit code = {0}'.format(p.returncode))
 
         # Verify that the proper error is indicated.
-        self.assertRegexpMatches(
+        self.assertRegex(
             p.stderr.read(), r'Log message is required',
             'Expected error message not found')
 

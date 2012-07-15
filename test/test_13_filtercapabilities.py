@@ -42,7 +42,7 @@ class TestFilterCapabilities(HookTestCase):
         p.wait()
 
         # Verify the proper error is returned.
-        self.assertRegexpMatches(
+        self.assertRegex(
             stderrdata, r'Capability missing',
             'Expected error message not found')
 
@@ -71,8 +71,8 @@ class TestFilterCapabilities(HookTestCase):
         p.wait()
 
         # Verify that no error message is returned.
-        self.assertNotRegexpMatches(
-            stderrdata, r'\S',
+        self.assertRegex(
+            stderrdata, r'(?s)^\s*$',
             'Unexpected error message found')
 
         # Verify that no failure is indicated.
@@ -102,8 +102,8 @@ class TestFilterCapabilities(HookTestCase):
         p.wait()
 
         # Verify that no error message is returned.
-        self.assertNotRegexpMatches(
-            stderrdata, r'\S',
+        self.assertRegex(
+            stderrdata, r'(?s)^\s*$',
             'Unexpected error message found')
 
         # Verify that no failure is indicated.
@@ -132,7 +132,7 @@ class TestFilterCapabilities(HookTestCase):
         p.wait()
 
         # Verify the proper error is returned.
-        self.assertRegexpMatches(
+        self.assertRegex(
             stderrdata, r'Capability missing',
             'Expected error message not found')
 

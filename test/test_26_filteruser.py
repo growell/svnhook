@@ -40,7 +40,7 @@ class TestFilterUser(HookTestCase):
         p.wait()
 
         # Verify the proper error message is returned.
-        self.assertRegexpMatches(
+        self.assertRegex(
             stderrdata, r'Internal hook error',
             'Expected error message not found')
 
@@ -48,10 +48,10 @@ class TestFilterUser(HookTestCase):
         self.assertEqual(
             p.returncode, 255,
             'Error exit code not found: '\
-            ' exit code = {}'.format(p.returncode))
+            ' exit code = {0}'.format(p.returncode))
 
         # Verify the proper error message is returned.
-        self.assertRegexpMatches(
+        self.assertRegex(
             stderrdata, r'Internal hook error',
             'Expected error message not found')
 
@@ -79,7 +79,7 @@ class TestFilterUser(HookTestCase):
         stdoutdata, stderrdata = p.communicate()
 
         # Verify that the error message was produced.
-        self.assertRegexpMatches(
+        self.assertRegex(
             stderrdata, r'Invalid lock user',
             'Expected error message not found')
 
@@ -87,7 +87,7 @@ class TestFilterUser(HookTestCase):
         self.assertEqual(
             p.returncode, 1,
             'Error exit code not found:'\
-                ' exit code = {}'.format(p.returncode))
+                ' exit code = {0}'.format(p.returncode))
 
     def test_03_mismatch(self):
         """User mismatch"""
@@ -108,15 +108,15 @@ class TestFilterUser(HookTestCase):
         stdoutdata, stderrdata = p.communicate()
 
         # Verify that an error message wasn't produced.
-        self.assertNotRegexpMatches(
-            stderrdata, r'\S',
+        self.assertRegex(
+            stderrdata, r'(?s)^\s*$',
             'Unexpected error message found')
 
         # Verify that an error wasn't indicated.
         self.assertEqual(
             p.returncode, 0,
             'Success exit code not found:'\
-                ' exit code = {}'.format(p.returncode))
+                ' exit code = {0}'.format(p.returncode))
 
 # Allow manual execution of tests.
 if __name__=='__main__':

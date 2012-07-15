@@ -40,7 +40,7 @@ class TestFilterComment(HookTestCase):
         p.wait()
 
         # Verify the proper error message is returned.
-        self.assertRegexpMatches(
+        self.assertRegex(
             stderrdata, r'Internal hook error',
             'Expected error message not found')
 
@@ -71,7 +71,7 @@ class TestFilterComment(HookTestCase):
         p.wait()
 
         # Verify the proper error message is returned.
-        self.assertRegexpMatches(
+        self.assertRegex(
             stderrdata, r'World comments not allowed',
             'Expected error message not found')
 
@@ -102,7 +102,7 @@ class TestFilterComment(HookTestCase):
         p.wait()
 
         # Verify the proper error message is returned.
-        self.assertRegexpMatches(
+        self.assertRegex(
             stderrdata, r'World comments required',
             'Expected error message not found')
 
@@ -138,8 +138,8 @@ class TestFilterComment(HookTestCase):
             'Expected exit code not found')
 
         # Verify an error message isn't returned.
-        self.assertNotRegexpMatches(
-            stderrdata, r'\S',
+        self.assertRegex(
+            stderrdata, r'(?s)^\s*$',
             'Unexpected error message found')
 
     def test_05_end_mismatch(self):
@@ -169,8 +169,8 @@ class TestFilterComment(HookTestCase):
             'Expected exit code not found')
 
         # Verify an error message isn't returned.
-        self.assertNotRegexpMatches(
-            stderrdata, r'\S',
+        self.assertRegex(
+            stderrdata, r'(?s)^\s*$',
             'Unexpected error message found')
 
 # Allow manual execution of tests.

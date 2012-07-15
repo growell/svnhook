@@ -48,10 +48,10 @@ class TestFilterPropList(HookTestCase):
         self.assertEqual(
             p.returncode, 1,
             'Error exit code not found:'\
-                ' exit code = {}'.format(p.returncode))
+                ' exit code = {0}'.format(p.returncode))
 
         # Verify that the proper error is indicated.
-        self.assertRegexpMatches(
+        self.assertRegex(
             p.stderr.read(), r'Internal hook error',
             'Internal error message not returned')
 
@@ -87,10 +87,10 @@ class TestFilterPropList(HookTestCase):
         self.assertEqual(
             p.returncode, 1,
             'Error exit code not found:'\
-                ' exit code = {}'.format(p.returncode))
+                ' exit code = {0}'.format(p.returncode))
 
         # Verify that the proper error is indicated.
-        self.assertRegexpMatches(
+        self.assertRegex(
             p.stderr.read(), r'Cannot mark as junk',
             'Expected error message not returned')
 
@@ -121,11 +121,11 @@ class TestFilterPropList(HookTestCase):
         self.assertEqual(
             p.returncode, 0,
             'Success exit code not found:'\
-                ' exit code = {}'.format(p.returncode))
+                ' exit code = {0}'.format(p.returncode))
 
         # Verify that an error message isn't sent.
-        self.assertNotRegexpMatches(
-            p.stderr.read(), r'\S',
+        self.assertRegex(
+            p.stderr.read(), r'(?s)^\s*$',
             'Unexpected error message found')
 
     def test_04_value_match(self):
@@ -155,10 +155,10 @@ class TestFilterPropList(HookTestCase):
         self.assertEqual(
             p.returncode, 1,
             'Error exit code not found:'\
-                ' exit code = {}'.format(p.returncode))
+                ' exit code = {0}'.format(p.returncode))
 
         # Verify that the proper error is indicated.
-        self.assertRegexpMatches(
+        self.assertRegex(
             p.stderr.read(), r'Cannot use junk value',
             'Expected error message not returned')
 
@@ -189,11 +189,11 @@ class TestFilterPropList(HookTestCase):
         self.assertEqual(
             p.returncode, 0,
             'Success exit code not found:'\
-                ' exit code = {}'.format(p.returncode))
+                ' exit code = {0}'.format(p.returncode))
 
         # Verify that an error message isn't sent.
-        self.assertNotRegexpMatches(
-            p.stderr.read(), r'\S',
+        self.assertRegex(
+            p.stderr.read(), r'(?s)^\s*$',
             'Unexpected error message found')
 
     def test_06_both_match(self):
@@ -224,10 +224,10 @@ class TestFilterPropList(HookTestCase):
         self.assertEqual(
             p.returncode, 1,
             'Error exit code not found:'\
-                ' exit code = {}'.format(p.returncode))
+                ' exit code = {0}'.format(p.returncode))
 
         # Verify that the proper error is indicated.
-        self.assertRegexpMatches(
+        self.assertRegex(
             p.stderr.read(), r'Cannot use junk value for stuff',
             'Expected error message not returned')
 
@@ -259,11 +259,11 @@ class TestFilterPropList(HookTestCase):
         self.assertEqual(
             p.returncode, 0,
             'Success exit code not found:'\
-                ' exit code = {}'.format(p.returncode))
+                ' exit code = {0}'.format(p.returncode))
 
         # Verify that an error message is provided.
-        self.assertNotRegexpMatches(
-            p.stderr.read(), r'\S',
+        self.assertRegex(
+            p.stderr.read(), r'(?s)^\s*$',
             'Unexpected error message returned')
 
 # Allow manual execution of tests.

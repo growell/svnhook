@@ -5,9 +5,9 @@
 import sys
 from distutils.core import setup, Command
 
-# Require Python 2.7+.
-if sys.version_info < (2,7):
-    raise RuntimeError('Python 2.7+ required.')
+# Require Python 2.6+.
+if sys.version_info < (2,6):
+    raise RuntimeError('Python 2.6+ required.')
 
 # "Run Unit Tests" Command
 class UnitTest(Command):
@@ -53,12 +53,26 @@ setup(
     description='Subversion Hook Framework',
     url='https://github.com/growell/svnhook',
     download_url='git://github.com/growell/svnhook.git',
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'Environment :: Plugins',
+        'Intended Audience :: System Administrators',
+        'License :: OSI Approved :: Apache Software License',
+        'Natural Language :: English',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python :: 2.6',
+        'Topic :: Software Development :: Version Control',
+        ],
     packages=['svnhook'],
-    scripts=['bin/svnhook-{}'.format(h) for h in hooknames],
+    scripts=['bin/svnhook-{0}'.format(h) for h in hooknames],
     data_files=[
-        ('schema', ['schema/{}.xsd'.format(h) for h in hooknames]),
-    ],
+        ('schema', ['schema/{0}.xsd'.format(h) for h in hooknames]),
+        ],
     cmdclass={'test': UnitTest},
+    requires=[
+        'discover',
+        'yaml',
+        ],
 )
 
 ########################### end of file ##############################
