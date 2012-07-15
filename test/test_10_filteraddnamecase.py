@@ -66,10 +66,10 @@ class TestFilterAddNameCase(HookTestCase):
 
         # Check for the expected error details (via SendError).
         errstr = p.stderr.read()
-        self.assertRegexpMatches(errstr, r'Name case conflict')
-        self.assertRegexpMatches(errstr, r'Folder\.+: /')
-        self.assertRegexpMatches(errstr, r'Existing: fileA\.txt')
-        self.assertRegexpMatches(errstr, r'Added\.+: FileA\.txt')
+        self.assertRegex(errstr, r'Name case conflict')
+        self.assertRegex(errstr, r'Folder\.+: /')
+        self.assertRegex(errstr, r'Existing: fileA\.txt')
+        self.assertRegex(errstr, r'Added\.+: FileA\.txt')
 
     def test_04_dir_file_conflict(self):
         """Detect folder-file name conflict."""
@@ -88,10 +88,10 @@ class TestFilterAddNameCase(HookTestCase):
         # Check for the expected error details (via SendError). Note
         # the trailing slash on the "Added" name.
         errstr = p.stderr.read()
-        self.assertRegexpMatches(errstr, r'Name case conflict')
-        self.assertRegexpMatches(errstr, r'Folder\.+: /')
-        self.assertRegexpMatches(errstr, r'Existing: fileA\.txt')
-        self.assertRegexpMatches(errstr, r'Added\.+: FileA\.txt/')
+        self.assertRegex(errstr, r'Name case conflict')
+        self.assertRegex(errstr, r'Folder\.+: /')
+        self.assertRegex(errstr, r'Existing: fileA\.txt')
+        self.assertRegex(errstr, r'Added\.+: FileA\.txt/')
 
     def test_05_dir_conflict(self):
         """Detect folder-folder name conflict."""
@@ -108,10 +108,10 @@ class TestFilterAddNameCase(HookTestCase):
         # Check for the expected error details (via SendError). Note
         # the trailing slash on the "Added" name.
         errstr = p.stderr.read()
-        self.assertRegexpMatches(errstr, r'Name case conflict')
-        self.assertRegexpMatches(errstr, r'Folder\.+: /')
-        self.assertRegexpMatches(errstr, r'Existing: dirA/')
-        self.assertRegexpMatches(errstr, r'Added\.+: dIRa/')
+        self.assertRegex(errstr, r'Name case conflict')
+        self.assertRegex(errstr, r'Folder\.+: /')
+        self.assertRegex(errstr, r'Existing: dirA/')
+        self.assertRegex(errstr, r'Added\.+: dIRa/')
 
 # Allow manual execution of tests.
 if __name__=='__main__':
