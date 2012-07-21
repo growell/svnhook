@@ -47,7 +47,7 @@ class TestFilterCommitList(HookTestCase):
                 ' exit code = {0}'.format(p.returncode))
 
         # Verify that the proper error is indicated.
-        self.assertRegex(
+        self.assertRegexpMatches(
             p.stderr.read(), r'Internal hook error',
             'Internal error message not returned')
 
@@ -82,7 +82,7 @@ class TestFilterCommitList(HookTestCase):
                 ' exit code = {0}'.format(p.returncode))
 
         # Verify that the proper error is indicated.
-        self.assertRegex(
+        self.assertRegexpMatches(
             p.stderr.read(), r'Adding content not allowed',
             'Expected error message not returned')
 
@@ -115,7 +115,7 @@ class TestFilterCommitList(HookTestCase):
                 ' exit code = {0}'.format(p.returncode))
 
         # Verify that the proper error is indicated.
-        self.assertRegex(
+        self.assertRegexpMatches(
             p.stderr.read(), r'Only adding content allowed',
             'Expected error message not returned')
 
@@ -146,7 +146,7 @@ class TestFilterCommitList(HookTestCase):
                 ' exit code = {0}'.format(p.returncode))
 
         # Verify that the proper error is indicated.
-        self.assertRegex(
+        self.assertRegexpMatches(
             p.stderr.read(), r'A2 content not allowed',
             'Expected error message not returned')
 
@@ -177,7 +177,7 @@ class TestFilterCommitList(HookTestCase):
                 ' exit code = {0}'.format(p.returncode))
 
         # Verify that an error message isn't returned.
-        self.assertRegex(
+        self.assertRegexpMatches(
             p.stderr.read(), r'(?s)^\s*$',
             'Unexpected error message returned')
 
@@ -208,7 +208,7 @@ class TestFilterCommitList(HookTestCase):
                 ' exit code = {0}'.format(p.returncode))
 
         # Verify that the proper error is indicated.
-        self.assertRegex(
+        self.assertRegexpMatches(
             p.stderr.read(), r'A2 content not allowed',
             'Expected error message not returned')
 
@@ -239,7 +239,7 @@ class TestFilterCommitList(HookTestCase):
                 ' exit code = {0}'.format(p.returncode))
 
         # Verify that the proper error is indicated.
-        self.assertRegex(
+        self.assertRegexpMatches(
             p.stderr.read(), r'A2 folder not allowed',
             'Expected error message not returned')
 
@@ -270,7 +270,7 @@ class TestFilterCommitList(HookTestCase):
                 ' exit code = {0}'.format(p.returncode))
 
         # Verify that an error message isn't returned.
-        self.assertRegex(
+        self.assertRegexpMatches(
             p.stderr.read(), r'(?s)^\s*$',
             'Unexpected error message returned')
 
@@ -310,7 +310,7 @@ class TestFilterCommitList2(SmtpTestCase):
                 ' exit code = {0}'.format(p.returncode))
 
         # Verify that the proper advisory is indicated.
-        self.assertRegex(
+        self.assertRegexpMatches(
             p.stdout.read(), r'Now you did it',
             'Expected advisory message not returned')
 

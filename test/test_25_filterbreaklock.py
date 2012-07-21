@@ -40,7 +40,7 @@ class TestFilterStealLock(HookTestCase):
         p.wait()
 
         # Verify the proper error message is returned.
-        self.assertRegex(
+        self.assertRegexpMatches(
             stderrdata, r'Cannot steal other user',
             'Expected error message not found')
 
@@ -77,7 +77,7 @@ class TestFilterStealLock(HookTestCase):
             ' exit code = {0}'.format(p.returncode))
 
         # Verify an error message isn't returned.
-        self.assertRegex(
+        self.assertRegexpMatches(
             stderrdata, r'(?s)^\s*$',
             'Unexpected error message found')
 
@@ -102,7 +102,7 @@ class TestFilterStealLock(HookTestCase):
         p.wait()
 
         # Verify the proper error message is returned.
-        self.assertRegex(
+        self.assertRegexpMatches(
             stderrdata, r'Cannot steal other user',
             'Expected error message not found')
 
@@ -133,7 +133,7 @@ class TestFilterStealLock(HookTestCase):
         p.wait()
 
         # Verify the proper error message is returned.
-        self.assertRegex(
+        self.assertRegexpMatches(
             stderrdata, r'Cannot get new locks',
             'Expected error message not found')
 
@@ -170,7 +170,7 @@ class TestFilterStealLock(HookTestCase):
             ' exit code = {0}'.format(p.returncode))
 
         # Verify an error message isn't returned.
-        self.assertRegex(
+        self.assertRegexpMatches(
             stderrdata, r'(?s)^\s*$',
             'Unexpected error message found')
 

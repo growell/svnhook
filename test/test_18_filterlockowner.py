@@ -37,7 +37,7 @@ class TestFilterLockOwner(HookTestCase):
         stdoutdata, stderrdata = p.communicate()
 
         # Verify that no error message was produced.
-        self.assertRegex(
+        self.assertRegexpMatches(
             stderrdata, r'(?s)^\s*$',
             'Unexpected error message found')
 
@@ -73,7 +73,7 @@ class TestFilterLockOwner(HookTestCase):
         stdoutdata, stderrdata = p.communicate()
 
         # Verify that the error message was produced.
-        self.assertRegex(
+        self.assertRegexpMatches(
             stderrdata, r'You are the lock owner',
             'Expected error message not found')
 
@@ -110,7 +110,7 @@ class TestFilterLockOwner(HookTestCase):
         stdoutdata, stderrdata = p.communicate()
 
         # Verify that the error message wasn't produced.
-        self.assertRegex(
+        self.assertRegexpMatches(
             stderrdata, r'(?s)^\s*$',
             'Unexpected error message found')
 
@@ -146,7 +146,7 @@ class TestFilterLockOwner(HookTestCase):
         stdoutdata, stderrdata = p.communicate()
 
         # Verify that the error message was produced.
-        self.assertRegex(
+        self.assertRegexpMatches(
             stderrdata, r'You are not the lock owner',
             'Expected error message not found')
 
@@ -182,7 +182,7 @@ class TestFilterLockOwner(HookTestCase):
         stdoutdata, stderrdata = p.communicate()
 
         # Verify that an error message wasn't produced.
-        self.assertRegex(
+        self.assertRegexpMatches(
             stderrdata, r'(?s)^\s*$',
             'Unexpected error message found')
 

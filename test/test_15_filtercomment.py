@@ -40,7 +40,7 @@ class TestFilterComment(HookTestCase):
         p.wait()
 
         # Verify the proper error message is returned.
-        self.assertRegex(
+        self.assertRegexpMatches(
             stderrdata, r'Internal hook error',
             'Expected error message not found')
 
@@ -71,7 +71,7 @@ class TestFilterComment(HookTestCase):
         p.wait()
 
         # Verify the proper error message is returned.
-        self.assertRegex(
+        self.assertRegexpMatches(
             stderrdata, r'World comments not allowed',
             'Expected error message not found')
 
@@ -102,7 +102,7 @@ class TestFilterComment(HookTestCase):
         p.wait()
 
         # Verify the proper error message is returned.
-        self.assertRegex(
+        self.assertRegexpMatches(
             stderrdata, r'World comments required',
             'Expected error message not found')
 
@@ -138,7 +138,7 @@ class TestFilterComment(HookTestCase):
             'Expected exit code not found')
 
         # Verify an error message isn't returned.
-        self.assertRegex(
+        self.assertRegexpMatches(
             stderrdata, r'(?s)^\s*$',
             'Unexpected error message found')
 
@@ -169,7 +169,7 @@ class TestFilterComment(HookTestCase):
             'Expected exit code not found')
 
         # Verify an error message isn't returned.
-        self.assertRegex(
+        self.assertRegexpMatches(
             stderrdata, r'(?s)^\s*$',
             'Unexpected error message found')
 

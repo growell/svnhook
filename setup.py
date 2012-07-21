@@ -6,7 +6,7 @@ import sys
 from distutils.core import setup, Command
 
 # Require Python 2.6+.
-if sys.version_info < (2,6):
+if sys.version_info < (2, 6):
     raise RuntimeError('Python 2.6+ required.')
 
 # "Run Unit Tests" Command
@@ -17,18 +17,26 @@ class UnitTest(Command):
 
     def initialize_options(self):
         self.tests = None
+        if sys.version_info >= (2, 7):
+            self.cmd = [sys.executable, '-m', 'unittest']
+        else:
+            self.cmd = ['unit2']
 
     def finalize_options(self):
-        if not self.tests: self.tests = 'discover'
+        if not self.tests:
+            self.cmd.append('discover')
+            if sys.version_info < (2, 7):
+                self.cmd += ['-s', 'test']
 
     def run(self):
         import sys, subprocess
 
-        cmd = [sys.executable, '-m', 'unittest']
-        for tests in self.tests.split(r','): cmd.append(tests)
-        if self.verbose > 1: cmd.append('-v')
+        if self.tests:
+            for tests in self.tests.split(r','):
+                self.cmd.append(tests)
+        if self.verbose > 1: self.cmd.append('-v')
 
-        errno = subprocess.call(cmd)
+        errno = subprocess.call(self.cmd)
         raise SystemExit(errno)
 
 # Subversion Hook Names
@@ -69,10 +77,7 @@ setup(
         ('schema', ['schema/{0}.xsd'.format(h) for h in hooknames]),
         ],
     cmdclass={'test': UnitTest},
-    requires=[
-        'discover',
-        'yaml',
-        ],
+    requires=['yaml']
 )
 
 ########################### end of file ##############################

@@ -51,7 +51,7 @@ class TestFilterPropList(HookTestCase):
                 ' exit code = {0}'.format(p.returncode))
 
         # Verify that the proper error is indicated.
-        self.assertRegex(
+        self.assertRegexpMatches(
             p.stderr.read(), r'Internal hook error',
             'Internal error message not returned')
 
@@ -90,7 +90,7 @@ class TestFilterPropList(HookTestCase):
                 ' exit code = {0}'.format(p.returncode))
 
         # Verify that the proper error is indicated.
-        self.assertRegex(
+        self.assertRegexpMatches(
             p.stderr.read(), r'Cannot mark as junk',
             'Expected error message not returned')
 
@@ -124,7 +124,7 @@ class TestFilterPropList(HookTestCase):
                 ' exit code = {0}'.format(p.returncode))
 
         # Verify that an error message isn't sent.
-        self.assertRegex(
+        self.assertRegexpMatches(
             p.stderr.read(), r'(?s)^\s*$',
             'Unexpected error message found')
 
@@ -158,7 +158,7 @@ class TestFilterPropList(HookTestCase):
                 ' exit code = {0}'.format(p.returncode))
 
         # Verify that the proper error is indicated.
-        self.assertRegex(
+        self.assertRegexpMatches(
             p.stderr.read(), r'Cannot use junk value',
             'Expected error message not returned')
 
@@ -192,7 +192,7 @@ class TestFilterPropList(HookTestCase):
                 ' exit code = {0}'.format(p.returncode))
 
         # Verify that an error message isn't sent.
-        self.assertRegex(
+        self.assertRegexpMatches(
             p.stderr.read(), r'(?s)^\s*$',
             'Unexpected error message found')
 
@@ -227,7 +227,7 @@ class TestFilterPropList(HookTestCase):
                 ' exit code = {0}'.format(p.returncode))
 
         # Verify that the proper error is indicated.
-        self.assertRegex(
+        self.assertRegexpMatches(
             p.stderr.read(), r'Cannot use junk value for stuff',
             'Expected error message not returned')
 
@@ -262,7 +262,7 @@ class TestFilterPropList(HookTestCase):
                 ' exit code = {0}'.format(p.returncode))
 
         # Verify that an error message is provided.
-        self.assertRegex(
+        self.assertRegexpMatches(
             p.stderr.read(), r'(?s)^\s*$',
             'Unexpected error message returned')
 

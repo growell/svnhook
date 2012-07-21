@@ -51,7 +51,7 @@ class TestFilterFileContent(HookTestCase):
                 ' exit code = {0}'.format(p.returncode))
 
         # Verify that the proper error is indicated.
-        self.assertRegex(
+        self.assertRegexpMatches(
             p.stderr.read(), r'Internal hook error',
             'Internal error message not returned')
 
@@ -90,7 +90,7 @@ class TestFilterFileContent(HookTestCase):
                 ' exit code = {0}'.format(p.returncode))
 
         # Verify that the proper error is indicated.
-        self.assertRegex(
+        self.assertRegexpMatches(
             p.stderr.read(), r'How high\?',
             'Expected error message not found')
 
@@ -124,7 +124,7 @@ class TestFilterFileContent(HookTestCase):
                 ' exit code = {0}'.format(p.returncode))
 
         # Verify that an error message isn't returned.
-        self.assertRegex(
+        self.assertRegexpMatches(
             p.stderr.read(), r'(?s)^\s*$',
             'Unexpected error message found')
 
@@ -158,7 +158,7 @@ class TestFilterFileContent(HookTestCase):
                 ' exit code = {0}'.format(p.returncode))
 
         # Verify that the proper error is indicated.
-        self.assertRegex(
+        self.assertRegexpMatches(
             p.stderr.read(), r'What is your question\?',
             'Expected error message not found')
 
@@ -192,7 +192,7 @@ class TestFilterFileContent(HookTestCase):
                 ' exit code = {0}'.format(p.returncode))
 
         # Verify that an error message isn't returned.
-        self.assertRegex(
+        self.assertRegexpMatches(
             p.stderr.read(), r'(?s)^\s*$',
             'Unexpected error message found')
 
@@ -229,7 +229,7 @@ class TestFilterFileContent(HookTestCase):
                 ' exit code = {0}'.format(p.returncode))
 
         # Verify that the error message is returned.
-        self.assertRegex(
+        self.assertRegexpMatches(
             p.stderr.read(), r'This is evil',
             'Expected error message not found')
 

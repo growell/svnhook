@@ -40,7 +40,7 @@ class TestFilterChgType(HookTestCase):
         p.wait()
 
         # Verify the proper error message is returned.
-        self.assertRegex(
+        self.assertRegexpMatches(
             stderrdata, r'Internal hook error',
             'Expected error message not found')
 
@@ -71,7 +71,7 @@ class TestFilterChgType(HookTestCase):
         p.wait()
 
         # Verify the proper error message is returned.
-        self.assertRegex(
+        self.assertRegexpMatches(
             stderrdata, r'Change type not allowed',
             'Expected error message not found')
 
@@ -109,7 +109,7 @@ class TestFilterChgType(HookTestCase):
             'Expected exit code not found')
 
         # Verify no error message is returned.
-        self.assertRegex(
+        self.assertRegexpMatches(
             stderrdata, r'(?s)^\s*$',
             'Unexpected error message found')
 
@@ -142,7 +142,7 @@ class TestFilterChgType(HookTestCase):
             'Expected exit code not found')
 
         # Verify no error message is returned.
-        self.assertRegex(
+        self.assertRegexpMatches(
             stderrdata, r'(?s)^\s*$',
             'Unexpected error message found')
 
@@ -170,7 +170,7 @@ class TestFilterChgType(HookTestCase):
         p.wait()
 
         # Verify the proper error message is returned.
-        self.assertRegex(
+        self.assertRegexpMatches(
             stderrdata, r'cannot be altered',
             'Expected error message not found')
 
