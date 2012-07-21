@@ -4,12 +4,20 @@
 ######################################################################
 __all__ = ['HookTestCase', 'SmtpTestCase', 'LogScanner', 'rmtree']
 
-import re
-import errno, os, sys, shutil, stat
+# For pre-Python 2.7, use back-ported unit testing module.
+import sys
+if sys.version_info < (2, 7):
+    import unittest2
+    unitTestModule = unittest2
+else:
+    import unittest
+    unitTestModule = unittest
+
+import pprint
+import re, errno, os, shutil, stat
 import subprocess
 import StringIO, mailbox, email
 from textwrap import dedent
-import unittest, pprint
 
 from smtpsink import SmtpSink
 
@@ -22,7 +30,7 @@ tmpdir = os.path.abspath(os.path.join(
 # If needed, create the temporary directory.
 if not os.path.isdir(tmpdir): os.makedirs(tmpdir)
 
-class HookTestCase(unittest.TestCase):
+class HookTestCase(unitTestModule.TestCase):
     """SvnHook Test Case Base Class"""
 
     # Per-Suite Test Case Indexes
@@ -158,25 +166,6 @@ class HookTestCase(unittest.TestCase):
         return os.path.join(
             self.repopath, 'logs', hookname + '.log')
 
-    #----------------------------------------------------------------
-    # backport assertRegex() alias from 3.2 to prior Pythons
-    #----------------------------------------------------------------
-    if not hasattr(unittest.TestCase, "assertRegex"):
-        if hasattr(unittest.TestCase, "assertRegexpMatches"):
-            # was present in 2.7/3.1 under name assertRegexpMatches
-            assertRegex = unittest.TestCase.assertRegexpMatches
-        else:
-            # 3.0 and <= 2.6 didn't have this method at all
-            def assertRegex(self, text, expected_regex, msg=None):
-                """Fail the test unless the text matches the regular expression."""
-                if isinstance(expected_regex, str):
-                    assert expected_regex, "expected_regex must not be empty."
-                    expected_regex = re.compile(expected_regex)
-                if not expected_regex.search(text):
-                    msg = msg or "Regex didn't match: "
-                    std = '%r not found in %r' % (expected_regex.pattern, text)
-                    raise self.failureException(msg + std)
-
     def assertLogRegexp(self, hookname, regexp, msg=None):
         """Assert that hook log matches a regular expression.
 
@@ -186,7 +175,7 @@ class HookTestCase(unittest.TestCase):
             msg: Assertion message when not matched.
         """
         with open(self.getHookLog(hookname)) as f:
-            self.assertRegex(f.read(), regexp, msg)
+            self.assertRegexpMatchespMatches(f.read(), regexp, msg)
 
     def callHook(self, hookname, *args, **kwargs):
         """Call a hook script directly.
@@ -657,7 +646,7 @@ class SmtpTestCase(HookTestCase):
         """
         # Assert against the decoded, non-multipart, content. Trim off
         # the terminal whitespace (two linefeeds).
-        self.assertRegex(
+        self.assertRegexpMatchespMatches(
             message.get_payload(None, True).rstrip(), regexp, msg)
 
 class LogScanner(object):

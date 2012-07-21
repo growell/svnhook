@@ -40,7 +40,7 @@ class TestFilterPath(HookTestCase):
         p.wait()
 
         # Verify the proper error message is returned.
-        self.assertRegex(
+        self.assertRegexpMatches(
             stderrdata, r'Internal hook error',
             'Expected error message not found')
 
@@ -72,7 +72,7 @@ class TestFilterPath(HookTestCase):
         p.wait()
 
         # Verify the proper error message is returned.
-        self.assertRegex(
+        self.assertRegexpMatches(
             stderrdata, r'Path not allowed',
             'Expected error message not found')
 
@@ -104,7 +104,7 @@ class TestFilterPath(HookTestCase):
         p.wait()
 
         # Verify that no error message is returned.
-        self.assertRegex(
+        self.assertRegexpMatches(
             stderrdata, r'(?s)^\s*$',
             'Unexpected error message found')
 

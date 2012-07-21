@@ -37,7 +37,7 @@ class TestFilterPathList(HookTestCase):
         stdoutdata, stderrdata = p.communicate()
 
         # Verify that the error message was produced.
-        self.assertRegex(
+        self.assertRegexpMatches(
             stderrdata, r'Internal hook error',
             'Expected error message not found')
 
@@ -71,7 +71,7 @@ class TestFilterPathList(HookTestCase):
         stdoutdata, stderrdata = p.communicate()
 
         # Verify that the error message was produced.
-        self.assertRegex(
+        self.assertRegexpMatches(
             stderrdata, r'Invalid path name',
             'Expected error message not found')
 
@@ -100,7 +100,7 @@ class TestFilterPathList(HookTestCase):
         stdoutdata, stderrdata = p.communicate()
 
         # Verify that an error message wasn't produced.
-        self.assertRegex(
+        self.assertRegexpMatches(
             stderrdata, r'(?s)^\s*$',
             'Unexpected error message found')
 

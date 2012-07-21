@@ -48,7 +48,7 @@ class TestFilterLogMsg(HookTestCase):
                 ' exit code = {0}'.format(p.returncode))
 
         # Verify that the proper error is indicated.
-        self.assertRegex(
+        self.assertRegexpMatches(
             p.stderr.read(), r'Internal hook error',
             'Internal error message not returned')
 
@@ -84,7 +84,7 @@ class TestFilterLogMsg(HookTestCase):
                 ' exit code = {0}'.format(p.returncode))
 
         # Verify that the proper error is indicated.
-        self.assertRegex(
+        self.assertRegexpMatches(
             p.stderr.read(), r'Cannot expose secret!',
             'Expected error message not found')
 
@@ -115,7 +115,7 @@ class TestFilterLogMsg(HookTestCase):
                 ' exit code = {0}'.format(p.returncode))
 
         # Verify that an error message isn't returned.
-        self.assertRegex(
+        self.assertRegexpMatches(
             p.stderr.read(), r'(?s)^\s*$',
             'Unexpected error message found')
 
@@ -146,7 +146,7 @@ class TestFilterLogMsg(HookTestCase):
                 ' exit code = {0}'.format(p.returncode))
 
         # Verify that the proper error is indicated.
-        self.assertRegex(
+        self.assertRegexpMatches(
             p.stderr.read(), r'Log message is required',
             'Expected error message not found')
 

@@ -40,7 +40,7 @@ class TestFilterAuthor1(HookTestCase):
 
         # Check for unexpected error details.
         errstr = p.stderr.read()
-        self.assertRegex(
+        self.assertRegexpMatches(
             errstr, r'(?s)^\s*$', 'Unexpected error message')
 
         # Check for the expected success.
@@ -74,7 +74,7 @@ class TestFilterAuthor1(HookTestCase):
 
         # Check for the expected error details (via SendError).
         errstr = p.stderr.read()
-        self.assertRegex(
+        self.assertRegexpMatches(
             errstr, r'Commits not allowed by ReadOnly')
 
     def test_03_block_author_ci(self):
@@ -103,7 +103,7 @@ class TestFilterAuthor1(HookTestCase):
 
         # Check for the expected error details (via SendError).
         errstr = p.stderr.read()
-        self.assertRegex(
+        self.assertRegexpMatches(
             errstr, r'Commits not allowed by ReadOnly')
 
 class TestFilterAuthor2(SmtpTestCase):
