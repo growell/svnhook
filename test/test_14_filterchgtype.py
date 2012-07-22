@@ -46,7 +46,7 @@ class TestFilterChgType(HookTestCase):
 
         # Verify an internal error is indicated.
         self.assertEquals(
-            p.returncode, 255,
+            p.returncode & 0x7f, 0x7f,
             'Error exit code not found: exit code = {0}'\
                 .format(p.returncode))
 

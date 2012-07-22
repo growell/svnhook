@@ -46,9 +46,9 @@ class TestFilterUser(HookTestCase):
 
         # Verify the exit code is correct.
         self.assertEqual(
-            p.returncode, 255,
-            'Error exit code not found: '\
-            ' exit code = {0}'.format(p.returncode))
+            p.returncode & 0x7f, 0x7f,
+            'Error exit code not found: exit code = {0}'\
+                .format(p.returncode))
 
         # Verify the proper error message is returned.
         self.assertRegexpMatches(
