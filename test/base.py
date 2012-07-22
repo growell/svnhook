@@ -8,10 +8,10 @@ __all__ = ['HookTestCase', 'SmtpTestCase', 'LogScanner', 'rmtree']
 import sys
 if sys.version_info < (2, 7):
     import unittest2
-    unitTestModule = unittest2
+    unit_test = unittest2
 else:
     import unittest
-    unitTestModule = unittest
+    unit_test = unittest
 
 import pprint
 import re, errno, os, shutil, stat
@@ -30,7 +30,7 @@ tmpdir = os.path.abspath(os.path.join(
 # If needed, create the temporary directory.
 if not os.path.isdir(tmpdir): os.makedirs(tmpdir)
 
-class HookTestCase(unitTestModule.TestCase):
+class HookTestCase(unit_test.TestCase):
     """SvnHook Test Case Base Class"""
 
     # Per-Suite Test Case Indexes
