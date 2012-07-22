@@ -46,9 +46,9 @@ class TestFilterPath(HookTestCase):
 
         # Verify a failure is indicated.
         self.assertEqual(
-            p.returncode, 255,
-            'Error exit code not found:'\
-                ' exit code = {0}'.format(p.returncode))
+            p.returncode & 0x7f, 0x7f,
+            'Error exit code not found: exit code = {0}'\
+                .format(p.returncode))
 
     def test_02_match(self):
         """Path true match."""
