@@ -29,9 +29,15 @@ class Filter(actions.Action):
 
         Returns: Exit code of the filter.
         """
+        # Get the child element iterator.
+        if hasattr(self.thistag, 'iterfind'):
+            childiter = self.thistag.iterfind(r'./*')
+        else:
+            childiter = self.thistag.findall(r'./*')
+
         # Execute the child actions.
         exitcode = 0
-        for childtag in self.thistag.iterfind(r'./*'):
+        for childtag in childiter:
             logger.debug('child tag = "{0}"'.format(childtag.tag))
 
             # Look for an action handler class that matches the
