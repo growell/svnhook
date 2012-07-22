@@ -77,7 +77,7 @@ setup(
         ('schema', ['schema/{0}.xsd'.format(h) for h in hooknames]),
         ],
     cmdclass={'test': UnitTest},
-    requires=['yaml']
+    requires=['argparse', 'yaml']
 )
 
 ########################### end of file ##############################
