@@ -63,8 +63,8 @@ class Context(object):
 
         # Replace all instances of the tokens.
         for token, value in found.items():
-            text = re.sub(r'\$\{' + token + r'\}',
-                   str(value), text, flags=re.IGNORECASE)
+            text = re.sub(
+                r'(?i)\$\{' + token + r'\}', str(value), text)
 
         # Try another level of expansion.
         return self.expand(text, depth + 1)
