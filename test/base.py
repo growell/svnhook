@@ -175,7 +175,7 @@ class HookTestCase(unit_test.TestCase):
             msg: Assertion message when not matched.
         """
         with open(self.getHookLog(hookname)) as f:
-            self.assertRegexpMatchespMatches(f.read(), regexp, msg)
+            self.assertRegexpMatches(f.read(), regexp, msg)
 
     def callHook(self, hookname, *args, **kwargs):
         """Call a hook script directly.
@@ -646,7 +646,7 @@ class SmtpTestCase(HookTestCase):
         """
         # Assert against the decoded, non-multipart, content. Trim off
         # the terminal whitespace (two linefeeds).
-        self.assertRegexpMatchespMatches(
+        self.assertRegexpMatches(
             message.get_payload(None, True).rstrip(), regexp, msg)
 
 class LogScanner(object):
