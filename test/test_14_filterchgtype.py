@@ -47,7 +47,8 @@ class TestFilterChgType(HookTestCase):
         # Verify an internal error is indicated.
         self.assertEquals(
             p.returncode, 255,
-            'Expected exit code not found')
+            'Error exit code not found: exit code = {0}'\
+                .format(p.returncode))
 
     def test_02_simple_regex_match(self):
         """Simple regex match."""

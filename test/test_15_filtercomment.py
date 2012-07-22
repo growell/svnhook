@@ -47,7 +47,8 @@ class TestFilterComment(HookTestCase):
         # Verify a failure is indicated.
         self.assertEqual(
             p.returncode, 255,
-            'Unexpected exit code found')
+            'Error exit code not found: exit code = {0}'\
+                .format(p.returncode))
 
     def test_02_match_true(self):
         """Comment regex true match."""
