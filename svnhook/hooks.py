@@ -20,7 +20,13 @@ import os, sys
 import re
 import yaml
 
-from xml.etree.ElementTree import ElementTree, ParseError
+from xml.etree.ElementTree import ElementTree
+if sys.version_info >= (2, 7):
+    from xml.etree.ElementTree import ParseError
+    parse_error = ParseError
+else:
+    from xml.parsers.expat import ExpatError
+    parse_error = ExpatError
 
 logger = logging.getLogger()
 
@@ -44,13 +50,15 @@ class SvnHook(object):
                             + cfgfile)
 
         # If a co-located logging configuration file exists, use it.
-        # Prefer a "*-log.yml" file over a "*-log.conf" file.
+        # Prefer a "*-log.yml" (Python 2.7+) file over a "*-log.conf"
+        # file.
         logymlfile = re.sub(
             r'\.[^\.]+$', r'-log.yml', cfgfile)
         logconffile = re.sub(
             r'\.[^\.]+$', r'-log.conf', cfgfile)
 
-        if os.path.isfile(logymlfile) == True:
+        if hasattr(logging.config, 'dictConfig')\
+                and os.path.isfile(logymlfile) == True:
             logcfg = yaml.load(open(logymlfile).read())
             logging.config.dictConfig(logcfg)
         elif os.path.isfile(logconffile) == True:
@@ -65,7 +73,7 @@ class SvnHook(object):
         # parse error, make sure to log it - before rethrowing it.
         try:
             self.cfg = ElementTree(file=cfgfile)
-        except ParseError:
+        except parse_error:
             logger.fatal(
                 'Unable to parse hook configuration file!',
                 exc_info=True)
