@@ -36,7 +36,7 @@ class TestFilterPropList(HookTestCase):
           ''')
 
         # Add a working copy change.
-        self.setWcProperty('junk', '*', 'fileA1.txt')
+        self.setWcProperty('junk', 'x', 'fileA1.txt')
 
         # Attempt to commit the change.
         p = self.commitWc()
@@ -78,7 +78,7 @@ class TestFilterPropList(HookTestCase):
           ''')
 
         # Add a working copy change.
-        self.setWcProperty('junk', '*', 'fileA1.txt')
+        self.setWcProperty('junk', 'x', 'fileA1.txt')
 
         # Attempt to commit the change.
         p = self.commitWc()
@@ -112,7 +112,7 @@ class TestFilterPropList(HookTestCase):
           ''')
 
         # Add a working copy change.
-        self.setWcProperty('zjunk', '*', 'fileA1.txt')
+        self.setWcProperty('zjunk', 'x', 'fileA1.txt')
 
         # Attempt to commit the changes.
         p = self.commitWc()

@@ -33,7 +33,7 @@ class TestFilterRevProp(HookTestCase):
           ''')
 
         # Apply a revision property change.
-        p = self.setRevProperty(1, 'junk', '*')
+        p = self.setRevProperty(1, 'junk', 'x')
 
         # Verify that an error is indicated. Please note that this is
         # NOT the hook script exit code. This is the "svn propset" exit
@@ -70,7 +70,7 @@ class TestFilterRevProp(HookTestCase):
           ''')
 
         # Apply a revision property change.
-        p = self.setRevProperty(1, 'junk', '*')
+        p = self.setRevProperty(1, 'junk', 'x')
 
         # Verify that an error is indicated.
         self.assertEqual(
@@ -98,7 +98,7 @@ class TestFilterRevProp(HookTestCase):
           ''')
 
         # Apply a revision property change.
-        p = self.setRevProperty(1, 'zjunk', '*')
+        p = self.setRevProperty(1, 'zjunk', 'x')
 
         # Verify that an error isn't indicated.
         self.assertEqual(
