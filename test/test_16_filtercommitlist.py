@@ -44,7 +44,7 @@ class TestFilterCommitList(HookTestCase):
         self.assertEqual(
             p.returncode, 1,
             'Error exit code not found:'\
-                ' exit code = {}'.format(p.returncode))
+                ' exit code = {0}'.format(p.returncode))
 
         # Verify that the proper error is indicated.
         self.assertRegexpMatches(
@@ -79,7 +79,7 @@ class TestFilterCommitList(HookTestCase):
         self.assertEqual(
             p.returncode, 1,
             'Error exit code not found:'\
-                ' exit code = {}'.format(p.returncode))
+                ' exit code = {0}'.format(p.returncode))
 
         # Verify that the proper error is indicated.
         self.assertRegexpMatches(
@@ -112,7 +112,7 @@ class TestFilterCommitList(HookTestCase):
         self.assertEqual(
             p.returncode, 1,
             'Error exit code not found:'\
-                ' exit code = {}'.format(p.returncode))
+                ' exit code = {0}'.format(p.returncode))
 
         # Verify that the proper error is indicated.
         self.assertRegexpMatches(
@@ -143,7 +143,7 @@ class TestFilterCommitList(HookTestCase):
         self.assertEqual(
             p.returncode, 1,
             'Error exit code not found:'\
-                ' exit code = {}'.format(p.returncode))
+                ' exit code = {0}'.format(p.returncode))
 
         # Verify that the proper error is indicated.
         self.assertRegexpMatches(
@@ -174,11 +174,11 @@ class TestFilterCommitList(HookTestCase):
         self.assertEqual(
             p.returncode, 0,
             'Success exit code not found:'\
-                ' exit code = {}'.format(p.returncode))
+                ' exit code = {0}'.format(p.returncode))
 
         # Verify that an error message isn't returned.
-        self.assertNotRegexpMatches(
-            p.stderr.read(), r'\S',
+        self.assertRegexpMatches(
+            p.stderr.read(), r'(?s)^\s*$',
             'Unexpected error message returned')
 
     def test_06_ci_path_match(self):
@@ -205,7 +205,7 @@ class TestFilterCommitList(HookTestCase):
         self.assertEqual(
             p.returncode, 1,
             'Error exit code not found:'\
-                ' exit code = {}'.format(p.returncode))
+                ' exit code = {0}'.format(p.returncode))
 
         # Verify that the proper error is indicated.
         self.assertRegexpMatches(
@@ -236,7 +236,7 @@ class TestFilterCommitList(HookTestCase):
         self.assertEqual(
             p.returncode, 1,
             'Error exit code not found:'\
-                ' exit code = {}'.format(p.returncode))
+                ' exit code = {0}'.format(p.returncode))
 
         # Verify that the proper error is indicated.
         self.assertRegexpMatches(
@@ -267,11 +267,11 @@ class TestFilterCommitList(HookTestCase):
         self.assertEqual(
             p.returncode, 0,
             'Success exit code not found:'\
-                ' exit code = {}'.format(p.returncode))
+                ' exit code = {0}'.format(p.returncode))
 
         # Verify that an error message isn't returned.
-        self.assertNotRegexpMatches(
-            p.stderr.read(), r'\S',
+        self.assertRegexpMatches(
+            p.stderr.read(), r'(?s)^\s*$',
             'Unexpected error message returned')
 
 class TestFilterCommitList2(SmtpTestCase):
@@ -307,7 +307,7 @@ class TestFilterCommitList2(SmtpTestCase):
         self.assertEqual(
             p.returncode, 0,
             'Success exit code not found:'\
-                ' exit code = {}'.format(p.returncode))
+                ' exit code = {0}'.format(p.returncode))
 
         # Verify that the proper advisory is indicated.
         self.assertRegexpMatches(
@@ -326,10 +326,10 @@ class TestFilterCommitList2(SmtpTestCase):
           <Actions>
             <FilterCommitList matchFirst="true">
               <PathRegex>/$</PathRegex>
-              <SendSmtp port="{}">
+              <SendSmtp port="{0}">
                 <FromAddress>source@mydomain.com</FromAddress>
                 <ToAddress>destination@yourdomain.com</ToAddress>
-                <Subject>{}</Subject>
+                <Subject>{1}</Subject>
                 <Message>Folder is added/modified.</Message>
               </SendSmtp>
             </FilterCommitList>
@@ -348,7 +348,7 @@ class TestFilterCommitList2(SmtpTestCase):
         self.assertEqual(
             p.returncode, 0,
             'Success exit code not found:'\
-                ' exit code = {}'.format(p.returncode))
+                ' exit code = {0}'.format(p.returncode))
 
         # Look for the first folder email message. It should be found.
         try:
@@ -378,10 +378,10 @@ class TestFilterCommitList2(SmtpTestCase):
           <Actions>
             <FilterCommitList matchFirst="false">
               <PathRegex>/$</PathRegex>
-              <SendSmtp port="{}">
+              <SendSmtp port="{0}">
                 <FromAddress>source@mydomain.com</FromAddress>
                 <ToAddress>destination@yourdomain.com</ToAddress>
-                <Subject>{}</Subject>
+                <Subject>{1}</Subject>
                 <Message>Folder is added/modified.</Message>
               </SendSmtp>
             </FilterCommitList>
@@ -400,7 +400,7 @@ class TestFilterCommitList2(SmtpTestCase):
         self.assertEqual(
             p.returncode, 0,
             'Success exit code not found:'\
-                ' exit code = {}'.format(p.returncode))
+                ' exit code = {0}'.format(p.returncode))
 
         # Look for the first folder email message. It should be found.
         try:

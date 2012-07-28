@@ -75,8 +75,8 @@ class TestFilterBreakUnlock(HookTestCase):
             'Expected success exit code not found')
 
         # Verify an error message isn't returned.
-        self.assertNotRegexpMatches(
-            stderrdata, r'\S',
+        self.assertRegexpMatches(
+            stderrdata, r'(?s)^\s*$',
             'Unexpected error message found')
 
     def test_03_explicit_match(self):
@@ -165,8 +165,8 @@ class TestFilterBreakUnlock(HookTestCase):
             'Unexpected error exit code found')
 
         # Verify an error message isn't returned.
-        self.assertNotRegexpMatches(
-            stderrdata, r'\S',
+        self.assertRegexpMatches(
+            stderrdata, r'(?s)^\s*$',
             'Unexpected error message found')
 
 # Allow manual execution of tests.

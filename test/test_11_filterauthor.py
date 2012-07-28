@@ -40,8 +40,8 @@ class TestFilterAuthor1(HookTestCase):
 
         # Check for unexpected error details.
         errstr = p.stderr.read()
-        self.assertNotRegexpMatches(
-            errstr, r'\S', 'Unexpected error message')
+        self.assertRegexpMatches(
+            errstr, r'(?s)^\s*$', 'Unexpected error message')
 
         # Check for the expected success.
         self.assertEqual(
@@ -117,7 +117,7 @@ class TestFilterAuthor2(SmtpTestCase):
     def test_04_block_author(self):
         """Suspicious author email"""
         # Define the message parameters.
-        subject = 'test @ {}'.format(time.asctime())
+        subject = 'test @ {0}'.format(time.asctime())
         body = 'User ${Author} committed r${Revision}!'
 
         # Define the hook configuration. In actual use, you're more
@@ -127,11 +127,11 @@ class TestFilterAuthor2(SmtpTestCase):
           <Actions>
             <FilterAuthor>
               <AuthorRegex>ReadOnly</AuthorRegex>
-              <SendSmtp port="{}">
+              <SendSmtp port="{0}">
                 <FromAddress>source@mydomain.com</FromAddress>
                 <ToAddress>destination@yourdomain.com</ToAddress>
-                <Subject>{}</Subject>
-                <Message>{}</Message>
+                <Subject>{1}</Subject>
+                <Message>{2}</Message>
               </SendSmtp>
             </FilterAuthor>
           </Actions>

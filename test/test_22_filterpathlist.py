@@ -45,7 +45,7 @@ class TestFilterPathList(HookTestCase):
         self.assertEqual(
             p.returncode, 1,
             'Error exit code not found:'\
-                ' exit code = {}'.format(p.returncode))
+                ' exit code = {0}'.format(p.returncode))
 
         # Verify that the detailed error is logged.
         self.assertLogRegexp(
@@ -79,7 +79,7 @@ class TestFilterPathList(HookTestCase):
         self.assertEqual(
             p.returncode, 1,
             'Error exit code not found:'\
-                ' exit code = {}'.format(p.returncode))
+                ' exit code = {0}'.format(p.returncode))
 
     def test_03_mismatch(self):
         """Path mismatch"""
@@ -100,15 +100,15 @@ class TestFilterPathList(HookTestCase):
         stdoutdata, stderrdata = p.communicate()
 
         # Verify that an error message wasn't produced.
-        self.assertNotRegexpMatches(
-            stderrdata, r'\S',
+        self.assertRegexpMatches(
+            stderrdata, r'(?s)^\s*$',
             'Unexpected error message found')
 
         # Verify that an error wasn't indicated.
         self.assertEqual(
             p.returncode, 0,
             'Success exit code not found:'\
-                ' exit code = {}'.format(p.returncode))
+                ' exit code = {0}'.format(p.returncode))
 
 # Allow manual execution of tests.
 if __name__=='__main__':

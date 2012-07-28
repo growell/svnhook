@@ -43,7 +43,7 @@ class Context(object):
         # Limit the recursion depth.
         if depth > 12: raise RuntimeError(
             'Maximum token recursion depth exceeded: '\
-                'text = "{}", tokens = {}'.format(text, self.tokens))
+                'text = "{0}", tokens = {1}'.format(text, self.tokens))
 
         # Get the case-insensitive tokens, and their values, as found
         # in the template. This removes any duplicates and ignores any
@@ -63,8 +63,8 @@ class Context(object):
 
         # Replace all instances of the tokens.
         for token, value in found.items():
-            text = re.sub(r'\$\{' + token + r'\}',
-                   str(value), text, flags=re.IGNORECASE)
+            text = re.sub(
+                r'(?i)\$\{' + token + r'\}', str(value), text)
 
         # Try another level of expansion.
         return self.expand(text, depth + 1)
@@ -78,7 +78,7 @@ class Context(object):
         Returns: Output produced by the command.
         """
         cmd = [str(field) for field in cmd]
-        logger.debug('Execute: {}'.format(cmd))
+        logger.debug('Execute: {0}'.format(cmd))
         try:
             p = subprocess.Popen(cmd,
                                  stdout=subprocess.PIPE,
@@ -94,7 +94,7 @@ class Context(object):
         # Handle errors returned by the command.
         if p.returncode != 0:
             errstr = p.stderr.read().strip()
-            msg = 'Command failed: {}: {}'.format(cmd, errstr)
+            msg = 'Command failed: {0}: {1}'.format(cmd, errstr)
             logger.error(msg)
             raise RuntimeError(msg)
 

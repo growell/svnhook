@@ -29,10 +29,16 @@ class Filter(actions.Action):
 
         Returns: Exit code of the filter.
         """
+        # Get the child element iterator.
+        if hasattr(self.thistag, 'iterfind'):
+            childiter = self.thistag.iterfind(r'./*')
+        else:
+            childiter = self.thistag.findall(r'./*')
+
         # Execute the child actions.
         exitcode = 0
-        for childtag in self.thistag.iterfind(r'./*'):
-            logger.debug('child tag = "{}"'.format(childtag.tag))
+        for childtag in childiter:
+            logger.debug('child tag = "{0}"'.format(childtag.tag))
 
             # Look for an action handler class that matches the
             # child tag name.
@@ -48,7 +54,7 @@ class Filter(actions.Action):
             if not action: continue
 
             # Construct and run the child action.
-            logger.debug('Running "{}"...'.format(childtag.tag))
+            logger.debug('Running "{0}"...'.format(childtag.tag))
             try:
                 exitcode = action(self.context, childtag).run()
             except Exception as e:
@@ -99,7 +105,7 @@ class FilterAddNameCase(Filter):
         listing = self.listings[folder] = dict()
 
         # Request the parent folder listing.
-        cmdline = 'svnlook tree "{}" "{}" --non-recursive'\
+        cmdline = 'svnlook tree "{0}" "{1}" --non-recursive'\
             .format(self.context.repospath, folder)
         logger.debug('Execute: ' + cmdline)
         try:
@@ -124,13 +130,13 @@ class FilterAddNameCase(Filter):
         if p.returncode == errno.ENOENT: return listing
         elif p.returncode != 0:
             errstr = p.stderr.read().strip()
-            msg = 'Command failed: {}: {}'.format(cmdline, errstr)
+            msg = 'Command failed: {0}: {1}'.format(cmdline, errstr)
             logger.error(msg)
             raise RuntimeError(msg)
 
         # Parse the folder listing.
         for line in p.stdout.readlines():
-            logger.debug('line = "{}"'.format(line.rstrip()))
+            logger.debug('line = "{0}"'.format(line.rstrip()))
 
             # Skip blank lines and headers.
             match = re.match(r'\s((\S+?)/?)$', line.rstrip())
@@ -159,7 +165,7 @@ class FilterAddNameCase(Filter):
                 r'(.*/)?((.+?)/?)$', change.path).group(1,2,3)
             if folder == None: folder = '/'
             logger.debug(
-                'folder = "{}", typedname = "{}", name = "{}"'\
+                'folder = "{0}", typedname = "{1}", name = "{2}"'\
                     .format(folder, typedname, name))
 
             # Skip entries not in the case-insensitive listing.
@@ -205,7 +211,7 @@ class FilterAuthor(Filter):
         # Get the author of the transaction or revision. This will
         # cache the author name in the "Author" token.
         self.author = self.context.get_author()
-        logger.debug('author = "{}"'.format(self.author))
+        logger.debug('author = "{0}"'.format(self.author))
 
     def run(self):
         """If author conditions match, run child actions.
@@ -235,12 +241,12 @@ class FilterBreakUnlock(Filter):
 
         # Get the comparison sense flag.
         self.sense = self.get_boolean('sense', default=True)
-        logger.debug('sense = {}'.format(self.sense))
+        logger.debug('sense = {0}'.format(self.sense))
 
         # Get the filter parameters.
         self.breakunlock = (
             self.context.tokens['BreakUnlock'] == '1')
-        logger.debug('breakunlock = {}'.format(self.breakunlock))
+        logger.debug('breakunlock = {0}'.format(self.breakunlock))
 
     def run(self):
         """If the flag matches the filter sense, run child actions.
@@ -279,7 +285,7 @@ class FilterCapabilities(Filter):
 
         # Get the capabilities string.
         self.capabilities = self.context.tokens['Capabilities']
-        logger.debug('capabilities = "{}"'.format(self.capabilities))
+        logger.debug('capabilities = "{0}"'.format(self.capabilities))
 
     def run(self):
         """If client capabilities match, run actions.
@@ -315,7 +321,7 @@ class FilterChgType(Filter):
 
         # Get the change type string.
         self.chgtype = self.context.tokens['ChgType']
-        logger.debug('chgtype = "{}"'.format(self.chgtype))
+        logger.debug('chgtype = "{0}"'.format(self.chgtype))
 
     def run(self):
         """If revprop change types match, run actions.
@@ -351,7 +357,7 @@ class FilterComment(Filter):
 
         # Get the lock comment.
         self.comment = self.context.tokens['Comment']
-        logger.debug('comment = "{}"'.format(self.comment))
+        logger.debug('comment = "{0}"'.format(self.comment))
 
     def run(self):
         """If lock comment matches, run actions.
@@ -382,7 +388,7 @@ class FilterCommitList(Filter):
 
         # Save the "stop on first match" flag.
         self.matchfirst = self.get_boolean('matchFirst')
-        logger.debug('matchFirst = {}'.format(self.matchfirst))
+        logger.debug('matchFirst = {0}'.format(self.matchfirst))
 
         # Construct a regular expression tag evaluator for the path
         # names.
@@ -415,8 +421,8 @@ class FilterCommitList(Filter):
 
         # Compare the changes to the regular expressions.
         for change in changes:
-            logger.debug('path = "{}"'.format(change.path))
-            logger.debug('chgtype = "{}"'.format(change.type))
+            logger.debug('path = "{0}"'.format(change.path))
+            logger.debug('chgtype = "{0}"'.format(change.type))
 
             # Check for a change path mismatch.
             if self.pathregex \
@@ -464,7 +470,7 @@ class FilterFileContent(Filter):
 
         # Get the current path. (This may point to a folder.)
         self.path = self.context.tokens['Path']
-        logger.debug('path = "{}"'.format(self.path))
+        logger.debug('path = "{0}"'.format(self.path))
         
     def run(self):
         """Filter actions based on file content.
@@ -500,7 +506,7 @@ class FilterLockOwner(Filter):
 
         # Get the filter sense flag.
         self.sense = self.get_boolean('sense', default=True)
-        logger.debug('sense = {}'.format(self.sense))
+        logger.debug('sense = {0}'.format(self.sense))
 
         # Get the lock location.
         self.repospath = self.context.tokens['ReposPath']
@@ -512,7 +518,7 @@ class FilterLockOwner(Filter):
         # Request the path lock details. Since this is a low-volume
         # hook, there's no need to cache the result.
         cmd = ['svnlook', 'lock', self.repospath, self.path]
-        logger.debug('Execute: {}'.format(cmd))
+        logger.debug('Execute: {0}'.format(cmd))
         try:
             p = subprocess.Popen(
                 cmd,
@@ -531,14 +537,14 @@ class FilterLockOwner(Filter):
         # Handle a command failure.
         if p.returncode != 0:
             errstr = p.stderr.read().strip()
-            msg = 'Command failed: {}: {}'.format(cmd, errstr)
+            msg = 'Command failed: {0}: {1}'.format(cmd, errstr)
             logger.error(msg)
             raise RuntimeError(msg)
 
         # Extract the lock owner name.
         self.owner = None
         for line in p.stdout.readlines():
-            logger.debug('line = "{}"'.format(line.rstrip()))
+            logger.debug('line = "{0}"'.format(line.rstrip()))
             
             # Skip the other lines.
             owner = re.match(r'Owner:\s+(\S+)', line.rstrip())
@@ -546,7 +552,7 @@ class FilterLockOwner(Filter):
 
             # Save the lock owner and stop looking.
             self.owner = owner.group(1)
-            logger.debug('owner = "{}"'.format(self.owner))
+            logger.debug('owner = "{0}"'.format(self.owner))
             return
 
         # Log that it's a new lock.
@@ -590,7 +596,7 @@ class FilterLockToken(Filter):
 
         # Get the actual lock token.
         self.locktoken = self.context.tokens['LockToken']
-        logger.debug('locktoken = "{}"'.format(self.locktoken))
+        logger.debug('locktoken = "{0}"'.format(self.locktoken))
 
     def run(self):
         """Filter actions based on lock tokens.
@@ -627,7 +633,7 @@ class FilterLogMsg(Filter):
 
         # Get the current log message.
         self.logmsg = self.context.get_log_message()
-        logger.debug('logmsg = "{}"'.format(self.logmsg))
+        logger.debug('logmsg = "{0}"'.format(self.logmsg))
 
     def run(self):
         """Filter actions based on log message.
@@ -664,7 +670,7 @@ class FilterPath(Filter):
 
         # Get the path name.
         self.path = self.context.tokens['Path']
-        logger.debug('path = "{}"'.format(self.path))
+        logger.debug('path = "{0}"'.format(self.path))
 
     def run(self):
         """Filter operations based on current path name.
@@ -701,11 +707,11 @@ class FilterPathList(Filter):
 
         # Get the "look for the first match" flag.
         self.matchfirst = self.get_boolean('matchFirst')
-        logger.debug('matchfirst = {}'.format(self.matchfirst))
+        logger.debug('matchfirst = {0}'.format(self.matchfirst))
 
         # Get the list of path names.
         self.paths = self.context.tokens['Paths']
-        logger.debug('paths = {}'.format(self.paths))
+        logger.debug('paths = {0}'.format(self.paths))
 
     def run(self):
         """Filter operations based on current path name.
@@ -765,11 +771,11 @@ class FilterPropList(Filter):
 
         # Get the "look for the first match" flag.
         self.matchfirst = self.get_boolean('matchFirst')
-        logger.debug('matchfirst = {}'.format(self.matchfirst))
+        logger.debug('matchfirst = {0}'.format(self.matchfirst))
 
         # Get the path name.
         self.path = self.context.tokens['Path']
-        logger.debug('path = {}'.format(self.path))
+        logger.debug('path = {0}'.format(self.path))
 
     def run(self):
         """Filter operations based on current path properties.
@@ -835,9 +841,9 @@ class FilterRevProp(Filter):
 
         # Save the revision property details.
         self.propname = self.context.tokens['RevPropName']
-        logger.debug('propname = {}'.format(self.propname))
+        logger.debug('propname = {0}'.format(self.propname))
         self.propvalue = self.context.tokens['RevPropValue']
-        logger.debug('propvalue = "{}"'.format(self.propvalue))
+        logger.debug('propvalue = "{0}"'.format(self.propvalue))
 
     def run(self):
         """Filter operations based on revision property.
@@ -871,12 +877,12 @@ class FilterStealLock(Filter):
 
         # Get the comparison sense flag.
         self.sense = self.get_boolean('sense', default=True)
-        logger.debug('sense = {}'.format(self.sense))
+        logger.debug('sense = {0}'.format(self.sense))
 
         # Get the filter parameters.
         self.steallock = (
             self.context.tokens['StealLock'] == '1')
-        logger.debug('steallock = {}'.format(self.steallock))
+        logger.debug('steallock = {0}'.format(self.steallock))
 
     def run(self):
         """If the flag matches the filter sense, run child actions.
@@ -914,7 +920,7 @@ class FilterUser(Filter):
 
         # Get the user name.
         self.user = self.context.tokens['User']
-        logger.debug('user = "{}"'.format(self.user))
+        logger.debug('user = "{0}"'.format(self.user))
 
     def run(self):
         """Filter operations based on user name.
@@ -943,7 +949,8 @@ class RegexTag(object):
         """
         if regextag.text == None:
             raise ValueError(
-                'Required tag content missing: {}'.format(regextag.tag))
+                'Required tag content missing: {0}'\
+                    .format(regextag.tag))
 
         # Compile the regular expression.
         self.regex = re.compile(regextag.text, *args)

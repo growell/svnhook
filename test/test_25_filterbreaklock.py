@@ -48,7 +48,7 @@ class TestFilterStealLock(HookTestCase):
         self.assertEqual(
             p.returncode, 1,
             'Error exit code not found: '\
-            ' exit code = {}'.format(p.returncode))
+            ' exit code = {0}'.format(p.returncode))
 
     def test_02_default_mismatch(self):
         """Default sense with unset flag."""
@@ -74,11 +74,11 @@ class TestFilterStealLock(HookTestCase):
         self.assertEqual(
             p.returncode, 0,
             'Success exit code not found: '\
-            ' exit code = {}'.format(p.returncode))
+            ' exit code = {0}'.format(p.returncode))
 
         # Verify an error message isn't returned.
-        self.assertNotRegexpMatches(
-            stderrdata, r'\S',
+        self.assertRegexpMatches(
+            stderrdata, r'(?s)^\s*$',
             'Unexpected error message found')
 
     def test_03_explicit_match(self):
@@ -110,7 +110,7 @@ class TestFilterStealLock(HookTestCase):
         self.assertEqual(
             p.returncode, 1,
             'Error exit code not found: '\
-            ' exit code = {}'.format(p.returncode))
+            ' exit code = {0}'.format(p.returncode))
 
     def test_04_explicit_match2(self):
         """Explicit sense with matching unset flag."""
@@ -141,7 +141,7 @@ class TestFilterStealLock(HookTestCase):
         self.assertEqual(
             p.returncode, 1,
             'Error exit code not found: '\
-            ' exit code = {}'.format(p.returncode))
+            ' exit code = {0}'.format(p.returncode))
 
     def test_05_explicit_mismatch(self):
         """Explicit sense with mismatched set flag."""
@@ -167,11 +167,11 @@ class TestFilterStealLock(HookTestCase):
         self.assertEqual(
             p.returncode, 0,
             'Success exit code not found: '\
-            ' exit code = {}'.format(p.returncode))
+            ' exit code = {0}'.format(p.returncode))
 
         # Verify an error message isn't returned.
-        self.assertNotRegexpMatches(
-            stderrdata, r'\S',
+        self.assertRegexpMatches(
+            stderrdata, r'(?s)^\s*$',
             'Unexpected error message found')
 
 # Allow manual execution of tests.

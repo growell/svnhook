@@ -46,8 +46,9 @@ class TestFilterComment(HookTestCase):
 
         # Verify a failure is indicated.
         self.assertEqual(
-            p.returncode, 255,
-            'Unexpected exit code found')
+            p.returncode & 0x7f, 0x7f,
+            'Error exit code not found: exit code = {0}'\
+                .format(p.returncode))
 
     def test_02_match_true(self):
         """Comment regex true match."""
@@ -138,8 +139,8 @@ class TestFilterComment(HookTestCase):
             'Expected exit code not found')
 
         # Verify an error message isn't returned.
-        self.assertNotRegexpMatches(
-            stderrdata, r'\S',
+        self.assertRegexpMatches(
+            stderrdata, r'(?s)^\s*$',
             'Unexpected error message found')
 
     def test_05_end_mismatch(self):
@@ -169,8 +170,8 @@ class TestFilterComment(HookTestCase):
             'Expected exit code not found')
 
         # Verify an error message isn't returned.
-        self.assertNotRegexpMatches(
-            stderrdata, r'\S',
+        self.assertRegexpMatches(
+            stderrdata, r'(?s)^\s*$',
             'Unexpected error message found')
 
 # Allow manual execution of tests.
