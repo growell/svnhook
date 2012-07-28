@@ -33,7 +33,11 @@ class TestFilterRevProp(HookTestCase):
           ''')
 
         # Apply a revision property change.
+<<<<<<< HEAD
         p = self.setRevProperty(1, 'junk', 'x')
+=======
+        p = self.setRevProperty(1, 'junk', '*')
+>>>>>>> origin/master
 
         # Verify that an error is indicated. Please note that this is
         # NOT the hook script exit code. This is the "svn propset" exit
@@ -42,7 +46,11 @@ class TestFilterRevProp(HookTestCase):
         self.assertEqual(
             p.returncode, 1,
             'Error exit code not found:'\
+<<<<<<< HEAD
                 ' exit code = {0}'.format(p.returncode))
+=======
+                ' exit code = {}'.format(p.returncode))
+>>>>>>> origin/master
 
         # Verify that the proper error is indicated.
         self.assertRegexpMatches(
@@ -70,13 +78,21 @@ class TestFilterRevProp(HookTestCase):
           ''')
 
         # Apply a revision property change.
+<<<<<<< HEAD
         p = self.setRevProperty(1, 'junk', 'x')
+=======
+        p = self.setRevProperty(1, 'junk', '*')
+>>>>>>> origin/master
 
         # Verify that an error is indicated.
         self.assertEqual(
             p.returncode, 1,
             'Error exit code not found:'\
+<<<<<<< HEAD
                 ' exit code = {0}'.format(p.returncode))
+=======
+                ' exit code = {}'.format(p.returncode))
+>>>>>>> origin/master
 
         # Verify that the proper error is indicated.
         self.assertRegexpMatches(
@@ -98,17 +114,29 @@ class TestFilterRevProp(HookTestCase):
           ''')
 
         # Apply a revision property change.
+<<<<<<< HEAD
         p = self.setRevProperty(1, 'zjunk', 'x')
+=======
+        p = self.setRevProperty(1, 'zjunk', '*')
+>>>>>>> origin/master
 
         # Verify that an error isn't indicated.
         self.assertEqual(
             p.returncode, 0,
             'Success exit code not found:'\
+<<<<<<< HEAD
                 ' exit code = {0}'.format(p.returncode))
 
         # Verify that an error message isn't sent.
         self.assertRegexpMatches(
             p.stderr.read(), r'(?s)^\s*$',
+=======
+                ' exit code = {}'.format(p.returncode))
+
+        # Verify that an error message isn't sent.
+        self.assertNotRegexpMatches(
+            p.stderr.read(), r'\S',
+>>>>>>> origin/master
             'Unexpected error message found')
 
     def test_04_value_match(self):
@@ -132,7 +160,11 @@ class TestFilterRevProp(HookTestCase):
         self.assertEqual(
             p.returncode, 1,
             'Error exit code not found:'\
+<<<<<<< HEAD
                 ' exit code = {0}'.format(p.returncode))
+=======
+                ' exit code = {}'.format(p.returncode))
+>>>>>>> origin/master
 
         # Verify that the proper error is indicated.
         self.assertRegexpMatches(
@@ -160,11 +192,19 @@ class TestFilterRevProp(HookTestCase):
         self.assertEqual(
             p.returncode, 0,
             'Success exit code not found:'\
+<<<<<<< HEAD
                 ' exit code = {0}'.format(p.returncode))
 
         # Verify that an error message isn't sent.
         self.assertRegexpMatches(
             p.stderr.read(), r'(?s)^\s*$',
+=======
+                ' exit code = {}'.format(p.returncode))
+
+        # Verify that an error message isn't sent.
+        self.assertNotRegexpMatches(
+            p.stderr.read(), r'\S',
+>>>>>>> origin/master
             'Unexpected error message found')
 
     def test_06_both_match(self):
@@ -189,7 +229,11 @@ class TestFilterRevProp(HookTestCase):
         self.assertEqual(
             p.returncode, 1,
             'Error exit code not found:'\
+<<<<<<< HEAD
                 ' exit code = {0}'.format(p.returncode))
+=======
+                ' exit code = {}'.format(p.returncode))
+>>>>>>> origin/master
 
         # Verify that the proper error is indicated.
         self.assertRegexpMatches(
@@ -218,11 +262,19 @@ class TestFilterRevProp(HookTestCase):
         self.assertEqual(
             p.returncode, 0,
             'Success exit code not found:'\
+<<<<<<< HEAD
                 ' exit code = {0}'.format(p.returncode))
 
         # Verify that an error message is provided.
         self.assertRegexpMatches(
             p.stderr.read(), r'(?s)^\s*$',
+=======
+                ' exit code = {}'.format(p.returncode))
+
+        # Verify that an error message is provided.
+        self.assertNotRegexpMatches(
+            p.stderr.read(), r'\S',
+>>>>>>> origin/master
             'Unexpected error message returned')
 
 # Allow manual execution of tests.

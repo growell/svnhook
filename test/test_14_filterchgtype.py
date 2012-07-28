@@ -46,9 +46,14 @@ class TestFilterChgType(HookTestCase):
 
         # Verify an internal error is indicated.
         self.assertEquals(
+<<<<<<< HEAD
             p.returncode & 0x7f, 0x7f,
             'Error exit code not found: exit code = {0}'\
                 .format(p.returncode))
+=======
+            p.returncode, 255,
+            'Expected exit code not found')
+>>>>>>> origin/master
 
     def test_02_simple_regex_match(self):
         """Simple regex match."""
@@ -110,8 +115,13 @@ class TestFilterChgType(HookTestCase):
             'Expected exit code not found')
 
         # Verify no error message is returned.
+<<<<<<< HEAD
         self.assertRegexpMatches(
             stderrdata, r'(?s)^\s*$',
+=======
+        self.assertNotRegexpMatches(
+            stderrdata, r'\S',
+>>>>>>> origin/master
             'Unexpected error message found')
 
     def test_04_negative_match(self):
@@ -143,8 +153,13 @@ class TestFilterChgType(HookTestCase):
             'Expected exit code not found')
 
         # Verify no error message is returned.
+<<<<<<< HEAD
         self.assertRegexpMatches(
             stderrdata, r'(?s)^\s*$',
+=======
+        self.assertNotRegexpMatches(
+            stderrdata, r'\S',
+>>>>>>> origin/master
             'Unexpected error message found')
 
     def test_05_negative_mismatch(self):

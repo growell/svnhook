@@ -36,7 +36,11 @@ class TestActions(HookTestCase):
         self.writeConf(testconf, '''\
           <?xml version="1.0"?>
           <Actions>
+<<<<<<< HEAD
             <SetRevisionFile>{0}</SetRevisionFile>
+=======
+            <SetRevisionFile>{}</SetRevisionFile>
+>>>>>>> origin/master
           </Actions>
           '''.format(revisionfile))
 
@@ -47,7 +51,11 @@ class TestActions(HookTestCase):
         # Check for the default exit code.
         self.assertEqual(
             p.returncode, 0,
+<<<<<<< HEAD
             'Exit code not correct: {0}'.format(p.returncode))
+=======
+            'Exit code not correct: {}'.format(p.returncode))
+>>>>>>> origin/master
 
         # Verify that the revision file now exists.
         self.assertTrue(os.path.isfile(revisionfile),
@@ -57,7 +65,11 @@ class TestActions(HookTestCase):
         contents = open(revisionfile).read().rstrip()
         self.assertEqual(
             contents, self.revision,
+<<<<<<< HEAD
             'Revision file contents not correct: {0}'.format(contents))
+=======
+            'Revision file contents not correct: {}'.format(contents))
+>>>>>>> origin/master
 
 # Allow manual execution of tests.
 if __name__=='__main__':

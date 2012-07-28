@@ -31,7 +31,11 @@ class TestActions(HookTestCase):
         self.writeConf(testconf, '''\
           <?xml version="1.0"?>
           <Actions>
+<<<<<<< HEAD
             <SendError>{0}</SendError>
+=======
+            <SendError>{}</SendError>
+>>>>>>> origin/master
           </Actions>
           '''.format(errmsg))
 
@@ -44,12 +48,20 @@ class TestActions(HookTestCase):
         # Check for the default exit code.
         self.assertTrue(
             p.returncode == 1,
+<<<<<<< HEAD
             'Exit code not default (1): {0}'.format(p.returncode))
+=======
+            'Exit code not default (1): {}'.format(p.returncode))
+>>>>>>> origin/master
 
         # Verify the proper error is returned.
         self.assertEqual(
             stderrdata, errmsg,
+<<<<<<< HEAD
             'Error output not correct: "{0}"'.format(stderrdata))
+=======
+            'Error output not correct: "{}"'.format(stderrdata))
+>>>>>>> origin/master
 
     def test_02_senderror(self):
         """Send error with exit code."""
@@ -60,7 +72,11 @@ class TestActions(HookTestCase):
         self.writeConf(testconf, '''\
           <?xml version="1.0"?>
           <Actions>
+<<<<<<< HEAD
             <SendError exitCode="{0}">{1}</SendError>
+=======
+            <SendError exitCode="{}">{}</SendError>
+>>>>>>> origin/master
           </Actions>
           '''.format(exitcode, errmsg))
 
@@ -73,12 +89,20 @@ class TestActions(HookTestCase):
         # Check for the default exit code.
         self.assertTrue(
             p.returncode == exitcode,
+<<<<<<< HEAD
             'Exit code not correct: {0}'.format(p.returncode))
+=======
+            'Exit code not correct: {}'.format(p.returncode))
+>>>>>>> origin/master
 
         # Verify the proper error is returned.
         self.assertEqual(
             stderrdata, errmsg,
+<<<<<<< HEAD
             'Error output not correct: "{0}"'.format(stderrdata))
+=======
+            'Error output not correct: "{}"'.format(stderrdata))
+>>>>>>> origin/master
 
     def test_03_settoken(self):
         """Set token."""
@@ -99,12 +123,20 @@ class TestActions(HookTestCase):
         # Check for the default exit code.
         self.assertTrue(
             p.returncode == 0,
+<<<<<<< HEAD
             'Exit code is not correct: {0}'.format(p.returncode))
+=======
+            'Exit code is not correct: {}'.format(p.returncode))
+>>>>>>> origin/master
 
         # Verify the proper error is returned.
         self.assertEqual(
             stderrdata, '',
+<<<<<<< HEAD
             'Error output not empty: "{0}"'.format(stderrdata))
+=======
+            'Error output not empty: "{}"'.format(stderrdata))
+>>>>>>> origin/master
 
     def test_04_settoken(self):
         """Set and use token."""
@@ -125,7 +157,11 @@ class TestActions(HookTestCase):
         (stdoutdata, stderrdata) = p.communicate()
         self.assertEqual(
             stderrdata, 'I feel joy!',
+<<<<<<< HEAD
             'Error output not correct: "{0}"'.format(stderrdata))
+=======
+            'Error output not correct: "{}"'.format(stderrdata))
+>>>>>>> origin/master
 
     def test_05_settoken(self):
         """Set and use recursive token."""
@@ -148,7 +184,11 @@ class TestActions(HookTestCase):
         # Verify the proper error is returned.
         self.assertEqual(
             stderrdata, 'She said, "I feel joy!"',
+<<<<<<< HEAD
             'Error output not correct: "{0}"'.format(stderrdata))
+=======
+            'Error output not correct: "{}"'.format(stderrdata))
+>>>>>>> origin/master
 
     def test_06_executecmd(self):
         """Execute a successful system command."""
@@ -156,7 +196,11 @@ class TestActions(HookTestCase):
         self.writeConf(testconf, '''\
           <?xml version="1.0"?>
           <Actions>
+<<<<<<< HEAD
             <ExecuteCmd><![CDATA[{0} --version]]></ExecuteCmd>
+=======
+            <ExecuteCmd><![CDATA[{} --version]]></ExecuteCmd>
+>>>>>>> origin/master
           </Actions>
           '''.format(sys.executable))
 
@@ -168,17 +212,29 @@ class TestActions(HookTestCase):
         # Check for the default exit code.
         self.assertTrue(
             p.returncode == 0,
+<<<<<<< HEAD
             'Exit code is not correct: {0}'.format(p.returncode))
+=======
+            'Exit code is not correct: {}'.format(p.returncode))
+>>>>>>> origin/master
 
     def test_07_executecmd(self):
         """Execute an unmasked failing system command."""
         # Define the hook configuration.
         exitcode = 2
+<<<<<<< HEAD
         cmdline = '{0} -c "exit({1})"'.format(sys.executable, exitcode)
         self.writeConf(testconf, '''\
           <?xml version="1.0"?>
           <Actions>
             <ExecuteCmd errorLevel="2"><![CDATA[{0}]]></ExecuteCmd>
+=======
+        cmdline = '{} -c "exit({})"'.format(sys.executable, exitcode)
+        self.writeConf(testconf, '''\
+          <?xml version="1.0"?>
+          <Actions>
+            <ExecuteCmd errorLevel="2"><![CDATA[{}]]></ExecuteCmd>
+>>>>>>> origin/master
           </Actions>
           '''.format(cmdline))
 
@@ -190,16 +246,28 @@ class TestActions(HookTestCase):
         # Check for the expected exit code.
         self.assertTrue(
             p.returncode == exitcode,
+<<<<<<< HEAD
             'Exit code is not correct: {0}'.format(p.returncode))
+=======
+            'Exit code is not correct: {}'.format(p.returncode))
+>>>>>>> origin/master
 
     def test_08_executecmd(self):
         """Execute a masked failing system command."""
         # Define the hook configuration.
+<<<<<<< HEAD
         cmdline = '{0} -c "exit(2)"'.format(sys.executable)
         self.writeConf(testconf, '''\
           <?xml version="1.0"?>
           <Actions>
             <ExecuteCmd errorLevel="3"><![CDATA[{0}]]></ExecuteCmd>
+=======
+        cmdline = '{} -c "exit(2)"'.format(sys.executable)
+        self.writeConf(testconf, '''\
+          <?xml version="1.0"?>
+          <Actions>
+            <ExecuteCmd errorLevel="3"><![CDATA[{}]]></ExecuteCmd>
+>>>>>>> origin/master
           </Actions>
           '''.format(cmdline))
 
@@ -211,7 +279,11 @@ class TestActions(HookTestCase):
         # Check for the expected exit code.
         self.assertTrue(
             p.returncode == 0,
+<<<<<<< HEAD
             'Exit code is not correct: {0}'.format(p.returncode))
+=======
+            'Exit code is not correct: {}'.format(p.returncode))
+>>>>>>> origin/master
 
 # Allow manual execution of tests.
 if __name__=='__main__':

@@ -27,21 +27,37 @@ class TestActions(SmtpTestCase):
         """Send a log email to multiple recipients."""
         # Define the message parameters.
         fromaddr = 'source@mydomain.com'
+<<<<<<< HEAD
         toaddrs = ['gal{0}@yourdomain.com'.format(idx)
                    for idx in range(1, 10)]
         subject = 'test @ {0}'.format(time.asctime())
 
         # Define the hook configuration.
         totags = ['<ToAddress>{0}</ToAddress>'.format(toaddr)
+=======
+        toaddrs = ['gal{}@yourdomain.com'.format(idx)
+                   for idx in range(1, 10)]
+        subject = 'test @ {}'.format(time.asctime())
+
+        # Define the hook configuration.
+        totags = ['<ToAddress>{}</ToAddress>'.format(toaddr)
+>>>>>>> origin/master
                   for toaddr in toaddrs]
 
         self.writeConf(testconf, '''\
           <?xml version="1.0"?>
           <Actions>
+<<<<<<< HEAD
             <SendLogSmtp port="{0}">
               <FromAddress>{1}</FromAddress>
               {2}
               <Subject>{3}</Subject>
+=======
+            <SendLogSmtp port="{}">
+              <FromAddress>{}</FromAddress>
+              {}
+              <Subject>{}</Subject>
+>>>>>>> origin/master
             </SendLogSmtp>
           </Actions>
           '''.format(self.smtpport, fromaddr, ''.join(totags),
@@ -54,7 +70,11 @@ class TestActions(SmtpTestCase):
         # Check for the default exit code.
         self.assertEqual(
             p.returncode, 0,
+<<<<<<< HEAD
             'Exit code not correct: {0}'.format(p.returncode))
+=======
+            'Exit code not correct: {}'.format(p.returncode))
+>>>>>>> origin/master
 
         # Get the received email message.
         try:
@@ -74,16 +94,27 @@ class TestActions(SmtpTestCase):
     def test_02_minimal(self):
         """Send a stripped-down log email."""
         # Define the message parameters.
+<<<<<<< HEAD
         subject = 'test @ {0}'.format(time.asctime())
+=======
+        subject = 'test @ {}'.format(time.asctime())
+>>>>>>> origin/master
 
         # Define the hook configuration.
         self.writeConf(testconf, '''\
           <?xml version="1.0"?>
           <Actions>
+<<<<<<< HEAD
             <SendLogSmtp port="{0}" verbose="no">
               <FromAddress>source@mydomain.com</FromAddress>
               <ToAddress>gal1@yourdomain.com</ToAddress>
               <Subject>{1}</Subject>
+=======
+            <SendLogSmtp port="{}" verbose="no">
+              <FromAddress>source@mydomain.com</FromAddress>
+              <ToAddress>gal1@yourdomain.com</ToAddress>
+              <Subject>{}</Subject>
+>>>>>>> origin/master
             </SendLogSmtp>
           </Actions>
           '''.format(self.smtpport, subject))
@@ -95,7 +126,11 @@ class TestActions(SmtpTestCase):
         # Check for the default exit code.
         self.assertEqual(
             p.returncode, 0,
+<<<<<<< HEAD
             'Exit code not correct: {0}'.format(p.returncode))
+=======
+            'Exit code not correct: {}'.format(p.returncode))
+>>>>>>> origin/master
 
         # Get the received email message.
         try:
@@ -104,6 +139,10 @@ class TestActions(SmtpTestCase):
             self.fail('Message with subject not found: ' + subject)
 
         # Check that the message body is correct.
+<<<<<<< HEAD
+=======
+        self.assertBodyNotRegexp(message, r'(?im)^Changed paths:$')
+>>>>>>> origin/master
         self.assertBodyRegexp(message, r'(?m)^Initial import$')
 
 # Allow manual execution of tests.

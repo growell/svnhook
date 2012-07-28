@@ -37,7 +37,11 @@ class TestFilterLockToken(HookTestCase):
         self.assertEqual(
             p.returncode, 0,
             'Lock success exit code not found:'\
+<<<<<<< HEAD
                 ' exit code = {0}'.format(p.returncode))
+=======
+                ' exit code = {}'.format(p.returncode))
+>>>>>>> origin/master
 
         # Unlock the path.
         p = self.unlockWcPath('fileA1.txt')
@@ -52,7 +56,11 @@ class TestFilterLockToken(HookTestCase):
         self.assertEqual(
             p.returncode, 1,
             'Error exit code not found:'\
+<<<<<<< HEAD
                 ' exit code = {0}'.format(p.returncode))
+=======
+                ' exit code = {}'.format(p.returncode))
+>>>>>>> origin/master
 
         # Verify that the detailed error is logged.
         self.assertLogRegexp(
@@ -78,7 +86,11 @@ class TestFilterLockToken(HookTestCase):
         self.assertEqual(
             p.returncode, 0,
             'Lock success exit code not found:'\
+<<<<<<< HEAD
                 ' exit code = {0}'.format(p.returncode))
+=======
+                ' exit code = {}'.format(p.returncode))
+>>>>>>> origin/master
 
         # Unlock the path.
         p = self.unlockWcPath('fileA1.txt')
@@ -93,7 +105,11 @@ class TestFilterLockToken(HookTestCase):
         self.assertEqual(
             p.returncode, 1,
             'Error exit code not found:'\
+<<<<<<< HEAD
                 ' exit code = {0}'.format(p.returncode))
+=======
+                ' exit code = {}'.format(p.returncode))
+>>>>>>> origin/master
 
     def test_03_mismatch(self):
         """Lock token mismatch"""
@@ -114,22 +130,35 @@ class TestFilterLockToken(HookTestCase):
         self.assertEqual(
             p.returncode, 0,
             'Lock success exit code not found:'\
+<<<<<<< HEAD
                 ' exit code = {0}'.format(p.returncode))
+=======
+                ' exit code = {}'.format(p.returncode))
+>>>>>>> origin/master
 
         # Unlock the path.
         p = self.unlockWcPath('fileA1.txt')
         stdoutdata, stderrdata = p.communicate()
 
         # Verify that an error message wasn't produced.
+<<<<<<< HEAD
         self.assertRegexpMatches(
             stderrdata, r'(?s)^\s*$',
+=======
+        self.assertNotRegexpMatches(
+            stderrdata, r'\S',
+>>>>>>> origin/master
             'Unexpected error message found')
 
         # Verify that an error wasn't indicated.
         self.assertEqual(
             p.returncode, 0,
             'Success exit code not found:'\
+<<<<<<< HEAD
                 ' exit code = {0}'.format(p.returncode))
+=======
+                ' exit code = {}'.format(p.returncode))
+>>>>>>> origin/master
 
 # Allow manual execution of tests.
 if __name__=='__main__':

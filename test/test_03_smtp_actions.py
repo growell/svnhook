@@ -28,18 +28,30 @@ class TestActions(SmtpTestCase):
         # Define the message parameters.
         fromaddr = 'source@mydomain.com'
         toaddr = 'destination@yourdomain.com'
+<<<<<<< HEAD
         subject = 'test @ {0}'.format(time.asctime())
+=======
+        subject = 'test @ {}'.format(time.asctime())
+>>>>>>> origin/master
         body = 'Hello World'
 
         # Define the hook configuration.
         self.writeConf(testconf, '''\
           <?xml version="1.0"?>
           <Actions>
+<<<<<<< HEAD
             <SendSmtp port="{0}">
               <FromAddress>{1}</FromAddress>
               <ToAddress>{2}</ToAddress>
               <Subject>{3}</Subject>
               <Message>{4}</Message>
+=======
+            <SendSmtp port="{}">
+              <FromAddress>{}</FromAddress>
+              <ToAddress>{}</ToAddress>
+              <Subject>{}</Subject>
+              <Message>{}</Message>
+>>>>>>> origin/master
             </SendSmtp>
           </Actions>
           '''.format(self.smtpport, fromaddr, toaddr, subject, body))
@@ -52,7 +64,11 @@ class TestActions(SmtpTestCase):
         # Check for the default exit code.
         self.assertEqual(
             p.returncode, 0,
+<<<<<<< HEAD
             'Exit code not correct: {0}'.format(p.returncode))
+=======
+            'Exit code not correct: {}'.format(p.returncode))
+>>>>>>> origin/master
 
         # Look for the email message.
         try:
@@ -68,21 +84,37 @@ class TestActions(SmtpTestCase):
     def test_02_multiple_to(self):
         """Send an email to multiple recipients."""
         # Define the message parameters.
+<<<<<<< HEAD
         toaddrs = ['gal{0}@yourdomain.com'.format(idx)
                    for idx in range(1, 10)]
         subject = 'test @ {0}'.format(time.asctime())
 
         # Define the hook configuration.
         totags = ['<ToAddress>{0}</ToAddress>'.format(toaddr)
+=======
+        toaddrs = ['gal{}@yourdomain.com'.format(idx)
+                   for idx in range(1, 10)]
+        subject = 'test @ {}'.format(time.asctime())
+
+        # Define the hook configuration.
+        totags = ['<ToAddress>{}</ToAddress>'.format(toaddr)
+>>>>>>> origin/master
                   for toaddr in toaddrs]
 
         self.writeConf(testconf, '''\
           <?xml version="1.0"?>
           <Actions>
+<<<<<<< HEAD
             <SendSmtp port="{0}">
               <FromAddress>source@mydomain.com</FromAddress>
               {1}
               <Subject>{2}</Subject>
+=======
+            <SendSmtp port="{}">
+              <FromAddress>source@mydomain.com</FromAddress>
+              {}
+              <Subject>{}</Subject>
+>>>>>>> origin/master
               <Message>Hello World!</Message>
             </SendSmtp>
           </Actions>
@@ -96,7 +128,11 @@ class TestActions(SmtpTestCase):
         # Check for the default exit code.
         self.assertEqual(
             p.returncode, 0,
+<<<<<<< HEAD
             'Exit code not correct: {0}'.format(p.returncode))
+=======
+            'Exit code not correct: {}'.format(p.returncode))
+>>>>>>> origin/master
 
         # Get the received email message.
         try:

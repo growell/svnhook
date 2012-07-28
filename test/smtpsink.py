@@ -24,7 +24,11 @@ class SmtpSinkServer(smtpd.SMTPServer):
     def process_message(self, peer, mailfrom, rcpttos, data):
         """Add a message to the mailbox file."""
         if self.mailboxFile is not None:
+<<<<<<< HEAD
             self.mailboxFile.write('From {0}\n'.format(mailfrom))
+=======
+            self.mailboxFile.write('From {}\n'.format(mailfrom))
+>>>>>>> origin/master
             self.mailboxFile.write(data)
             self.mailboxFile.write('\n\n')
             self.mailboxFile.flush()
