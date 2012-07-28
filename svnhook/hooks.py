@@ -20,17 +20,7 @@ import os, sys
 import re
 import yaml
 
-<<<<<<< HEAD
-from xml.etree.ElementTree import ElementTree
-if sys.version_info >= (2, 7):
-    from xml.etree.ElementTree import ParseError
-    parse_error = ParseError
-else:
-    from xml.parsers.expat import ExpatError
-    parse_error = ExpatError
-=======
 from xml.etree.ElementTree import ElementTree, ParseError
->>>>>>> origin/master
 
 logger = logging.getLogger()
 
@@ -54,23 +44,13 @@ class SvnHook(object):
                             + cfgfile)
 
         # If a co-located logging configuration file exists, use it.
-<<<<<<< HEAD
-        # Prefer a "*-log.yml" (Python 2.7+) file over a "*-log.conf"
-        # file.
-=======
         # Prefer a "*-log.yml" file over a "*-log.conf" file.
->>>>>>> origin/master
         logymlfile = re.sub(
             r'\.[^\.]+$', r'-log.yml', cfgfile)
         logconffile = re.sub(
             r'\.[^\.]+$', r'-log.conf', cfgfile)
 
-<<<<<<< HEAD
-        if hasattr(logging.config, 'dictConfig')\
-                and os.path.isfile(logymlfile) == True:
-=======
         if os.path.isfile(logymlfile) == True:
->>>>>>> origin/master
             logcfg = yaml.load(open(logymlfile).read())
             logging.config.dictConfig(logcfg)
         elif os.path.isfile(logconffile) == True:
@@ -85,11 +65,7 @@ class SvnHook(object):
         # parse error, make sure to log it - before rethrowing it.
         try:
             self.cfg = ElementTree(file=cfgfile)
-<<<<<<< HEAD
-        except parse_error:
-=======
         except ParseError:
->>>>>>> origin/master
             logger.fatal(
                 'Unable to parse hook configuration file!',
                 exc_info=True)

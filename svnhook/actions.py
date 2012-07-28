@@ -85,11 +85,7 @@ class ExecuteCmd(Action):
         # The subprocess is run without a shell, because doing
         # otherwise would return the exit code of the shell process
         # - not the exit code of the command.
-<<<<<<< HEAD
-        logger.debug('cmd={0}, errorlevel={1}'
-=======
         logger.debug('cmd={}, errorlevel={}'
->>>>>>> origin/master
                       .format(cmd, self.errorlevel))
 
         p = subprocess.Popen(cmd,
@@ -111,11 +107,7 @@ class ExecuteCmd(Action):
             # Return the terminal exit code.
             return p.returncode
         else:
-<<<<<<< HEAD
-            logger.debug('exit code={0}'.format(p.returncode))
-=======
             logger.debug('exit code={}'.format(p.returncode))
->>>>>>> origin/master
 
         # Indicate a non-terminal action.
         return 0
@@ -203,11 +195,7 @@ class _SendSmtp(Action):
             self.timeout = int(
                 self.thistag.get('seconds', default=60))
         except ValueError:
-<<<<<<< HEAD
-            raise ValueError('Illegal seconds attribute: {0}'
-=======
             raise ValueError('Illegal seconds attribute: {}'
->>>>>>> origin/master
                              .format(self.thistag.get('seconds')))
 
         # Get the from email address.
@@ -255,16 +243,6 @@ class _SendSmtp(Action):
         message = self.getMessage()
 
         # Assemble the message content.
-<<<<<<< HEAD
-        content = 'From: {0}\r\n'.format(fromaddress)
-        for toaddress in toaddresses:
-            content += 'To: {0}\r\n'.format(toaddress)
-        content += 'Subject: {0}\r\n'.format(subject)
-
-        content += '\r\n'
-        for msgline in message.splitlines():
-            content += '{0}\r\n'.format(msgline)
-=======
         content = 'From: {}\r\n'.format(fromaddress)
         for toaddress in toaddresses:
             content += 'To: {}\r\n'.format(toaddress)
@@ -273,7 +251,6 @@ class _SendSmtp(Action):
         content += '\r\n'
         for msgline in message.splitlines():
             content += '{}\r\n'.format(msgline)
->>>>>>> origin/master
 
         # Construct the SMTP connection.
         server = smtplib.SMTP(host, port, None, self.timeout)
@@ -284,11 +261,7 @@ class _SendSmtp(Action):
         except smtplib.SMTPRecipientsRefused as e:
             for recipient in e.recipients:
                 logger.warning(
-<<<<<<< HEAD
-                    'Recipient refused: {0}'.format(recipient))
-=======
                     'Recipient refused: {}'.format(recipient))
->>>>>>> origin/master
 
         # Disconnect from the host.
         server.quit()
@@ -359,15 +332,9 @@ class SetRevisionFile(Action):
 
         # Write the revision number into the file.
         with open(revfile, 'w') as f:
-<<<<<<< HEAD
-            f.write('{0}\n'.format(self.revision))
-
-        logger.info('Wrote revision #{0} to "{1}".'.format(
-=======
             f.write('{}\n'.format(self.revision))
 
         logger.info('Wrote revision #{} to "{}".'.format(
->>>>>>> origin/master
                 self.revision, revfile))
 
         # Indicate a non-terminal action.

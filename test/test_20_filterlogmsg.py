@@ -45,11 +45,7 @@ class TestFilterLogMsg(HookTestCase):
         self.assertEqual(
             p.returncode, 1,
             'Error exit code not found:'\
-<<<<<<< HEAD
-                ' exit code = {0}'.format(p.returncode))
-=======
                 ' exit code = {}'.format(p.returncode))
->>>>>>> origin/master
 
         # Verify that the proper error is indicated.
         self.assertRegexpMatches(
@@ -85,11 +81,7 @@ class TestFilterLogMsg(HookTestCase):
         self.assertEqual(
             p.returncode, 1,
             'Error exit code not found:'\
-<<<<<<< HEAD
-                ' exit code = {0}'.format(p.returncode))
-=======
                 ' exit code = {}'.format(p.returncode))
->>>>>>> origin/master
 
         # Verify that the proper error is indicated.
         self.assertRegexpMatches(
@@ -120,19 +112,11 @@ class TestFilterLogMsg(HookTestCase):
         self.assertEqual(
             p.returncode, 0,
             'Success exit code not found:'\
-<<<<<<< HEAD
-                ' exit code = {0}'.format(p.returncode))
-
-        # Verify that an error message isn't returned.
-        self.assertRegexpMatches(
-            p.stderr.read(), r'(?s)^\s*$',
-=======
                 ' exit code = {}'.format(p.returncode))
 
         # Verify that an error message isn't returned.
         self.assertNotRegexpMatches(
             p.stderr.read(), r'\S',
->>>>>>> origin/master
             'Unexpected error message found')
 
     def test_04_no_required_msg(self):
@@ -159,11 +143,7 @@ class TestFilterLogMsg(HookTestCase):
         self.assertEqual(
             p.returncode, 1,
             'Error exit code not found:'\
-<<<<<<< HEAD
-                ' exit code = {0}'.format(p.returncode))
-=======
                 ' exit code = {}'.format(p.returncode))
->>>>>>> origin/master
 
         # Verify that the proper error is indicated.
         self.assertRegexpMatches(

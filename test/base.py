@@ -4,29 +4,12 @@
 ######################################################################
 __all__ = ['HookTestCase', 'SmtpTestCase', 'LogScanner', 'rmtree']
 
-<<<<<<< HEAD
-# For pre-Python 2.7, use back-ported unit testing module.
-import sys
-if sys.version_info < (2, 7):
-    import unittest2
-    unit_test = unittest2
-else:
-    import unittest
-    unit_test = unittest
-
-import pprint
-import re, errno, os, shutil, stat
-import subprocess
-import StringIO, mailbox, email
-from textwrap import dedent
-=======
 import re
 import errno, os, sys, shutil, stat
 import subprocess
 import StringIO, mailbox, email
 from textwrap import dedent
 import unittest, pprint
->>>>>>> origin/master
 
 from smtpsink import SmtpSink
 
@@ -39,11 +22,7 @@ tmpdir = os.path.abspath(os.path.join(
 # If needed, create the temporary directory.
 if not os.path.isdir(tmpdir): os.makedirs(tmpdir)
 
-<<<<<<< HEAD
-class HookTestCase(unit_test.TestCase):
-=======
 class HookTestCase(unittest.TestCase):
->>>>>>> origin/master
     """SvnHook Test Case Base Class"""
 
     # Per-Suite Test Case Indexes
@@ -73,11 +52,7 @@ class HookTestCase(unittest.TestCase):
         
         # Construct the test artifact directory.
         workdir = os.path.join(
-<<<<<<< HEAD
-            tmpdir, '{0}.{1:02d}'.format(self.repoid, self.tcindex))
-=======
             tmpdir, '{}.{:02d}'.format(self.repoid, self.tcindex))
->>>>>>> origin/master
         if os.path.isdir(workdir): rmtree(workdir)
         os.makedirs(workdir)
 
@@ -93,16 +68,7 @@ class HookTestCase(unittest.TestCase):
         self.wcpath = os.path.join(workdir, 'wc')
 
         # Construct the test repository.
-<<<<<<< HEAD
-        p = subprocess.Popen(
-            ['svnadmin', 'create', self.repopath],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE)
-        p.wait()
-        if p.returncode != 0: raise RuntimeError(p.stderr.read())
-=======
         subprocess.check_output(['svnadmin', 'create', self.repopath])
->>>>>>> origin/master
 
         # Create the standard repository log file directory.
         os.mkdir(os.path.join(self.repopath, 'logs'))
@@ -117,22 +83,10 @@ class HookTestCase(unittest.TestCase):
 
                 # Load a repository dump file.
                 if datafile.endswith('.dmp'):
-<<<<<<< HEAD
-                    p = subprocess.Popen(
-                        ['svnadmin', 'load', self.repopath,
-                         '--force-uuid', '--quiet'],
-                        stdin=open(datapath),
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE)
-                    p.wait()
-                    if p.returncode != 0:
-                        raise RuntimeError(p.stderr.read())
-=======
                     subprocess.check_output(
                         ['svnadmin', 'load', self.repopath,
                          '--force-uuid', '--quiet'],
                         stdin=open(datapath))
->>>>>>> origin/master
 
                 # Load a hook configuration file.
                 elif datafile.endswith('.conf')\
@@ -161,21 +115,10 @@ class HookTestCase(unittest.TestCase):
 
         # Create the initial working copy. Explicit credentials are
         # used to set the default commit user name.
-<<<<<<< HEAD
-        p = subprocess.Popen(
-            ['svn', 'checkout', self.repourl, self.wcpath,
-             '--non-interactive', '--username', self.username,
-             '--password', self.password],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE)
-        p.wait()
-        if p.returncode != 0: raise RuntimeError(p.stderr.read())
-=======
         subprocess.check_output(
             ['svn', 'checkout', self.repourl, self.wcpath,
              '--non-interactive', '--username', self.username,
              '--password', self.password])
->>>>>>> origin/master
 
     def writeConf(self, filename, content, raw=False):
         """Write content into a repository configuration file.
@@ -212,8 +155,6 @@ class HookTestCase(unittest.TestCase):
         with open(self.getHookLog(hookname)) as f:
             self.assertRegexpMatches(f.read(), regexp, msg)
 
-<<<<<<< HEAD
-=======
     def assertLogNotRegexp(self, hookname, regexp, msg=None):
         """Assert that hook log doesn't match a regular expression.
 
@@ -225,7 +166,6 @@ class HookTestCase(unittest.TestCase):
         with open(self.getHookLog(hookname)) as f:
             self.assertNotRegexpMatches(f.read(), regexp, msg)
 
->>>>>>> origin/master
     def callHook(self, hookname, *args, **kwargs):
         """Call a hook script directly.
 
@@ -299,17 +239,7 @@ class HookTestCase(unittest.TestCase):
         Returns: Output produced by Subversion command.
         """
         fullpath = os.path.join(self.wcpath, pathname)
-<<<<<<< HEAD
-        p = subprocess.Popen(
-            ['svn', 'add', fullpath],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE)
-        p.wait()
-        if p.returncode != 0: raise RuntimeError(p.stderr.read())
-        return p.stdout.read()
-=======
         return subprocess.check_output(['svn', 'add', fullpath])
->>>>>>> origin/master
 
     def cpWcItem(self, srcpathname, destpathname):
         """Copy a working copy item.
@@ -322,18 +252,8 @@ class HookTestCase(unittest.TestCase):
         """
         source = os.path.join(self.wcpath, srcpathname)
         destination = os.path.join(self.wcpath, destpathname)
-<<<<<<< HEAD
-        p = subprocess.Popen(
-            ['svn', 'cp', source, destination],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE)
-        p.wait()
-        if p.returncode != 0: raise RuntimeError(p.stderr.read())
-        return p.stdout.read()
-=======
         return subprocess.check_output(
             ['svn', 'cp', source, destination])
->>>>>>> origin/master
 
     def mvWcItem(self, srcpathname, destpathname):
         """Move/Rename a working copy item.
@@ -346,18 +266,8 @@ class HookTestCase(unittest.TestCase):
         """
         source = os.path.join(self.wcpath, srcpathname)
         destination = os.path.join(self.wcpath, destpathname)
-<<<<<<< HEAD
-        p = subprocess.Popen(
-            ['svn', 'mv', source, destination],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE)
-        p.wait()
-        if p.returncode != 0: raise RuntimeError(p.stderr.read())
-        return p.stdout.read()
-=======
         return subprocess.check_output(
             ['svn', 'mv', source, destination])
->>>>>>> origin/master
 
     def rmWcItem(self, pathname):
         """Schedule working copy items for deletion.
@@ -368,17 +278,7 @@ class HookTestCase(unittest.TestCase):
         Returns: Output produced by Subversion command.
         """
         fullpath = os.path.join(self.wcpath, pathname)
-<<<<<<< HEAD
-        p = subprocess.Popen(
-            ['svn', 'rm', fullpath],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE)
-        p.wait()
-        if p.returncode != 0: raise RuntimeError(p.stderr.read())
-        return p.stdout.read()
-=======
         return subprocess.check_output(['svn', 'rm', fullpath])
->>>>>>> origin/master
 
     def rmWcFsFile(self, pathname):
         """Remove a working copy file without scheduling it for
@@ -411,18 +311,8 @@ class HookTestCase(unittest.TestCase):
         Returns: Output produced by Subversion command.
         """
         fullpath = os.path.join(self.wcpath, pathname)
-<<<<<<< HEAD
-        p = subprocess.Popen(
-            ['svn', 'propset', propname, propval, fullpath],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE)
-        p.wait()
-        if p.returncode != 0: raise RuntimeError(p.stderr.read())
-        return p.stdout.read()
-=======
         return subprocess.check_output(
             ['svn', 'propset', propname, propval, fullpath])
->>>>>>> origin/master
 
     def delWcProperty(self, propname, pathname='.'):
         """Delete a working copy property.
@@ -434,36 +324,16 @@ class HookTestCase(unittest.TestCase):
         Returns: Output produced by Subversion command.
         """
         fullpath = os.path.join(self.wcpath, pathname)
-<<<<<<< HEAD
-        p = subprocess.Popen(
-            ['svn', 'propdel', propname, fullpath],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE)
-        p.wait()
-        if p.returncode != 0: raise RuntimeError(p.stderr.read())
-        return p.stdout.read()
-=======
         return subprocess.check_output(
             ['svn', 'propdel', propname, fullpath])
->>>>>>> origin/master
 
     def revertWc(self):
         """Revert all working copy changes.
 
         Returns: Output produced by Subversion command.
         """
-<<<<<<< HEAD
-        p = subprocess.Popen(
-            ['svn', 'revert', self.wcpath, '-R'],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE)
-        p.wait()
-        if p.returncode != 0: raise RuntimeError(p.stderr.read())
-        return p.stdout.read()
-=======
         return subprocess.check_output(
             ['svn', 'revert', self.wcpath, '-R'])
->>>>>>> origin/master
 
     def commitWc(self, msg='', *args, **kwargs):
         """Commit working copy changes.
@@ -502,17 +372,7 @@ class HookTestCase(unittest.TestCase):
 
         Returns: Output produced by Subversion command.
         """
-<<<<<<< HEAD
-        p = subprocess.Popen(
-            ['svn', 'update', self.wcpath],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE)
-        p.wait()
-        if p.returncode != 0: raise RuntimeError(p.stderr.read())
-        return p.stdout.read()
-=======
         return subprocess.check_output(['svn', 'update', self.wcpath])
->>>>>>> origin/master
 
     def lockWcPath(self, pathname, user='user',
                    comment=None, force=False):
@@ -735,8 +595,6 @@ class SmtpTestCase(HookTestCase):
         self.assertRegexpMatches(
             message.get_payload(None, True).rstrip(), regexp, msg)
 
-<<<<<<< HEAD
-=======
     def assertBodyNotRegexp(self, message, regexp, msg=None):
         """Assert that a message body doesn't match a regular
         expression.
@@ -752,7 +610,6 @@ class SmtpTestCase(HookTestCase):
         self.assertNotRegexpMatches(
             message.get_payload(None, True).rstrip(), regexp, msg)
 
->>>>>>> origin/master
 class LogScanner(object):
     """SvnHook Log File Scanner"""
 

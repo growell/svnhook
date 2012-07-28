@@ -37,24 +37,15 @@ class TestFilterLockOwner(HookTestCase):
         stdoutdata, stderrdata = p.communicate()
 
         # Verify that no error message was produced.
-<<<<<<< HEAD
-        self.assertRegexpMatches(
-            stderrdata, r'(?s)^\s*$',
-=======
         self.assertNotRegexpMatches(
             stderrdata, r'\S',
->>>>>>> origin/master
             'Unexpected error message found')
 
         # Verify that an error wasn't indicated.
         self.assertEqual(
             p.returncode, 0,
             'Success exit code not found:'\
-<<<<<<< HEAD
-                ' exit code = {0}'.format(p.returncode))
-=======
                 ' exit code = {}'.format(p.returncode))
->>>>>>> origin/master
 
     def test_02_true_match(self):
         """Positive owner match"""
@@ -75,11 +66,7 @@ class TestFilterLockOwner(HookTestCase):
         self.assertEqual(
             p.returncode, 0,
             'Success exit code not found:'\
-<<<<<<< HEAD
-                ' exit code = {0}'.format(p.returncode))
-=======
                 ' exit code = {}'.format(p.returncode))
->>>>>>> origin/master
 
         # Apply another lock to the same path as the same user.
         p = self.lockWcPath('fileA1.txt', 'userA')
@@ -94,11 +81,7 @@ class TestFilterLockOwner(HookTestCase):
         self.assertEqual(
             p.returncode, 1,
             'Error exit code not found:'\
-<<<<<<< HEAD
-                ' exit code = {0}'.format(p.returncode))
-=======
                 ' exit code = {}'.format(p.returncode))
->>>>>>> origin/master
 
     def test_03_true_mismatch(self):
         """Positive owner mismatch"""
@@ -119,11 +102,7 @@ class TestFilterLockOwner(HookTestCase):
         self.assertEqual(
             p.returncode, 0,
             'Success exit code not found:'\
-<<<<<<< HEAD
-                ' exit code = {0}'.format(p.returncode))
-=======
                 ' exit code = {}'.format(p.returncode))
->>>>>>> origin/master
 
         # Force a lock on the same path as a different user. If we
         # don't force it, it'll skip the hook and fail with a warning.
@@ -131,24 +110,15 @@ class TestFilterLockOwner(HookTestCase):
         stdoutdata, stderrdata = p.communicate()
 
         # Verify that the error message wasn't produced.
-<<<<<<< HEAD
-        self.assertRegexpMatches(
-            stderrdata, r'(?s)^\s*$',
-=======
         self.assertNotRegexpMatches(
             stderrdata, r'\S',
->>>>>>> origin/master
             'Unexpected error message found')
 
         # Verify that an error wasn't indicated.
         self.assertEqual(
             p.returncode, 0,
             'Success exit code not found:'\
-<<<<<<< HEAD
-                ' exit code = {0}'.format(p.returncode))
-=======
                 ' exit code = {}'.format(p.returncode))
->>>>>>> origin/master
 
     def test_04_false_match(self):
         """Negative owner match"""
@@ -169,11 +139,7 @@ class TestFilterLockOwner(HookTestCase):
         self.assertEqual(
             p.returncode, 0,
             'Success exit code not found:'\
-<<<<<<< HEAD
-                ' exit code = {0}'.format(p.returncode))
-=======
                 ' exit code = {}'.format(p.returncode))
->>>>>>> origin/master
 
         # Force a lock on the same path as a different user.
         p = self.lockWcPath('fileA1.txt', 'userB', force=True)
@@ -188,11 +154,7 @@ class TestFilterLockOwner(HookTestCase):
         self.assertEqual(
             p.returncode, 1,
             'Error exit code not found:'\
-<<<<<<< HEAD
-                ' exit code = {0}'.format(p.returncode))
-=======
                 ' exit code = {}'.format(p.returncode))
->>>>>>> origin/master
 
     def test_05_false_mismatch(self):
         """Negative owner mismatch"""
@@ -213,35 +175,22 @@ class TestFilterLockOwner(HookTestCase):
         self.assertEqual(
             p.returncode, 0,
             'Success exit code not found:'\
-<<<<<<< HEAD
-                ' exit code = {0}'.format(p.returncode))
-=======
                 ' exit code = {}'.format(p.returncode))
->>>>>>> origin/master
 
         # Force a lock on the same path as the same user.
         p = self.lockWcPath('fileA1.txt', 'userA', force=True)
         stdoutdata, stderrdata = p.communicate()
 
         # Verify that an error message wasn't produced.
-<<<<<<< HEAD
-        self.assertRegexpMatches(
-            stderrdata, r'(?s)^\s*$',
-=======
         self.assertNotRegexpMatches(
             stderrdata, r'\S',
->>>>>>> origin/master
             'Unexpected error message found')
 
         # Verify that an error wasn't indicated.
         self.assertEqual(
             p.returncode, 0,
             'Success exit code not found:'\
-<<<<<<< HEAD
-                ' exit code = {0}'.format(p.returncode))
-=======
                 ' exit code = {}'.format(p.returncode))
->>>>>>> origin/master
 
 # Allow manual execution of tests.
 if __name__=='__main__':

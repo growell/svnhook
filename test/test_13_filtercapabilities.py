@@ -71,13 +71,8 @@ class TestFilterCapabilities(HookTestCase):
         p.wait()
 
         # Verify that no error message is returned.
-<<<<<<< HEAD
-        self.assertRegexpMatches(
-            stderrdata, r'(?s)^\s*$',
-=======
         self.assertNotRegexpMatches(
             stderrdata, r'\S',
->>>>>>> origin/master
             'Unexpected error message found')
 
         # Verify that no failure is indicated.
@@ -107,13 +102,8 @@ class TestFilterCapabilities(HookTestCase):
         p.wait()
 
         # Verify that no error message is returned.
-<<<<<<< HEAD
-        self.assertRegexpMatches(
-            stderrdata, r'(?s)^\s*$',
-=======
         self.assertNotRegexpMatches(
             stderrdata, r'\S',
->>>>>>> origin/master
             'Unexpected error message found')
 
         # Verify that no failure is indicated.
